@@ -81,6 +81,140 @@
             border-left: 4px solid #10b981;
             background-color: #f0fdf4;
         }
+        
+        /* 友善時間選擇器樣式 */
+        .time-selector {
+            transition: all 0.3s ease;
+        }
+        
+        .time-selector:focus {
+            ring: 2px;
+            ring-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        
+        .quick-time-btn {
+            transition: all 0.2s ease;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .quick-time-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .quick-time-btn:active {
+            transform: translateY(0);
+        }
+        
+        .date-range-display {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .comparison-toggle {
+            transition: all 0.2s ease;
+        }
+        
+        .comparison-toggle:hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* 自定義日期模態框樣式 */
+        .custom-date-modal {
+            backdrop-filter: blur(4px);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        
+        .custom-date-content {
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        .date-input {
+            transition: all 0.2s ease;
+        }
+        
+        .date-input:focus {
+            ring: 2px;
+            ring-color: #3b82f6;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .quick-date-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .quick-date-btn:hover {
+            background-color: #f9fafb;
+            border-color: #6b7280;
+            transform: translateY(-1px);
+        }
+        
+        /* 動畫定義 */
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* 時間範圍標籤樣式 */
+        .time-range-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            animation: badgeGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes badgeGlow {
+            from {
+                box-shadow: 0 0 5px rgba(102, 126, 234, 0.4);
+            }
+            to {
+                box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+            }
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .time-controls {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .quick-time-buttons {
+                justify-content: center;
+                gap: 0.25rem;
+            }
+            
+            .quick-time-btn {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen bg-gray-50">
@@ -249,17 +383,81 @@
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-gray-900">高頻扣分指標 TOP 5</h3>
-                    <div class="flex items-center space-x-2 text-sm">
-                        <select class="border border-gray-300 rounded px-3 py-1 text-sm">
-                            <option>今日</option>
-                            <option>本週</option>
-                            <option>本月</option>
-                        </select>
+                    <div class="flex items-center space-x-2 text-sm time-controls">
+                        <!-- 時間選擇器 -->
+                        <div class="relative">
+                            <select id="overviewTimeRange" onchange="updateOverviewData()" class="time-selector border border-gray-300 rounded px-3 py-1 text-sm pr-8 focus:ring-2 focus:ring-blue-500">
+                                <option value="today">今日</option>
+                                <option value="yesterday">昨日</option>
+                                <option value="last7days">近7天</option>
+                                <option value="thisweek" selected>本週</option>
+                                <option value="lastweek">上週</option>
+                                <option value="last30days">近30天</option>
+                                <option value="thismonth">本月</option>
+                                <option value="lastmonth">上月</option>
+                                <option value="last3months">近3個月</option>
+                                <option value="custom">自定義範圍</option>
+                            </select>
+                        </div>
+                        
+                        <!-- 快速時間按鈕 -->
+                        <div class="flex items-center space-x-1 border-l pl-2 ml-2 quick-time-buttons">
+                            <button onclick="setQuickTimeRange('today')" class="quick-time-btn px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition">今日</button>
+                            <button onclick="setQuickTimeRange('last7days')" class="quick-time-btn px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition">近7天</button>
+                            <button onclick="setQuickTimeRange('thismonth')" class="quick-time-btn px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition">本月</button>
+                        </div>
+                        
+                        <!-- 比較功能 -->
+                        <div class="flex items-center space-x-2 border-l pl-2 ml-2">
+                            <label class="comparison-toggle flex items-center text-xs px-2 py-1 rounded hover:bg-gray-50 cursor-pointer">
+                                <input type="checkbox" id="enableComparison" onchange="toggleComparison()" class="mr-1 rounded text-blue-600 focus:ring-blue-500">
+                                <span class="text-gray-600">與上期比較</span>
+                            </label>
+                        </div>
+                        
                         <select class="border border-gray-300 rounded px-3 py-1 text-sm">
                             <option>依扣分次數</option>
                             <option>依總扣分數</option>
                             <option>依影響人數</option>
                         </select>
+                    </div>
+                </div>
+                
+                <!-- 自定義日期範圍模態框 -->
+                <div id="customDateModal" class="custom-date-modal hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+                    <div class="flex items-center justify-center min-h-screen p-4">
+                        <div class="custom-date-content bg-white rounded-lg shadow-xl max-w-md w-full">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <h3 class="text-lg font-semibold text-gray-900">選擇日期範圍</h3>
+                            </div>
+                            <div class="px-6 py-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">開始日期</label>
+                                        <input type="date" id="startDate" class="date-input w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">結束日期</label>
+                                        <input type="date" id="endDate" class="date-input w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <h4 class="text-sm font-medium text-gray-700 mb-2">快速選擇</h4>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <button onclick="setDateRange('last7days')" class="quick-date-btn px-3 py-2 text-xs border border-gray-300 rounded hover:bg-gray-50">近7天</button>
+                                        <button onclick="setDateRange('last30days')" class="quick-date-btn px-3 py-2 text-xs border border-gray-300 rounded hover:bg-gray-50">近30天</button>
+                                        <button onclick="setDateRange('last90days')" class="quick-date-btn px-3 py-2 text-xs border border-gray-300 rounded hover:bg-gray-50">近90天</button>
+                                        <button onclick="setDateRange('thismonth')" class="quick-date-btn px-3 py-2 text-xs border border-gray-300 rounded hover:bg-gray-50">本月</button>
+                                        <button onclick="setDateRange('lastmonth')" class="quick-date-btn px-3 py-2 text-xs border border-gray-300 rounded hover:bg-gray-50">上月</button>
+                                        <button onclick="setDateRange('thisyear')" class="quick-date-btn px-3 py-2 text-xs border border-gray-300 rounded hover:bg-gray-50">今年</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end space-x-3">
+                                <button onclick="closeCustomDateModal()" class="px-4 py-2 text-sm border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition">取消</button>
+                                <button onclick="applyCustomDateRange()" class="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition">確定</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="space-y-4" id="topIssuesList">
@@ -421,12 +619,28 @@
                 <div class="flex flex-wrap items-center gap-4 pt-4 border-t border-gray-200">
                     <div class="flex items-center space-x-2">
                         <label class="text-sm font-medium text-gray-700">時間範圍:</label>
-                        <select id="timeRange" class="border border-gray-300 rounded px-3 py-1 text-sm">
+                        <select id="timeRange" onchange="onAudioTimeRangeChange()" class="time-selector border border-gray-300 rounded px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500">
                             <option value="today">今日</option>
-                            <option value="week">本週</option>
-                            <option value="month">本月</option>
-                            <option value="custom">自定義</option>
+                            <option value="yesterday">昨日</option>
+                            <option value="last7days">近7天</option>
+                            <option value="thisweek">本週</option>
+                            <option value="lastweek">上週</option>
+                            <option value="last30days">近30天</option>
+                            <option value="thismonth">本月</option>
+                            <option value="lastmonth">上月</option>
+                            <option value="last3months">近3個月</option>
+                            <option value="custom">自定義範圍</option>
                         </select>
+                        
+                        <!-- 顯示選中的日期範圍 -->
+                        <span id="selectedDateRange" class="date-range-display text-xs text-white time-range-badge px-2 py-1 rounded"></span>
+                        
+                        <!-- 快速時間按鈕 -->
+                        <div class="flex items-center space-x-1 border-l pl-2 ml-2 quick-time-buttons">
+                            <button onclick="setAudioTimeRange('today')" class="quick-time-btn px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition">今天</button>
+                            <button onclick="setAudioTimeRange('last7days')" class="quick-time-btn px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition">7天</button>
+                            <button onclick="setAudioTimeRange('thismonth')" class="quick-time-btn px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition">本月</button>
+                        </div>
                     </div>
                     
                     <div class="flex items-center space-x-2">
@@ -1492,6 +1706,243 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        }
+
+        // 友善時間查詢功能
+        const timeRanges = {
+            today: { name: '今日', days: 0 },
+            yesterday: { name: '昨日', days: 1 },
+            last7days: { name: '近7天', days: 7 },
+            thisweek: { name: '本週', days: 'thisweek' },
+            lastweek: { name: '上週', days: 'lastweek' },
+            last30days: { name: '近30天', days: 30 },
+            thismonth: { name: '本月', days: 'thismonth' },
+            lastmonth: { name: '上月', days: 'lastmonth' },
+            last3months: { name: '近3個月', days: 90 },
+            custom: { name: '自定義範圍', days: 'custom' }
+        };
+
+        // 計算日期範圍
+        function calculateDateRange(rangeType) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            switch(rangeType) {
+                case 'today':
+                    return {
+                        start: new Date(today),
+                        end: new Date(today.getTime() + 24 * 60 * 60 * 1000 - 1)
+                    };
+                case 'yesterday':
+                    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+                    return {
+                        start: yesterday,
+                        end: new Date(yesterday.getTime() + 24 * 60 * 60 * 1000 - 1)
+                    };
+                case 'last7days':
+                    return {
+                        start: new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000),
+                        end: new Date(today.getTime() + 24 * 60 * 60 * 1000 - 1)
+                    };
+                case 'thisweek':
+                    const dayOfWeek = today.getDay();
+                    const startOfWeek = new Date(today.getTime() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1) * 24 * 60 * 60 * 1000);
+                    return {
+                        start: startOfWeek,
+                        end: new Date(today.getTime() + 24 * 60 * 60 * 1000 - 1)
+                    };
+                case 'lastweek':
+                    const lastWeekEnd = new Date(today.getTime() - (today.getDay() === 0 ? 0 : today.getDay()) * 24 * 60 * 60 * 1000 - 1);
+                    const lastWeekStart = new Date(lastWeekEnd.getTime() - 6 * 24 * 60 * 60 * 1000);
+                    return {
+                        start: lastWeekStart,
+                        end: lastWeekEnd
+                    };
+                case 'last30days':
+                    return {
+                        start: new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000),
+                        end: new Date(today.getTime() + 24 * 60 * 60 * 1000 - 1)
+                    };
+                case 'thismonth':
+                    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                    return {
+                        start: startOfMonth,
+                        end: new Date(today.getTime() + 24 * 60 * 60 * 1000 - 1)
+                    };
+                case 'lastmonth':
+                    const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                    const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+                    return {
+                        start: lastMonthStart,
+                        end: lastMonthEnd
+                    };
+                case 'last3months':
+                    return {
+                        start: new Date(today.getTime() - 89 * 24 * 60 * 60 * 1000),
+                        end: new Date(today.getTime() + 24 * 60 * 60 * 1000 - 1)
+                    };
+                default:
+                    return { start: today, end: today };
+            }
+        }
+
+        // 格式化日期範圍顯示
+        function formatDateRange(range) {
+            const options = { month: '2-digit', day: '2-digit' };
+            const startStr = range.start.toLocaleDateString('zh-TW', options);
+            const endStr = range.end.toLocaleDateString('zh-TW', options);
+            
+            if (startStr === endStr) {
+                return startStr;
+            }
+            return `${startStr} ~ ${endStr}`;
+        }
+
+        // 更新總覽數據
+        function updateOverviewData() {
+            const selectedRange = document.getElementById('overviewTimeRange').value;
+            const isComparison = document.getElementById('enableComparison').checked;
+            
+            if (selectedRange === 'custom') {
+                showCustomDateModal();
+                return;
+            }
+            
+            const range = calculateDateRange(selectedRange);
+            console.log(`更新總覽數據: ${timeRanges[selectedRange].name}`, range);
+            
+            // 這裡可以添加實際的數據更新邏輯
+            // 例如：重新載入圖表、更新統計數字等
+            if (isComparison) {
+                console.log('啟用對比功能');
+                // 計算上一週期的數據進行對比
+            }
+            
+            // 更新頁面標題顯示當前時間範圍
+            updatePageTitle(timeRanges[selectedRange].name);
+        }
+
+        // 快速時間選擇
+        function setQuickTimeRange(rangeType) {
+            document.getElementById('overviewTimeRange').value = rangeType;
+            updateOverviewData();
+        }
+
+        // 開啟/關閉時間比較功能
+        function toggleComparison() {
+            const isEnabled = document.getElementById('enableComparison').checked;
+            console.log(`時間比較功能: ${isEnabled ? '開啟' : '關閉'}`);
+            
+            if (isEnabled) {
+                updateOverviewData(); // 重新加載帶對比的數據
+            }
+        }
+
+        // 自定義日期範圍相關函數
+        function showCustomDateModal() {
+            // 設定預設日期
+            const today = new Date();
+            const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            
+            document.getElementById('startDate').value = lastWeek.toISOString().split('T')[0];
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+            
+            document.getElementById('customDateModal').classList.remove('hidden');
+        }
+
+        function closeCustomDateModal() {
+            document.getElementById('customDateModal').classList.add('hidden');
+            // 重置下拉選單到之前的值
+            document.getElementById('overviewTimeRange').value = 'thisweek';
+        }
+
+        function setDateRange(rangeType) {
+            const range = calculateDateRange(rangeType);
+            document.getElementById('startDate').value = range.start.toISOString().split('T')[0];
+            document.getElementById('endDate').value = range.end.toISOString().split('T')[0];
+        }
+
+        function applyCustomDateRange() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('請選擇開始和結束日期');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                alert('開始日期不能晚於結束日期');
+                return;
+            }
+            
+            console.log(`自定義日期範圍: ${startDate} ~ ${endDate}`);
+            closeCustomDateModal();
+            
+            // 更新頁面顯示
+            updatePageTitle(`${startDate} ~ ${endDate}`);
+        }
+
+        // 音檔頁面時間選擇
+        function onAudioTimeRangeChange() {
+            const selectedRange = document.getElementById('timeRange').value;
+            
+            if (selectedRange === 'custom') {
+                showCustomDateModal();
+                return;
+            }
+            
+            const range = calculateDateRange(selectedRange);
+            const rangeText = formatDateRange(range);
+            
+            // 更新顯示的日期範圍
+            document.getElementById('selectedDateRange').textContent = rangeText;
+            
+            console.log(`音檔頁面時間範圍: ${timeRanges[selectedRange].name}`, range);
+            
+            // 重新應用篩選
+            applyFilters();
+        }
+
+        function setAudioTimeRange(rangeType) {
+            document.getElementById('timeRange').value = rangeType;
+            onAudioTimeRangeChange();
+        }
+
+        // 更新頁面標題
+        function updatePageTitle(timeRangeText) {
+            const titleElement = document.querySelector('h1');
+            if (titleElement) {
+                const baseTitle = 'AI質檢系統儀表板';
+                titleElement.textContent = `${baseTitle} - ${timeRangeText}`;
+            }
+        }
+
+        // 初始化時間選擇器
+        function initTimeSelectors() {
+            // 設定預設時間範圍顯示
+            const defaultRange = calculateDateRange('thisweek');
+            const defaultRangeText = formatDateRange(defaultRange);
+            
+            // 初始化音檔頁面的日期範圍顯示
+            const selectedDateRange = document.getElementById('selectedDateRange');
+            if (selectedDateRange) {
+                selectedDateRange.textContent = defaultRangeText;
+            }
+            
+            console.log('時間選擇器已初始化');
+        }
+
+        // 增強版的 initDashboard 函數
+        function initDashboard() {
+            populateTopIssues();
+            populateAgentsTable();
+            initChartsForTab('overview');
+            updateLastUpdateTime();
+            initTimeSelectors(); // 新增：初始化時間選擇器
+            
+            // Update time every minute
+            setInterval(updateLastUpdateTime, 60000);
         }
 
         // Initialize when DOM is loaded
