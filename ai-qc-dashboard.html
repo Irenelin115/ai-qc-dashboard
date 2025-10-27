@@ -198,6 +198,66 @@
             }
         }
         
+        /* Tooltip 樣式 */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+        
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 280px;
+            background-color: #1f2937;
+            color: #ffffff;
+            text-align: left;
+            border-radius: 8px;
+            padding: 12px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -140px;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+            font-size: 13px;
+            line-height: 1.4;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .tooltip .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1f2937 transparent transparent transparent;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .tooltip-icon {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            background-color: #6b7280;
+            color: #ffffff;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 10px;
+            line-height: 14px;
+            margin-left: 4px;
+            cursor: help;
+        }
+        
+        .tooltip-icon:hover {
+            background-color: #374151;
+        }
+        
         /* 響應式設計 */
         @media (max-width: 768px) {
             .time-controls {
@@ -213,6 +273,12 @@
             .quick-time-btn {
                 font-size: 0.75rem;
                 padding: 0.25rem 0.5rem;
+            }
+            
+            .tooltip .tooltip-text {
+                width: 240px;
+                margin-left: -120px;
+                font-size: 12px;
             }
         }
     </style>
@@ -693,19 +759,47 @@
             <!-- Summary Stats -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="bg-white rounded-lg shadow p-4">
-                    <div class="text-sm text-gray-600">高嚴重度</div>
+                    <div class="text-sm text-gray-600 tooltip">高嚴重度
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">
+                            <strong>高嚴重度扣分</strong><br>
+                            扣分分數 ≥ 8分的音檔數量<br>
+                            <em>通常涉及嚴重違規或重要流程缺失</em>
+                        </span>
+                    </div>
                     <div class="text-2xl font-bold text-red-600" id="highSeverityCount">0</div>
                 </div>
                 <div class="bg-white rounded-lg shadow p-4">
-                    <div class="text-sm text-gray-600">中嚴重度</div>
+                    <div class="text-sm text-gray-600 tooltip">中嚴重度
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">
+                            <strong>中嚴重度扣分</strong><br>
+                            扣分分數 4-7分的音檔數量<br>
+                            <em>一般性違規或品質問題</em>
+                        </span>
+                    </div>
                     <div class="text-2xl font-bold text-orange-600" id="mediumSeverityCount">0</div>
                 </div>
                 <div class="bg-white rounded-lg shadow p-4">
-                    <div class="text-sm text-gray-600">低嚴重度</div>
+                    <div class="text-sm text-gray-600 tooltip">低嚴重度
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">
+                            <strong>低嚴重度扣分</strong><br>
+                            扣分分數 1-3分的音檔數量<br>
+                            <em>輕微違規或改善建議</em>
+                        </span>
+                    </div>
                     <div class="text-2xl font-bold text-green-600" id="lowSeverityCount">0</div>
                 </div>
                 <div class="bg-white rounded-lg shadow p-4">
-                    <div class="text-sm text-gray-600">平均時長</div>
+                    <div class="text-sm text-gray-600 tooltip">平均時長
+                        <span class="tooltip-icon">?</span>
+                        <span class="tooltip-text">
+                            <strong>平均通話時長</strong><br>
+                            當前篩選範圍內所有音檔的平均通話時間<br>
+                            <em>計算：總時長 ÷ 音檔數量</em>
+                        </span>
+                    </div>
                     <div class="text-2xl font-bold text-blue-600" id="avgDuration">0</div>
                 </div>
             </div>
@@ -1543,18 +1637,60 @@
                                     </span>
                                 </div>
                                 <div class="flex items-center space-x-4 text-sm text-gray-600 mb-2">
-                                    <span>扣分次數: <span class="font-semibold text-gray-900">${item.count}次</span></span>
+                                    <span class="tooltip">扣分次數: <span class="font-semibold text-gray-900">${item.count}次</span>
+                                        <span class="tooltip-icon">?</span>
+                                        <span class="tooltip-text">
+                                            <strong>扣分次數</strong><br>
+                                            該指標在所有質檢通話中被標記扣分的總次數<br>
+                                            <em>範例：「${item.issue}」共被扣分 ${item.count} 次</em>
+                                        </span>
+                                    </span>
                                     <span>•</span>
-                                    <span>扣分率: <span class="font-semibold text-gray-900">${item.rate}%</span></span>
+                                    <span class="tooltip">扣分率: <span class="font-semibold text-gray-900">${item.rate}%</span>
+                                        <span class="tooltip-icon">?</span>
+                                        <span class="tooltip-text">
+                                            <strong>扣分率</strong><br>
+                                            (該指標扣分次數 ÷ 總質檢通話數) × 100%<br>
+                                            <em>計算：${item.count} ÷ 700 × 100% = ${item.rate}%</em>
+                                        </span>
+                                    </span>
                                     <span>•</span>
-                                    <span>影響通話: <span class="font-semibold text-gray-900">${item.affectedCalls}通</span></span>
+                                    <span class="tooltip">影響通話: <span class="font-semibold text-gray-900">${item.affectedCalls}通</span>
+                                        <span class="tooltip-icon">?</span>
+                                        <span class="tooltip-text">
+                                            <strong>影響通話</strong><br>
+                                            該指標被扣分的音檔數量<br>
+                                            <em>範例：有 ${item.affectedCalls} 通電話因此指標被扣分</em>
+                                        </span>
+                                    </span>
                                 </div>
                                 <div class="flex items-center space-x-4 text-sm text-gray-600">
-                                    <span>總扣分: <span class="font-semibold text-orange-600">${item.totalDeduction}分</span></span>
+                                    <span class="tooltip">總扣分: <span class="font-semibold text-orange-600">${item.totalDeduction}分</span>
+                                        <span class="tooltip-icon">?</span>
+                                        <span class="tooltip-text">
+                                            <strong>總扣分</strong><br>
+                                            該指標在所有被扣分通話中的扣分分數總和<br>
+                                            <em>範例：${item.count} 次扣分的分數加總為 ${item.totalDeduction} 分</em>
+                                        </span>
+                                    </span>
                                     <span>•</span>
-                                    <span>平均: <span class="font-semibold text-gray-900">${item.avgDeduction}分/次</span></span>
+                                    <span class="tooltip">平均: <span class="font-semibold text-gray-900">${item.avgDeduction}分/次</span>
+                                        <span class="tooltip-icon">?</span>
+                                        <span class="tooltip-text">
+                                            <strong>平均扣分</strong><br>
+                                            總扣分 ÷ 扣分次數<br>
+                                            <em>計算：${item.totalDeduction} ÷ ${item.count} = ${item.avgDeduction} 分/次</em>
+                                        </span>
+                                    </span>
                                     <span>•</span>
-                                    <span>影響客服: <span class="font-semibold text-gray-900">${item.affectedAgents}人</span></span>
+                                    <span class="tooltip">影響客服: <span class="font-semibold text-gray-900">${item.affectedAgents}人</span>
+                                        <span class="tooltip-icon">?</span>
+                                        <span class="tooltip-text">
+                                            <strong>影響客服</strong><br>
+                                            該指標涉及的不重複客服人員數量<br>
+                                            <em>範例：${item.count} 次扣分涉及 ${item.affectedAgents} 位不同客服</em>
+                                        </span>
+                                    </span>
                                 </div>
                             </div>
                         </div>
