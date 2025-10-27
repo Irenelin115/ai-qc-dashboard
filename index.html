@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>語音質檢系統 - 意圖標籤管理</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>語音質檢系統</h1>
+        <p>意圖標籤管理 & 人機混合標註平台</p>
+    </header>
+    
+    <main>
+        <div class="app-container">
+            <aside class="sidebar">
+                <nav class="nav-menu">
+                    <div class="nav-item active" data-section="detection">
+                        <i class="icon">🎯</i>
+                        <span>意圖檢測</span>
+                    </div>
+                    <div class="nav-item" data-section="prompt">
+                        <i class="icon">📝</i>
+                        <span>Prompt管理</span>
+                    </div>
+                    <div class="nav-item" data-section="samples">
+                        <i class="icon">📚</i>
+                        <span>Few-shot樣本</span>
+                    </div>
+                    <div class="nav-item" data-section="review">
+                        <i class="icon">👥</i>
+                        <span>人工覆核</span>
+                    </div>
+                </nav>
+            </aside>
+            
+            <div class="content-area">
+                <section id="detection-section" class="content-section active">
+            <div class="input-section">
+                <h3>STT文本輸入</h3>
+                <textarea id="stt-text" placeholder="請輸入STT轉錄的文本內容..."></textarea>
+                <button id="detect-intent">LLM意圖檢測</button>
+            </div>
+            
+            <div class="result-section">
+                <h3>檢測結果</h3>
+                <div id="intent-result">
+                    <div class="result-item">
+                        <span class="intent-label">等待檢測...</span>
+                        <span class="confidence">置信度: -</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button id="confirm-result" disabled>確認結果</button>
+                    <button id="manual-review" disabled>人工覆核</button>
+                </div>
+            </div>
+                </section>
+
+                <section id="prompt-section" class="content-section">
+            <div class="prompt-management">
+                <h3>意圖類別管理</h3>
+                <div class="intent-list">
+                    <!-- 保險相關意圖 -->
+                    <div class="intent-item">
+                        <input type="text" value="詢問保單" class="intent-name">
+                        <textarea class="intent-desc">客戶詢問保險相關資訊、保單內容、理賠流程等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    <div class="intent-item">
+                        <input type="text" value="購買意願" class="intent-name">
+                        <textarea class="intent-desc">客戶表達購買意願、詢問價格、比較產品等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    <div class="intent-item">
+                        <input type="text" value="理賠申請" class="intent-name">
+                        <textarea class="intent-desc">客戶申請理賠、提交理賠資料、詢問理賠進度等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    <div class="intent-item">
+                        <input type="text" value="保單變更" class="intent-name">
+                        <textarea class="intent-desc">客戶要求變更保單內容、受益人、聯絡資訊等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    <div class="intent-item">
+                        <input type="text" value="續保詢問" class="intent-name">
+                        <textarea class="intent-desc">客戶詢問續保事宜、保費調整、續保優惠等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    
+                    <!-- 帳務相關意圖 -->
+                    <div class="intent-item">
+                        <input type="text" value="帳單查詢" class="intent-name">
+                        <textarea class="intent-desc">客戶查詢帳單、繳費記錄、費用明細等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    <div class="intent-item">
+                        <input type="text" value="帳單申請" class="intent-name">
+                        <textarea class="intent-desc">客戶申請帳單、更改計費方式、設定自動扣款等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    <div class="intent-item">
+                        <input type="text" value="繳費問題" class="intent-name">
+                        <textarea class="intent-desc">客戶詢問繳費方式、繳費期限、逾期處理等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    <div class="intent-item">
+                        <input type="text" value="費用爭議" class="intent-name">
+                        <textarea class="intent-desc">客戶對費用計算有疑問、申請費用減免、退費等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    
+                    <!-- 服務相關意圖 -->
+                    <div class="intent-item">
+                        <input type="text" value="技術支援" class="intent-name">
+                        <textarea class="intent-desc">客戶遇到技術問題、系統故障、操作困難等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    <div class="intent-item">
+                        <input type="text" value="服務諮詢" class="intent-name">
+                        <textarea class="intent-desc">客戶詢問服務內容、使用方法、功能說明等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    <div class="intent-item">
+                        <input type="text" value="預約服務" class="intent-name">
+                        <textarea class="intent-desc">客戶預約面談、電話回訪、到府服務等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    
+                    <!-- 客訴相關意圖 -->
+                    <div class="intent-item">
+                        <input type="text" value="服務投訴" class="intent-name">
+                        <textarea class="intent-desc">客戶對服務品質不滿、投訴服務態度、處理效率等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    <div class="intent-item">
+                        <input type="text" value="產品投訴" class="intent-name">
+                        <textarea class="intent-desc">客戶對產品功能不滿、產品缺陷、效果不佳等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    <div class="intent-item">
+                        <input type="text" value="申請退保" class="intent-name">
+                        <textarea class="intent-desc">客戶要求退保、解約、終止服務等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    
+                    <!-- 資訊查詢意圖 -->
+                    <div class="intent-item">
+                        <input type="text" value="營業資訊" class="intent-name">
+                        <textarea class="intent-desc">客戶詢問營業時間、據點位置、聯絡方式等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    <div class="intent-item">
+                        <input type="text" value="促銷活動" class="intent-name">
+                        <textarea class="intent-desc">客戶詢問優惠活動、促銷方案、折扣資訊等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    <div class="intent-item">
+                        <input type="text" value="流程說明" class="intent-name">
+                        <textarea class="intent-desc">客戶詢問申請流程、辦理手續、所需文件等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    
+                    <!-- 其他意圖 -->
+                    <div class="intent-item">
+                        <input type="text" value="感謝回饋" class="intent-name">
+                        <textarea class="intent-desc">客戶表達感謝、給予正面回饋、推薦他人等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    <div class="intent-item">
+                        <input type="text" value="閒聊交談" class="intent-name">
+                        <textarea class="intent-desc">客戶進行閒聊、寒暄、非業務相關對話等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                    <div class="intent-item">
+                        <input type="text" value="轉接請求" class="intent-name">
+                        <textarea class="intent-desc">客戶要求轉接專員、轉接部門、人工服務等</textarea>
+                        <button class="remove-intent">刪除</button>
+                    </div>
+                </div>
+                <button id="add-intent">新增意圖類別</button>
+                
+                <div class="prompt-template">
+                    <h3>Prompt模板</h3>
+                    <textarea id="prompt-text" placeholder="系統Prompt模板...">你是一個專業的語音質檢系統意圖分析助手。請分析客戶在語音通話中的STT轉錄文本，準確識別客戶的主要意圖並給出置信度評分。
+
+## 分析要求：
+1. 仔細分析客戶話語的核心訴求和情感傾向
+2. 考慮語音對話的上下文和語氣
+3. 從預定義意圖類別中選擇最符合的一個
+4. 給出合理的置信度評分（0.0-1.0）
+5. 提供清晰的分析理由
+
+## 意圖類別定義：
+{INTENT_CATEGORIES}
+
+## Few-shot學習樣本：
+{FEW_SHOT_EXAMPLES}
+
+## 待分析的STT文本：
+```
+{STT_TEXT}
+```
+
+## 輸出要求：
+請嚴格按照以下JSON格式回覆，不要包含其他文字：
+```json
+{
+  "intent": "意圖類別名稱",
+  "confidence": 0.85,
+  "reasoning": "基於文本內容的具體分析理由，說明為什麼判斷為此意圖"
+}
+```
+
+注意事項：
+- intent必須完全匹配預定義類別名稱
+- confidence為0.0-1.0之間的數值
+- reasoning需要簡潔明確地說明判斷依據</textarea>
+                    <button id="save-prompt">儲存模板</button>
+                </div>
+            </div>
+                </section>
+
+                <section id="samples-section" class="content-section">
+            <div class="samples-management">
+                <h3>Few-shot樣本管理</h3>
+                <div class="add-sample">
+                    <select id="sample-intent">
+                        <option value="">選擇意圖類別</option>
+                        <!-- 保險相關意圖 -->
+                        <option value="詢問保單">詢問保單</option>
+                        <option value="購買意願">購買意願</option>
+                        <option value="理賠申請">理賠申請</option>
+                        <option value="保單變更">保單變更</option>
+                        <option value="續保詢問">續保詢問</option>
+                        <!-- 帳務相關意圖 -->
+                        <option value="帳單查詢">帳單查詢</option>
+                        <option value="帳單申請">帳單申請</option>
+                        <option value="繳費問題">繳費問題</option>
+                        <option value="費用爭議">費用爭議</option>
+                        <!-- 服務相關意圖 -->
+                        <option value="技術支援">技術支援</option>
+                        <option value="服務諮詢">服務諮詢</option>
+                        <option value="預約服務">預約服務</option>
+                        <!-- 客訴相關意圖 -->
+                        <option value="服務投訴">服務投訴</option>
+                        <option value="產品投訴">產品投訴</option>
+                        <option value="申請退保">申請退保</option>
+                        <!-- 資訊查詢意圖 -->
+                        <option value="營業資訊">營業資訊</option>
+                        <option value="促銷活動">促銷活動</option>
+                        <option value="流程說明">流程說明</option>
+                        <!-- 其他意圖 -->
+                        <option value="感謝回饋">感謝回饋</option>
+                        <option value="閒聊交談">閒聊交談</option>
+                        <option value="轉接請求">轉接請求</option>
+                    </select>
+                    <textarea id="sample-text" placeholder="輸入樣本文本..."></textarea>
+                    <button id="add-sample">新增樣本</button>
+                </div>
+                
+                <div class="samples-list" id="samples-list">
+                    <!-- 保險相關樣本 -->
+                    <div class="sample-item">
+                        <div class="sample-intent">詢問保單</div>
+                        <div class="sample-text">請問我的保單什麼時候到期？理賠的流程是怎樣的？</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    <div class="sample-item">
+                        <div class="sample-intent">購買意願</div>
+                        <div class="sample-text">我想了解一下你們的車險方案，價格大概多少？</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    <div class="sample-item">
+                        <div class="sample-intent">理賠申請</div>
+                        <div class="sample-text">我要申請車禍理賠，需要準備什麼資料？</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    <div class="sample-item">
+                        <div class="sample-intent">保單變更</div>
+                        <div class="sample-text">我想要更改保單的受益人，可以怎麼辦理？</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    <div class="sample-item">
+                        <div class="sample-intent">續保詢問</div>
+                        <div class="sample-text">我的保險快到期了，續保會有優惠嗎？</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    
+                    <!-- 帳務相關樣本 -->
+                    <div class="sample-item">
+                        <div class="sample-intent">帳單查詢</div>
+                        <div class="sample-text">我想查詢上個月的保費帳單明細</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    <div class="sample-item">
+                        <div class="sample-intent">繳費問題</div>
+                        <div class="sample-text">請問保費可以用信用卡繳嗎？分期付款有手續費嗎？</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    <div class="sample-item">
+                        <div class="sample-intent">費用爭議</div>
+                        <div class="sample-text">為什麼這個月的保費比上個月多了一千塊？</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    
+                    <!-- 服務相關樣本 -->
+                    <div class="sample-item">
+                        <div class="sample-intent">技術支援</div>
+                        <div class="sample-text">我的保險APP登不進去，一直顯示密碼錯誤</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    <div class="sample-item">
+                        <div class="sample-intent">服務諮詢</div>
+                        <div class="sample-text">請問你們有提供線上客服嗎？服務時間是幾點到幾點？</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    <div class="sample-item">
+                        <div class="sample-intent">預約服務</div>
+                        <div class="sample-text">我想預約業務員到公司來說明團保方案</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    
+                    <!-- 客訴相關樣本 -->
+                    <div class="sample-item">
+                        <div class="sample-intent">服務投訴</div>
+                        <div class="sample-text">你們的客服態度很差，講話很沒耐心，我要投訴</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    <div class="sample-item">
+                        <div class="sample-intent">產品投訴</div>
+                        <div class="sample-text">這個保險根本沒有當初說的那麼好，很多都不賠</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    <div class="sample-item">
+                        <div class="sample-intent">申請退保</div>
+                        <div class="sample-text">我不想要這個保險了，可以退保嗎？會扣多少錢？</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    
+                    <!-- 資訊查詢樣本 -->
+                    <div class="sample-item">
+                        <div class="sample-intent">營業資訊</div>
+                        <div class="sample-text">請問你們台北的服務中心在哪裡？營業時間是？</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    <div class="sample-item">
+                        <div class="sample-intent">促銷活動</div>
+                        <div class="sample-text">聽說你們最近有新保戶優惠活動，可以介紹一下嗎？</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    <div class="sample-item">
+                        <div class="sample-intent">流程說明</div>
+                        <div class="sample-text">請問投保需要準備什麼文件？整個流程要多久？</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    
+                    <!-- 其他樣本 -->
+                    <div class="sample-item">
+                        <div class="sample-intent">感謝回饋</div>
+                        <div class="sample-text">謝謝你們的服務這麼好，我會推薦朋友來投保</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    <div class="sample-item">
+                        <div class="sample-intent">閒聊交談</div>
+                        <div class="sample-text">最近天氣真的很熱呢，你們那邊也很熱嗎？</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                    <div class="sample-item">
+                        <div class="sample-intent">轉接請求</div>
+                        <div class="sample-text">可以幫我轉接到理賠部門嗎？我要找專員處理</div>
+                        <button class="remove-sample">刪除</button>
+                    </div>
+                </div>
+            </div>
+                </section>
+
+                <section id="review-section" class="content-section">
+            <div class="review-management">
+                <h3>待審核項目</h3>
+                <div class="review-list" id="review-list">
+                    <div class="review-item">
+                        <div class="review-text">客戶：我想查一下上個月的電話費帳單</div>
+                        <div class="ai-result">
+                            <span class="label">AI判斷:</span>
+                            <span class="intent">帳單查詢</span>
+                            <span class="confidence">(85%)</span>
+                        </div>
+                        <div class="manual-actions">
+                            <select class="manual-intent">
+                                <option value="帳單查詢" selected>帳單查詢</option>
+                                <!-- 保險相關意圖 -->
+                                <option value="詢問保單">詢問保單</option>
+                                <option value="購買意願">購買意願</option>
+                                <option value="理賠申請">理賠申請</option>
+                                <option value="保單變更">保單變更</option>
+                                <option value="續保詢問">續保詢問</option>
+                                <!-- 帳務相關意圖 -->
+                                <option value="帳單申請">帳單申請</option>
+                                <option value="繳費問題">繳費問題</option>
+                                <option value="費用爭議">費用爭議</option>
+                                <!-- 服務相關意圖 -->
+                                <option value="技術支援">技術支援</option>
+                                <option value="服務諮詢">服務諮詢</option>
+                                <option value="預約服務">預約服務</option>
+                                <!-- 客訴相關意圖 -->
+                                <option value="服務投訴">服務投訴</option>
+                                <option value="產品投訴">產品投訴</option>
+                                <option value="申請退保">申請退保</option>
+                                <!-- 資訊查詢意圖 -->
+                                <option value="營業資訊">營業資訊</option>
+                                <option value="促銷活動">促銷活動</option>
+                                <option value="流程說明">流程說明</option>
+                                <!-- 其他意圖 -->
+                                <option value="感謝回饋">感謝回饋</option>
+                                <option value="閒聊交談">閒聊交談</option>
+                                <option value="轉接請求">轉接請求</option>
+                            </select>
+                            <button class="approve">確認</button>
+                            <button class="reject">修正</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                </section>
+            </div>
+        </div>
+    </main>
+    
+    <script src="script.js"></script>
+</body>
+</html>

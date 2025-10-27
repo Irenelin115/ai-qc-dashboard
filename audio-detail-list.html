@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音檔明細列表 - AI質檢系統</title>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .audio-row {
+            transition: all 0.2s ease;
+        }
+        .audio-row:hover {
+            background-color: #f8fafc;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .play-button {
+            transition: all 0.2s ease;
+        }
+        .play-button:hover {
+            transform: scale(1.1);
+        }
+        .stt-text {
+            max-height: 60px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .stt-text.expanded {
+            max-height: none;
+        }
+        .severity-high {
+            border-left: 4px solid #ef4444;
+            background-color: #fef2f2;
+        }
+        .severity-medium {
+            border-left: 4px solid #f59e0b;
+            background-color: #fffbeb;
+        }
+        .severity-low {
+            border-left: 4px solid #10b981;
+            background-color: #f0fdf4;
+        }
+        .filter-chip {
+            transition: all 0.2s ease;
+        }
+        .filter-chip:hover {
+            transform: translateY(-1px);
+        }
+        .loading {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <button onclick="goBack()" class="flex items-center text-gray-600 hover:text-gray-900 transition">
+                        <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                        返回儀表板
+                    </button>
+                    <div class="h-6 w-px bg-gray-300"></div>
+                    <h1 class="text-xl font-bold text-gray-900" id="pageTitle">音檔明細列表</h1>
+                    <span class="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-800" id="issueCategory"></span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600" id="totalCount">總計 0 筆</span>
+                    <button onclick="exportAudioList()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                        <i data-lucide="download" class="w-4 h-4 mr-2 inline"></i>
+                        匯出清單
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Filters -->
+    <div class="bg-white border-b">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="flex items-center space-x-2">
+                    <label class="text-sm font-medium text-gray-700">時間範圍:</label>
+                    <select id="timeRange" class="border border-gray-300 rounded px-3 py-1 text-sm">
+                        <option value="today">今日</option>
+                        <option value="week">本週</option>
+                        <option value="month">本月</option>
+                        <option value="custom">自定義</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center space-x-2">
+                    <label class="text-sm font-medium text-gray-700">客服人員:</label>
+                    <select id="agentFilter" class="border border-gray-300 rounded px-3 py-1 text-sm">
+                        <option value="">全部</option>
+                        <option value="A001">張小明 (A001)</option>
+                        <option value="A002">李美玲 (A002)</option>
+                        <option value="A003">王大偉 (A003)</option>
+                        <option value="A004">陳小華 (A004)</option>
+                        <option value="A005">林志強 (A005)</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <label class="text-sm font-medium text-gray-700">嚴重程度:</label>
+                    <select id="severityFilter" class="border border-gray-300 rounded px-3 py-1 text-sm">
+                        <option value="">全部</option>
+                        <option value="high">高</option>
+                        <option value="medium">中</option>
+                        <option value="low">低</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <label class="text-sm font-medium text-gray-700">搜尋:</label>
+                    <input type="text" id="searchInput" placeholder="客戶代號、檔案名稱..." 
+                           class="border border-gray-300 rounded px-3 py-1 text-sm w-48">
+                </div>
+
+                <button onclick="applyFilters()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                    <i data-lucide="filter" class="w-4 h-4 mr-2 inline"></i>
+                    套用篩選
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="text-sm text-gray-600">高嚴重度</div>
+                <div class="text-2xl font-bold text-red-600" id="highSeverityCount">0</div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="text-sm text-gray-600">中嚴重度</div>
+                <div class="text-2xl font-bold text-orange-600" id="mediumSeverityCount">0</div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="text-sm text-gray-600">低嚴重度</div>
+                <div class="text-2xl font-bold text-green-600" id="lowSeverityCount">0</div>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="text-sm text-gray-600">平均時長</div>
+                <div class="text-2xl font-bold text-blue-600" id="avgDuration">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio List -->
+    <div class="max-w-7xl mx-auto px-6 pb-6">
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-gray-50 border-b">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">播放</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">檔案資訊</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">通話詳情</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">人員資訊</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">扣分詳情</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="audioTableBody">
+                        <!-- Audio rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-6 flex items-center justify-between">
+            <div class="text-sm text-gray-700">
+                顯示 <span id="showingFrom">1</span> 到 <span id="showingTo">20</span> 筆，共 <span id="totalItems">0</span> 筆
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="previousPage()" id="prevBtn" class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
+                    上一頁
+                </button>
+                <div class="flex items-center space-x-1" id="pageNumbers">
+                    <!-- Page numbers will be populated by JavaScript -->
+                </div>
+                <button onclick="nextPage()" id="nextBtn" class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
+                    下一頁
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STT Modal -->
+    <div id="sttModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-auto">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900" id="modalTitle">STT 轉錄文本</h3>
+                        <button onclick="closeSttModal()" class="text-gray-400 hover:text-gray-600">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="mb-4">
+                        <div class="flex items-center space-x-4 text-sm text-gray-600 mb-4">
+                            <span>檔案: <span class="font-medium" id="modalFileName"></span></span>
+                            <span>時長: <span class="font-medium" id="modalDuration"></span></span>
+                            <span>客服: <span class="font-medium" id="modalAgent"></span></span>
+                        </div>
+                    </div>
+                    <div class="prose max-w-none">
+                        <div id="modalSttContent" class="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                            <!-- STT content will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                    <div class="flex justify-end space-x-3">
+                        <button onclick="exportSttText()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                            匯出文本
+                        </button>
+                        <button onclick="closeSttModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
+                            關閉
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Global variables
+        let currentPage = 1;
+        let pageSize = 20;
+        let totalPages = 0;
+        let currentData = [];
+        let allAudioData = [];
+        let currentIssueType = '';
+
+        // Sample audio data based on top issues
+        const audioDataByIssue = {
+            '未使用禮貌用語': [
+                {
+                    fileName: 'call_20241017_142530_A002_C8859.wav',
+                    duration: '05:23',
+                    callTime: '2024/10/17 14:25:30',
+                    agentId: 'A002',
+                    agentName: '李美玲',
+                    createdBy: 'QC001',
+                    createdByName: '質檢員王小芬',
+                    customerId: 'C8859',
+                    customerName: '陳先生',
+                    severity: 'medium',
+                    deduction: 5,
+                    sttText: '客服：您好，請問有什麼需要幫助的嗎？\n客戶：我想要查詢我的保單狀況。\n客服：好的，請提供您的身分證字號。\n客戶：A123456789\n客服：查到了，您的保單目前正常繳費中。\n客戶：那我想要變更受益人可以嗎？\n客服：可以，但需要填寫變更申請書。\n客戶：好的謝謝。\n客服：不客氣。'
+                },
+                {
+                    fileName: 'call_20241017_135420_A003_C7742.wav',
+                    duration: '03:45',
+                    callTime: '2024/10/17 13:54:20',
+                    agentId: 'A003',
+                    agentName: '王大偉',
+                    createdBy: 'QC002',
+                    createdByName: '質檢員林小美',
+                    customerId: 'C7742',
+                    customerName: '張女士',
+                    severity: 'high',
+                    deduction: 8,
+                    sttText: '客服：喂？\n客戶：你好，我想要理賠申請。\n客服：什麼理賠？\n客戶：我上個月車禍，想要申請理賠。\n客服：那你要填表格，然後準備資料。\n客戶：什麼資料？\n客服：就診斷書、收據這些。\n客戶：好吧。\n客服：還有其他問題嗎？\n客戶：沒有了。\n客服：那就這樣。'
+                },
+                {
+                    fileName: 'call_20241017_161155_A005_C9123.wav',
+                    duration: '07:12',
+                    callTime: '2024/10/17 16:11:55',
+                    agentId: 'A005',
+                    agentName: '林志強',
+                    createdBy: 'QC001',
+                    createdByName: '質檢員王小芬',
+                    customerId: 'C9123',
+                    customerName: '劉太太',
+                    severity: 'low',
+                    deduction: 3,
+                    sttText: '客服：您好，這裡是保險公司，請問有什麼可以為您服務的？\n客戶：我想要了解一下意外險的理賠範圍。\n客服：好的，意外險主要理賠因為意外事故造成的醫療費用和殘廢給付。\n客戶：那包括哪些意外呢？\n客服：包括交通事故、跌倒、燒燙傷等非疾病原因造成的傷害。\n客戶：了解，那理賠金額是怎麼計算的？\n客服：會依照您投保的保額和醫療費用收據來計算。\n客戶：好的，謝謝你的說明。\n客服：嗯，沒事。'
+                }
+            ],
+            '問題未完全解決': [
+                {
+                    fileName: 'call_20241017_093025_A001_C5566.wav',
+                    duration: '08:45',
+                    callTime: '2024/10/17 09:30:25',
+                    agentId: 'A001',
+                    agentName: '張小明',
+                    createdBy: 'QC003',
+                    createdByName: '質檢員陳小華',
+                    customerId: 'C5566',
+                    customerName: '黃先生',
+                    severity: 'high',
+                    deduction: 12,
+                    sttText: '客服：您好，感謝您來電，我是張小明，請問有什麼可以為您服務的？\n客戶：我的保險理賠案件已經送件兩個月了，為什麼還沒有下來？\n客服：請您稍等，我幫您查詢一下案件狀況。請提供您的保單號碼。\n客戶：PL202401234567\n客服：好的，我查到您的案件目前在核保部門審核中。\n客戶：為什麼要這麼久？我急需這筆錢。\n客服：因為您的案件金額比較大，需要詳細審核。\n客戶：那什麼時候會有結果？\n客服：這個我也不太清楚，要問核保部門。\n客戶：那你可以幫我問嗎？\n客服：我等一下會幫您反映。\n客戶：什麼時候會回覆我？\n客服：大概一週內會有人聯絡您。'
+                },
+                {
+                    fileName: 'call_20241017_112215_A004_C3344.wav',
+                    duration: '06:33',
+                    callTime: '2024/10/17 11:22:15',
+                    agentId: 'A004',
+                    agentName: '陳小華',
+                    createdBy: 'QC002',
+                    createdByName: '質檢員林小美',
+                    customerId: 'C3344',
+                    customerName: '吳小姐',
+                    severity: 'medium',
+                    deduction: 8,
+                    sttText: '客服：您好，這裡是客服中心，我是陳小華，請問有什麼可以協助您的？\n客戶：我想要更改我的通訊地址。\n客服：好的，請提供您的身分證字號和保單號碼。\n客戶：身分證字號是B987654321，保單號碼是PL202401567890\n客服：好的，請問您要更改成什麼地址？\n客戶：台北市信義區松高路123號4樓\n客服：我已經幫您登記了，大概3-5個工作天會完成更改。\n客戶：那我怎麼知道已經更改成功了？\n客服：系統會自動更新。\n客戶：但是我怎麼確認呢？會有通知嗎？\n客服：這個...我不太確定，您可以過幾天再打電話來確認。'
+                }
+            ],
+            '回應時間過長': [
+                {
+                    fileName: 'call_20241017_145030_A002_C6677.wav',
+                    duration: '04:58',
+                    callTime: '2024/10/17 14:50:30',
+                    agentId: 'A002',
+                    agentName: '李美玲',
+                    createdBy: 'QC001',
+                    createdByName: '質檢員王小芬',
+                    customerId: 'C6677',
+                    customerName: '徐先生',
+                    severity: 'medium',
+                    deduction: 4,
+                    sttText: '客服：您好，感謝您來電，我是李美玲，請問有什麼可以為您服務的？\n客戶：我想要查詢我的保單現金價值。\n客服：好的，請稍等一下...(沉默15秒)...抱歉讓您久等了，請提供您的保單號碼。\n客戶：PL202401345678\n客服：好的，我幫您查詢...(沉默20秒)...請問您是要查詢哪一張保單呢？\n客戶：就剛才那個號碼啊。\n客服：抱歉，我再查一次...(沉默18秒)...您的保單現金價值是18萬5千元。\n客戶：好的，謝謝。'
+                }
+            ],
+            '專業知識不足': [
+                {
+                    fileName: 'call_20241017_105540_A005_C1122.wav',
+                    duration: '09:22',
+                    callTime: '2024/10/17 10:55:40',
+                    agentId: 'A005',
+                    agentName: '林志強',
+                    createdBy: 'QC003',
+                    createdByName: '質檢員陳小華',
+                    customerId: 'C1122',
+                    customerName: '方小姐',
+                    severity: 'high',
+                    deduction: 10,
+                    sttText: '客服：您好，我是林志強，請問有什麼可以為您服務的？\n客戶：我想要了解一下投資型保單的費用結構。\n客服：好的，投資型保單就是...嗯...就是可以投資的保單。\n客戶：我知道，但是費用怎麼算呢？有哪些費用？\n客服：費用的話...有管理費...還有其他費用。\n客戶：具體是多少呢？\n客服：這個我要查一下...您稍等。\n客戶：好。\n客服：管理費大概是...我不太確定，要不您留個電話，我請專員回電給您？\n客戶：可是我現在就想知道啊。\n客服：真的不好意思，這個比較複雜，我可能說不清楚。'
+                }
+            ],
+            '缺少結束語': [
+                {
+                    fileName: 'call_20241017_164420_A003_C4455.wav',
+                    duration: '02:31',
+                    callTime: '2024/10/17 16:44:20',
+                    agentId: 'A003',
+                    agentName: '王大偉',
+                    createdBy: 'QC002',
+                    createdByName: '質檢員林小美',
+                    customerId: 'C4455',
+                    customerName: '李太太',
+                    severity: 'low',
+                    deduction: 4,
+                    sttText: '客服：您好，請問有什麼需要幫助的？\n客戶：我想要查詢我上個月的繳費記錄。\n客服：請提供您的保單號碼。\n客戶：PL202401789012\n客服：您上個月已經正常繳費了，金額是3500元。\n客戶：好的，謝謝。\n客服：嗯。'
+                }
+            ]
+        };
+
+        // Initialize page
+        function initPage() {
+            // Get issue type from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            currentIssueType = urlParams.get('issue') || '未使用禮貌用語';
+            
+            // Update page title and category
+            document.getElementById('pageTitle').textContent = `${currentIssueType} - 音檔明細`;
+            document.getElementById('issueCategory').textContent = currentIssueType;
+            
+            // Load data for current issue type
+            allAudioData = audioDataByIssue[currentIssueType] || [];
+            currentData = [...allAudioData];
+            
+            // Update stats
+            updateStats();
+            
+            // Render table
+            renderTable();
+            
+            // Setup pagination
+            setupPagination();
+        }
+
+        // Update statistics
+        function updateStats() {
+            const highSeverity = currentData.filter(item => item.severity === 'high').length;
+            const mediumSeverity = currentData.filter(item => item.severity === 'medium').length;
+            const lowSeverity = currentData.filter(item => item.severity === 'low').length;
+            
+            const totalDuration = currentData.reduce((sum, item) => {
+                const [min, sec] = item.duration.split(':').map(Number);
+                return sum + min * 60 + sec;
+            }, 0);
+            const avgDurationSeconds = totalDuration / currentData.length;
+            const avgMin = Math.floor(avgDurationSeconds / 60);
+            const avgSec = Math.floor(avgDurationSeconds % 60);
+            
+            document.getElementById('highSeverityCount').textContent = highSeverity;
+            document.getElementById('mediumSeverityCount').textContent = mediumSeverity;
+            document.getElementById('lowSeverityCount').textContent = lowSeverity;
+            document.getElementById('avgDuration').textContent = `${avgMin}:${avgSec.toString().padStart(2, '0')}`;
+            document.getElementById('totalCount').textContent = `總計 ${currentData.length} 筆`;
+        }
+
+        // Render table
+        function renderTable() {
+            const tbody = document.getElementById('audioTableBody');
+            tbody.innerHTML = '';
+            
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, currentData.length);
+            const pageData = currentData.slice(startIndex, endIndex);
+            
+            pageData.forEach((audio, index) => {
+                const row = createAudioRow(audio, startIndex + index);
+                tbody.appendChild(row);
+            });
+            
+            lucide.createIcons();
+        }
+
+        // Create audio row
+        function createAudioRow(audio, index) {
+            const tr = document.createElement('tr');
+            const severityClass = `severity-${audio.severity}`;
+            tr.className = `audio-row ${severityClass}`;
+            
+            const severityText = {
+                high: '高',
+                medium: '中',
+                low: '低'
+            };
+            
+            const severityColor = {
+                high: 'text-red-600',
+                medium: 'text-orange-600',
+                low: 'text-green-600'
+            };
+            
+            tr.innerHTML = `
+                <td class="px-4 py-4">
+                    <button onclick="playAudio('${audio.fileName}')" class="play-button bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition">
+                        <i data-lucide="play" class="w-4 h-4"></i>
+                    </button>
+                </td>
+                <td class="px-4 py-4">
+                    <div class="text-sm font-medium text-gray-900">${audio.fileName}</div>
+                    <div class="text-sm text-gray-600">時長: ${audio.duration}</div>
+                    <div class="text-sm text-gray-600">大小: ${Math.floor(Math.random() * 5 + 2)}.${Math.floor(Math.random() * 99)}MB</div>
+                </td>
+                <td class="px-4 py-4">
+                    <div class="text-sm text-gray-900">${audio.callTime}</div>
+                    <div class="text-sm text-gray-600">客戶: ${audio.customerName} (${audio.customerId})</div>
+                    <div class="text-sm text-gray-600">通話類型: 保險諮詢</div>
+                </td>
+                <td class="px-4 py-4">
+                    <div class="text-sm font-medium text-gray-900">${audio.agentName}</div>
+                    <div class="text-sm text-gray-600">ID: ${audio.agentId}</div>
+                    <div class="text-sm text-gray-600">建立: ${audio.createdByName}</div>
+                </td>
+                <td class="px-4 py-4">
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span class="text-sm font-medium ${severityColor[audio.severity]}">${severityText[audio.severity]}嚴重度</span>
+                        <span class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-800">-${audio.deduction}分</span>
+                    </div>
+                    <div class="text-sm text-gray-600">指標: ${currentIssueType}</div>
+                    <div class="text-sm text-gray-600">時間點: ${Math.floor(Math.random() * 3 + 1)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}</div>
+                </td>
+                <td class="px-4 py-4">
+                    <div class="flex flex-col space-y-1">
+                        <button onclick="showSttModal('${audio.fileName}')" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                            查看STT
+                        </button>
+                        <button onclick="downloadAudio('${audio.fileName}')" class="text-green-600 hover:text-green-700 text-sm font-medium">
+                            下載音檔
+                        </button>
+                        <button onclick="addToTraining('${audio.fileName}')" class="text-purple-600 hover:text-purple-700 text-sm font-medium">
+                            加入訓練
+                        </button>
+                    </div>
+                </td>
+            `;
+            
+            return tr;
+        }
+
+        // Setup pagination
+        function setupPagination() {
+            totalPages = Math.ceil(currentData.length / pageSize);
+            
+            const showingFrom = (currentPage - 1) * pageSize + 1;
+            const showingTo = Math.min(currentPage * pageSize, currentData.length);
+            
+            document.getElementById('showingFrom').textContent = showingFrom;
+            document.getElementById('showingTo').textContent = showingTo;
+            document.getElementById('totalItems').textContent = currentData.length;
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage === totalPages;
+            
+            // Generate page numbers
+            const pageNumbers = document.getElementById('pageNumbers');
+            pageNumbers.innerHTML = '';
+            
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    const button = document.createElement('button');
+                    button.className = `px-3 py-2 border text-sm font-medium ${i === currentPage ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`;
+                    button.textContent = i;
+                    button.onclick = () => goToPage(i);
+                    pageNumbers.appendChild(button);
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    const span = document.createElement('span');
+                    span.textContent = '...';
+                    span.className = 'px-2 py-2 text-gray-500';
+                    pageNumbers.appendChild(span);
+                }
+            }
+        }
+
+        // Navigation functions
+        function goToPage(page) {
+            currentPage = page;
+            renderTable();
+            setupPagination();
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                goToPage(currentPage - 1);
+            }
+        }
+
+        function nextPage() {
+            if (currentPage < totalPages) {
+                goToPage(currentPage + 1);
+            }
+        }
+
+        // Filter functions
+        function applyFilters() {
+            const timeRange = document.getElementById('timeRange').value;
+            const agentFilter = document.getElementById('agentFilter').value;
+            const severityFilter = document.getElementById('severityFilter').value;
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            
+            currentData = allAudioData.filter(audio => {
+                // Agent filter
+                if (agentFilter && audio.agentId !== agentFilter) return false;
+                
+                // Severity filter
+                if (severityFilter && audio.severity !== severityFilter) return false;
+                
+                // Search filter
+                if (searchInput && 
+                    !audio.fileName.toLowerCase().includes(searchInput) &&
+                    !audio.customerId.toLowerCase().includes(searchInput) &&
+                    !audio.customerName.toLowerCase().includes(searchInput)) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            currentPage = 1;
+            updateStats();
+            renderTable();
+            setupPagination();
+        }
+
+        // Modal functions
+        function showSttModal(fileName) {
+            const audio = allAudioData.find(a => a.fileName === fileName);
+            if (!audio) return;
+            
+            document.getElementById('modalFileName').textContent = audio.fileName;
+            document.getElementById('modalDuration').textContent = audio.duration;
+            document.getElementById('modalAgent').textContent = `${audio.agentName} (${audio.agentId})`;
+            document.getElementById('modalSttContent').textContent = audio.sttText;
+            
+            document.getElementById('sttModal').classList.remove('hidden');
+        }
+
+        function closeSttModal() {
+            document.getElementById('sttModal').classList.add('hidden');
+        }
+
+        // Action functions
+        function playAudio(fileName) {
+            alert(`播放音檔: ${fileName}`);
+        }
+
+        function downloadAudio(fileName) {
+            alert(`下載音檔: ${fileName}`);
+        }
+
+        function addToTraining(fileName) {
+            alert(`已將 ${fileName} 加入訓練素材庫`);
+        }
+
+        function exportAudioList() {
+            alert('匯出音檔清單功能開發中...');
+        }
+
+        function exportSttText() {
+            const sttContent = document.getElementById('modalSttContent').textContent;
+            const blob = new Blob([sttContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'stt_transcript.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        // Initialize page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+</html>

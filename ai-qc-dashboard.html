@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI質檢系統儀表板</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .tab-button {
+            transition: all 0.2s ease;
+        }
+        .tab-button:hover {
+            background-color: #f3f4f6;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        .alert-item {
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .trend-up {
+            color: #10b981;
+        }
+        .trend-down {
+            color: #ef4444;
+        }
+        .loading {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        .audio-row {
+            transition: all 0.2s ease;
+        }
+        .audio-row:hover {
+            background-color: #f8fafc;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .play-button {
+            transition: all 0.2s ease;
+        }
+        .play-button:hover {
+            transform: scale(1.1);
+        }
+        .severity-high {
+            border-left: 4px solid #ef4444;
+            background-color: #fef2f2;
+        }
+        .severity-medium {
+            border-left: 4px solid #f59e0b;
+            background-color: #fffbeb;
+        }
+        .severity-low {
+            border-left: 4px solid #10b981;
+            background-color: #f0fdf4;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-bold text-gray-900">AI質檢系統儀表板</h1>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600" id="lastUpdate">最後更新: 2025/10/17 14:30</span>
+                    <button onclick="exportReport()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                        匯出報表
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-white border-b">
+        <div class="max-w-7xl mx-auto px-6">
+            <nav class="flex space-x-8">
+                <button onclick="setActiveTab('overview')" 
+                        class="tab-button py-4 px-2 border-b-2 font-medium text-sm transition border-blue-600 text-blue-600" 
+                        id="tab-overview">
+                    總覽
+                </button>
+                <button onclick="setActiveTab('quality')" 
+                        class="tab-button py-4 px-2 border-b-2 font-medium text-sm transition border-transparent text-gray-600 hover:text-gray-900" 
+                        id="tab-quality">
+                    品質分析
+                </button>
+                <button onclick="setActiveTab('compliance')" 
+                        class="tab-button py-4 px-2 border-b-2 font-medium text-sm transition border-transparent text-gray-600 hover:text-gray-900" 
+                        id="tab-compliance">
+                    合規檢測
+                </button>
+                <button onclick="setActiveTab('emotion')" 
+                        class="tab-button py-4 px-2 border-b-2 font-medium text-sm transition border-transparent text-gray-600 hover:text-gray-900" 
+                        id="tab-emotion">
+                    情緒分析
+                </button>
+                <button onclick="setActiveTab('agents')" 
+                        class="tab-button py-4 px-2 border-b-2 font-medium text-sm transition border-transparent text-gray-600 hover:text-gray-900" 
+                        id="tab-agents">
+                    客服績效
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-6">
+        <!-- Overview Tab -->
+        <div id="overview-content" class="space-y-6">
+            <!-- Key Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="stat-card bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1">今日質檢通話數</p>
+                            <p class="text-3xl font-bold text-gray-900">700</p>
+                            <div class="flex items-center mt-2 text-sm trend-up">
+                                <i data-lucide="trending-up" class="w-4 h-4 mr-1"></i>
+                                <span>+12.5%</span>
+                            </div>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-full">
+                            <i data-lucide="phone" class="w-8 h-8 text-blue-600"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1">質檢覆蓋率</p>
+                            <p class="text-3xl font-bold text-gray-900">98%</p>
+                            <div class="flex items-center mt-2 text-sm trend-up">
+                                <i data-lucide="trending-up" class="w-4 h-4 mr-1"></i>
+                                <span>+2.1%</span>
+                            </div>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-full">
+                            <i data-lucide="award" class="w-8 h-8 text-blue-600"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1">平均品質分數</p>
+                            <p class="text-3xl font-bold text-gray-900">88</p>
+                            <div class="flex items-center mt-2 text-sm trend-up">
+                                <i data-lucide="trending-up" class="w-4 h-4 mr-1"></i>
+                                <span>+1.5</span>
+                            </div>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-full">
+                            <i data-lucide="trending-up" class="w-8 h-8 text-blue-600"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1">違規事件</p>
+                            <p class="text-3xl font-bold text-gray-900">23</p>
+                            <div class="flex items-center mt-2 text-sm trend-down">
+                                <i data-lucide="trending-down" class="w-4 h-4 mr-1"></i>
+                                <span>-8.0%</span>
+                            </div>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-full">
+                            <i data-lucide="alert-triangle" class="w-8 h-8 text-blue-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Quality Score Distribution -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">品質分數分布</h3>
+                    <div class="chart-container">
+                        <canvas id="qualityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Trend Chart -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">品質趨勢 (近7天)</h3>
+                    <div class="chart-container">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                    <div class="mt-4 grid grid-cols-4 gap-4 pt-4 border-t">
+                        <div>
+                            <p class="text-sm text-gray-600">7日平均</p>
+                            <p class="text-lg font-bold text-gray-900">85分</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">最高分</p>
+                            <p class="text-lg font-bold text-green-600">88分</p>
+                            <p class="text-xs text-gray-500">10/17</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">最低分</p>
+                            <p class="text-lg font-bold text-orange-600">82分</p>
+                            <p class="text-xs text-gray-500">10/11</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">趨勢</p>
+                            <p class="text-lg font-bold text-green-600 flex items-center">
+                                <i data-lucide="trending-up" class="w-5 h-5 mr-1"></i>
+                                改善中
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Issues -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">高頻扣分指標 TOP 5</h3>
+                    <div class="flex items-center space-x-2 text-sm">
+                        <select class="border border-gray-300 rounded px-3 py-1 text-sm">
+                            <option>今日</option>
+                            <option>本週</option>
+                            <option>本月</option>
+                        </select>
+                        <select class="border border-gray-300 rounded px-3 py-1 text-sm">
+                            <option>依扣分次數</option>
+                            <option>依總扣分數</option>
+                            <option>依影響人數</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="space-y-4" id="topIssuesList">
+                    <!-- Issues will be populated by JavaScript -->
+                </div>
+                
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <div class="grid grid-cols-3 gap-4 text-sm">
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <p class="text-gray-600 mb-1">今日總扣分次數</p>
+                            <p class="text-2xl font-bold text-gray-900">164次</p>
+                            <p class="text-xs text-gray-500 mt-1">平均每通: 0.23次</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <p class="text-gray-600 mb-1">零扣分通話</p>
+                            <p class="text-2xl font-bold text-green-600">536通</p>
+                            <p class="text-xs text-gray-500 mt-1">占比: 76.6%</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <p class="text-gray-600 mb-1">主要改善方向</p>
+                            <p class="text-sm font-semibold text-gray-900">服務態度培訓</p>
+                            <p class="text-xs text-gray-500 mt-1">#1, #5 相關項目</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quality Tab -->
+        <div id="quality-content" class="space-y-6" style="display: none;">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">評分項目明細</h3>
+                <div class="chart-container">
+                    <canvas id="complianceChart"></canvas>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h4 class="font-semibold text-gray-900 mb-2">開場白完整度</h4>
+                    <div class="text-3xl font-bold text-blue-600">92.8%</div>
+                    <p class="text-sm text-gray-600 mt-1">較上週 +2.3%</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h4 class="font-semibold text-gray-900 mb-2">專業知識準確性</h4>
+                    <div class="text-3xl font-bold text-green-600">88.5%</div>
+                    <p class="text-sm text-gray-600 mt-1">較上週 +1.8%</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h4 class="font-semibold text-gray-900 mb-2">問題解決能力</h4>
+                    <div class="text-3xl font-bold text-orange-600">85.2%</div>
+                    <p class="text-sm text-gray-600 mt-1">較上週 -0.5%</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compliance Tab -->
+        <div id="compliance-content" class="space-y-6" style="display: none;">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">合規項目檢測</h3>
+                    <div class="chart-container">
+                        <canvas id="complianceDetailChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">高風險事件</h3>
+                    <div class="space-y-3">
+                        <div class="alert-item flex items-start space-x-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 mt-0.5"></i>
+                            <div>
+                                <p class="font-semibold text-red-900">未執行身份驗證</p>
+                                <p class="text-sm text-red-700">客服：李美玲 | 時間：14:25</p>
+                            </div>
+                        </div>
+                        <div class="alert-item flex items-start space-x-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                            <i data-lucide="alert-circle" class="w-5 h-5 text-orange-600 mt-0.5"></i>
+                            <div>
+                                <p class="font-semibold text-orange-900">使用禁用詞彙</p>
+                                <p class="text-sm text-orange-700">客服：王大偉 | 時間：13:42</p>
+                            </div>
+                        </div>
+                        <div class="alert-item flex items-start space-x-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <i data-lucide="alert-circle" class="w-5 h-5 text-yellow-600 mt-0.5"></i>
+                            <div>
+                                <p class="font-semibold text-yellow-900">流程跳過未確認</p>
+                                <p class="text-sm text-yellow-700">客服：陳小華 | 時間：12:18</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emotion Tab -->
+        <div id="emotion-content" class="space-y-6" style="display: none;">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">客戶情緒分布</h3>
+                    <div class="chart-container">
+                        <canvas id="emotionChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">情緒轉折分析</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 border border-gray-200 rounded-lg">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium">正面→負面轉換</span>
+                                <span class="text-2xl font-bold text-red-600">12</span>
+                            </div>
+                            <p class="text-sm text-gray-600">主要原因：等待時間過長、問題未解決</p>
+                        </div>
+                        <div class="p-4 border border-gray-200 rounded-lg">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium">負面→正面轉換</span>
+                                <span class="text-2xl font-bold text-green-600">28</span>
+                            </div>
+                            <p class="text-sm text-gray-600">主要原因：問題快速解決、態度良好</p>
+                        </div>
+                        <div class="p-4 border border-gray-200 rounded-lg">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium">持續負面情緒</span>
+                                <span class="text-2xl font-bold text-orange-600">8</span>
+                            </div>
+                            <p class="text-sm text-gray-600">需要主管介入處理</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio Detail Tab -->
+        <div id="audio-detail-content" class="space-y-6" style="display: none;">
+            <!-- Header -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-4">
+                        <button onclick="backToOverview()" class="flex items-center text-gray-600 hover:text-gray-900 transition">
+                            <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                            返回總覽
+                        </button>
+                        <div class="h-6 w-px bg-gray-300"></div>
+                        <h2 class="text-xl font-bold text-gray-900" id="detailPageTitle">音檔明細列表</h2>
+                        <span class="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-800" id="detailIssueCategory"></span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-600" id="detailTotalCount">總計 0 筆</span>
+                        <button onclick="exportAudioList()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                            <i data-lucide="download" class="w-4 h-4 mr-2 inline"></i>
+                            匯出清單
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="flex flex-wrap items-center gap-4 pt-4 border-t border-gray-200">
+                    <div class="flex items-center space-x-2">
+                        <label class="text-sm font-medium text-gray-700">時間範圍:</label>
+                        <select id="timeRange" class="border border-gray-300 rounded px-3 py-1 text-sm">
+                            <option value="today">今日</option>
+                            <option value="week">本週</option>
+                            <option value="month">本月</option>
+                            <option value="custom">自定義</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2">
+                        <label class="text-sm font-medium text-gray-700">客服人員:</label>
+                        <select id="agentFilter" class="border border-gray-300 rounded px-3 py-1 text-sm">
+                            <option value="">全部</option>
+                            <option value="A001">張小明 (A001)</option>
+                            <option value="A002">李美玲 (A002)</option>
+                            <option value="A003">王大偉 (A003)</option>
+                            <option value="A004">陳小華 (A004)</option>
+                            <option value="A005">林志強 (A005)</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <label class="text-sm font-medium text-gray-700">嚴重程度:</label>
+                        <select id="severityFilter" class="border border-gray-300 rounded px-3 py-1 text-sm">
+                            <option value="">全部</option>
+                            <option value="high">高</option>
+                            <option value="medium">中</option>
+                            <option value="low">低</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <label class="text-sm font-medium text-gray-700">搜尋:</label>
+                        <input type="text" id="searchInput" placeholder="客戶代號、檔案名稱..." 
+                               class="border border-gray-300 rounded px-3 py-1 text-sm w-48">
+                    </div>
+
+                    <button onclick="applyFilters()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                        <i data-lucide="filter" class="w-4 h-4 mr-2 inline"></i>
+                        套用篩選
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div class="text-sm text-gray-600">高嚴重度</div>
+                    <div class="text-2xl font-bold text-red-600" id="highSeverityCount">0</div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div class="text-sm text-gray-600">中嚴重度</div>
+                    <div class="text-2xl font-bold text-orange-600" id="mediumSeverityCount">0</div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div class="text-sm text-gray-600">低嚴重度</div>
+                    <div class="text-2xl font-bold text-green-600" id="lowSeverityCount">0</div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <div class="text-sm text-gray-600">平均時長</div>
+                    <div class="text-2xl font-bold text-blue-600" id="avgDuration">0</div>
+                </div>
+            </div>
+
+            <!-- Audio List -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50 border-b">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">播放</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">檔案資訊</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">通話詳情</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">人員資訊</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">扣分詳情</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="audioTableBody">
+                            <!-- Audio rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex items-center justify-between">
+                <div class="text-sm text-gray-700">
+                    顯示 <span id="showingFrom">1</span> 到 <span id="showingTo">20</span> 筆，共 <span id="totalItems">0</span> 筆
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="previousPage()" id="prevBtn" class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
+                        上一頁
+                    </button>
+                    <div class="flex items-center space-x-1" id="pageNumbers">
+                        <!-- Page numbers will be populated by JavaScript -->
+                    </div>
+                    <button onclick="nextPage()" id="nextBtn" class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50">
+                        下一頁
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agents Tab -->
+        <div id="agents-content" class="space-y-6" style="display: none;">
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <h3 class="text-lg font-semibold text-gray-900 p-6 border-b">客服人員績效排名</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">排名</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">姓名</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">平均分數</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">通話數</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">首次解決率</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">狀態</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="agentsTable">
+                            <!-- Agent data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h4 class="font-semibold text-gray-900 mb-2">本月之星</h4>
+                    <div class="text-2xl font-bold text-blue-600">張小明</div>
+                    <p class="text-sm text-gray-600 mt-1">平均分數 92 | 156通電話</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h4 class="font-semibold text-gray-900 mb-2">進步最多</h4>
+                    <div class="text-2xl font-bold text-green-600">李美玲</div>
+                    <p class="text-sm text-gray-600 mt-1">較上月 +5.2分</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h4 class="font-semibold text-gray-900 mb-2">需要輔導</h4>
+                    <div class="text-2xl font-bold text-orange-600">3人</div>
+                    <p class="text-sm text-gray-600 mt-1">分數低於80分</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- STT Modal -->
+    <div id="sttModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-auto">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900" id="modalTitle">STT 轉錄文本</h3>
+                        <button onclick="closeSttModal()" class="text-gray-400 hover:text-gray-600">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="mb-4">
+                        <div class="flex items-center space-x-4 text-sm text-gray-600 mb-4">
+                            <span>檔案: <span class="font-medium" id="modalFileName"></span></span>
+                            <span>時長: <span class="font-medium" id="modalDuration"></span></span>
+                            <span>客服: <span class="font-medium" id="modalAgent"></span></span>
+                        </div>
+                    </div>
+                    <div class="prose max-w-none">
+                        <div id="modalSttContent" class="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                            <!-- STT content will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                    <div class="flex justify-end space-x-3">
+                        <button onclick="exportSttText()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                            匯出文本
+                        </button>
+                        <button onclick="closeSttModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
+                            關閉
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Global variables
+        let activeTab = 'overview';
+        let charts = {};
+
+        // Data
+        const qualityScoreData = [
+            { name: '90-100分', value: 245, percent: 35 },
+            { name: '80-89分', value: 315, percent: 45 },
+            { name: '70-79分', value: 105, percent: 15 },
+            { name: '60-69分', value: 35, percent: 5 }
+        ];
+
+        const trendData = {
+            labels: ['10/11', '10/12', '10/13', '10/14', '10/15', '10/16', '10/17'],
+            datasets: [{
+                label: '平均分數',
+                data: [82, 84, 83, 85, 87, 86, 88],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: '#3b82f6'
+            }, {
+                label: '中位數',
+                data: [83, 85, 84, 86, 88, 87, 89],
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.4,
+                pointRadius: 3,
+                pointBackgroundColor: '#10b981',
+                borderDash: [5, 5]
+            }]
+        };
+
+        const trendRawData = [
+            { date: '10/11', score: 82, calls: 622, median: 83, q1: 78, q3: 87 },
+            { date: '10/12', score: 84, calls: 655, median: 85, q1: 80, q3: 89 },
+            { date: '10/13', score: 83, calls: 648, median: 84, q1: 79, q3: 88 },
+            { date: '10/14', score: 85, calls: 670, median: 86, q1: 81, q3: 90 },
+            { date: '10/15', score: 87, calls: 688, median: 88, q1: 83, q3: 92 },
+            { date: '10/16', score: 86, calls: 675, median: 87, q1: 82, q3: 91 },
+            { date: '10/17', score: 88, calls: 700, median: 89, q1: 84, q3: 93 }
+        ];
+
+        const topIssues = [
+            { 
+                issue: '未使用禮貌用語', 
+                count: 45, 
+                rate: 6.4,
+                totalDeduction: 248,
+                avgDeduction: 5.5,
+                affectedCalls: 45,
+                affectedAgents: 28,
+                trend: 'up',
+                changePercent: 12.5,
+                category: '服務態度',
+                fullScore: 8
+            },
+            { 
+                issue: '問題未完全解決', 
+                count: 38, 
+                rate: 5.4,
+                totalDeduction: 380,
+                avgDeduction: 10.0,
+                affectedCalls: 38,
+                affectedAgents: 15,
+                trend: 'down',
+                changePercent: -5.0,
+                category: '問題解決',
+                fullScore: 12
+            },
+            { 
+                issue: '回應時間過長', 
+                count: 32, 
+                rate: 4.6,
+                totalDeduction: 128,
+                avgDeduction: 4.0,
+                affectedCalls: 32,
+                affectedAgents: 18,
+                trend: 'up',
+                changePercent: 8.3,
+                category: '溝通效率',
+                fullScore: 5
+            },
+            { 
+                issue: '專業知識不足', 
+                count: 28, 
+                rate: 4.0,
+                totalDeduction: 280,
+                avgDeduction: 10.0,
+                affectedCalls: 28,
+                affectedAgents: 5,
+                trend: 'stable',
+                changePercent: 0,
+                category: '專業能力',
+                fullScore: 12
+            },
+            { 
+                issue: '缺少結束語', 
+                count: 21, 
+                rate: 3.0,
+                totalDeduction: 84,
+                avgDeduction: 4.0,
+                affectedCalls: 21,
+                affectedAgents: 12,
+                trend: 'down',
+                changePercent: -15.0,
+                category: '結束語',
+                fullScore: 4
+            }
+        ];
+
+        const agentPerformance = [
+            { name: '張小明', score: 92, calls: 156, fcr: 89 },
+            { name: '李美玲', score: 88, calls: 142, fcr: 85 },
+            { name: '王大偉', score: 85, calls: 138, fcr: 82 },
+            { name: '陳小華', score: 82, calls: 145, fcr: 78 },
+            { name: '林志強', score: 78, calls: 132, fcr: 75 }
+        ];
+
+        // Audio detail data
+        const audioDataByIssue = {
+            '未使用禮貌用語': [
+                {
+                    fileName: 'call_20241017_142530_A002_C8859.wav',
+                    duration: '05:23',
+                    callTime: '2024/10/17 14:25:30',
+                    agentId: 'A002',
+                    agentName: '李美玲',
+                    createdBy: 'QC001',
+                    createdByName: '質檢員王小芬',
+                    customerId: 'C8859',
+                    customerName: '陳先生',
+                    severity: 'medium',
+                    deduction: 5,
+                    sttText: '客服：您好，請問有什麼需要幫助的嗎？\n客戶：我想要查詢我的保單狀況。\n客服：好的，請提供您的身分證字號。\n客戶：A123456789\n客服：查到了，您的保單目前正常繳費中。\n客戶：那我想要變更受益人可以嗎？\n客服：可以，但需要填寫變更申請書。\n客戶：好的謝謝。\n客服：不客氣。'
+                },
+                {
+                    fileName: 'call_20241017_135420_A003_C7742.wav',
+                    duration: '03:45',
+                    callTime: '2024/10/17 13:54:20',
+                    agentId: 'A003',
+                    agentName: '王大偉',
+                    createdBy: 'QC002',
+                    createdByName: '質檢員林小美',
+                    customerId: 'C7742',
+                    customerName: '張女士',
+                    severity: 'high',
+                    deduction: 8,
+                    sttText: '客服：喂？\n客戶：你好，我想要理賠申請。\n客服：什麼理賠？\n客戶：我上個月車禍，想要申請理賠。\n客服：那你要填表格，然後準備資料。\n客戶：什麼資料？\n客服：就診斷書、收據這些。\n客戶：好吧。\n客服：還有其他問題嗎？\n客戶：沒有了。\n客服：那就這樣。'
+                },
+                {
+                    fileName: 'call_20241017_161155_A005_C9123.wav',
+                    duration: '07:12',
+                    callTime: '2024/10/17 16:11:55',
+                    agentId: 'A005',
+                    agentName: '林志強',
+                    createdBy: 'QC001',
+                    createdByName: '質檢員王小芬',
+                    customerId: 'C9123',
+                    customerName: '劉太太',
+                    severity: 'low',
+                    deduction: 3,
+                    sttText: '客服：您好，這裡是保險公司，請問有什麼可以為您服務的？\n客戶：我想要了解一下意外險的理賠範圍。\n客服：好的，意外險主要理賠因為意外事故造成的醫療費用和殘廢給付。\n客戶：那包括哪些意外呢？\n客服：包括交通事故、跌倒、燒燙傷等非疾病原因造成的傷害。\n客戶：了解，那理賠金額是怎麼計算的？\n客服：會依照您投保的保額和醫療費用收據來計算。\n客戶：好的，謝謝你的說明。\n客服：嗯，沒事。'
+                }
+            ],
+            '問題未完全解決': [
+                {
+                    fileName: 'call_20241017_093025_A001_C5566.wav',
+                    duration: '08:45',
+                    callTime: '2024/10/17 09:30:25',
+                    agentId: 'A001',
+                    agentName: '張小明',
+                    createdBy: 'QC003',
+                    createdByName: '質檢員陳小華',
+                    customerId: 'C5566',
+                    customerName: '黃先生',
+                    severity: 'high',
+                    deduction: 12,
+                    sttText: '客服：您好，感謝您來電，我是張小明，請問有什麼可以為您服務的？\n客戶：我的保險理賠案件已經送件兩個月了，為什麼還沒有下來？\n客服：請您稍等，我幫您查詢一下案件狀況。請提供您的保單號碼。\n客戶：PL202401234567\n客服：好的，我查到您的案件目前在核保部門審核中。\n客戶：為什麼要這麼久？我急需這筆錢。\n客服：因為您的案件金額比較大，需要詳細審核。\n客戶：那什麼時候會有結果？\n客服：這個我也不太清楚，要問核保部門。\n客戶：那你可以幫我問嗎？\n客服：我等一下會幫您反映。\n客戶：什麼時候會回覆我？\n客服：大概一週內會有人聯絡您。'
+                },
+                {
+                    fileName: 'call_20241017_112215_A004_C3344.wav',
+                    duration: '06:33',
+                    callTime: '2024/10/17 11:22:15',
+                    agentId: 'A004',
+                    agentName: '陳小華',
+                    createdBy: 'QC002',
+                    createdByName: '質檢員林小美',
+                    customerId: 'C3344',
+                    customerName: '吳小姐',
+                    severity: 'medium',
+                    deduction: 8,
+                    sttText: '客服：您好，這裡是客服中心，我是陳小華，請問有什麼可以協助您的？\n客戶：我想要更改我的通訊地址。\n客服：好的，請提供您的身分證字號和保單號碼。\n客戶：身分證字號是B987654321，保單號碼是PL202401567890\n客服：好的，請問您要更改成什麼地址？\n客戶：台北市信義區松高路123號4樓\n客服：我已經幫您登記了，大概3-5個工作天會完成更改。\n客戶：那我怎麼知道已經更改成功了？\n客服：系統會自動更新。\n客戶：但是我怎麼確認呢？會有通知嗎？\n客服：這個...我不太確定，您可以過幾天再打電話來確認。'
+                }
+            ],
+            '回應時間過長': [
+                {
+                    fileName: 'call_20241017_145030_A002_C6677.wav',
+                    duration: '04:58',
+                    callTime: '2024/10/17 14:50:30',
+                    agentId: 'A002',
+                    agentName: '李美玲',
+                    createdBy: 'QC001',
+                    createdByName: '質檢員王小芬',
+                    customerId: 'C6677',
+                    customerName: '徐先生',
+                    severity: 'medium',
+                    deduction: 4,
+                    sttText: '客服：您好，感謝您來電，我是李美玲，請問有什麼可以為您服務的？\n客戶：我想要查詢我的保單現金價值。\n客服：好的，請稍等一下...(沉默15秒)...抱歉讓您久等了，請提供您的保單號碼。\n客戶：PL202401345678\n客服：好的，我幫您查詢...(沉默20秒)...請問您是要查詢哪一張保單呢？\n客戶：就剛才那個號碼啊。\n客服：抱歉，我再查一次...(沉默18秒)...您的保單現金價值是18萬5千元。\n客戶：好的，謝謝。'
+                }
+            ],
+            '專業知識不足': [
+                {
+                    fileName: 'call_20241017_105540_A005_C1122.wav',
+                    duration: '09:22',
+                    callTime: '2024/10/17 10:55:40',
+                    agentId: 'A005',
+                    agentName: '林志強',
+                    createdBy: 'QC003',
+                    createdByName: '質檢員陳小華',
+                    customerId: 'C1122',
+                    customerName: '方小姐',
+                    severity: 'high',
+                    deduction: 10,
+                    sttText: '客服：您好，我是林志強，請問有什麼可以為您服務的？\n客戶：我想要了解一下投資型保單的費用結構。\n客服：好的，投資型保單就是...嗯...就是可以投資的保單。\n客戶：我知道，但是費用怎麼算呢？有哪些費用？\n客服：費用的話...有管理費...還有其他費用。\n客戶：具體是多少呢？\n客服：這個我要查一下...您稍等。\n客戶：好。\n客服：管理費大概是...我不太確定，要不您留個電話，我請專員回電給您？\n客戶：可是我現在就想知道啊。\n客服：真的不好意思，這個比較複雜，我可能說不清楚。'
+                }
+            ],
+            '缺少結束語': [
+                {
+                    fileName: 'call_20241017_164420_A003_C4455.wav',
+                    duration: '02:31',
+                    callTime: '2024/10/17 16:44:20',
+                    agentId: 'A003',
+                    agentName: '王大偉',
+                    createdBy: 'QC002',
+                    createdByName: '質檢員林小美',
+                    customerId: 'C4455',
+                    customerName: '李太太',
+                    severity: 'low',
+                    deduction: 4,
+                    sttText: '客服：您好，請問有什麼需要幫助的？\n客戶：我想要查詢我上個月的繳費記錄。\n客服：請提供您的保單號碼。\n客戶：PL202401789012\n客服：您上個月已經正常繳費了，金額是3500元。\n客戶：好的，謝謝。\n客服：嗯。'
+                }
+            ]
+        };
+
+        // Audio detail page variables
+        let currentAudioPage = 1;
+        let audioPageSize = 20;
+        let totalAudioPages = 0;
+        let currentAudioData = [];
+        let allCurrentAudioData = [];
+        let currentIssueType = '';
+
+        const complianceData = {
+            labels: ['開場白', '身份驗證', '問題確認', '解決方案', '結束語'],
+            datasets: [{
+                label: '合格',
+                data: [650, 620, 640, 600, 660],
+                backgroundColor: '#10b981'
+            }, {
+                label: '不合格',
+                data: [50, 80, 60, 100, 40],
+                backgroundColor: '#ef4444'
+            }]
+        };
+
+        const emotionData = {
+            labels: ['正面', '中性', '負面'],
+            datasets: [{
+                data: [520, 280, 120],
+                backgroundColor: ['#10b981', '#6b7280', '#ef4444']
+            }]
+        };
+
+        // Tab switching function
+        function setActiveTab(tab) {
+            // Hide all content
+            document.querySelectorAll('[id$="-content"]').forEach(content => {
+                content.style.display = 'none';
+            });
+
+            // Show selected content
+            document.getElementById(tab + '-content').style.display = 'block';
+
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.className = 'tab-button py-4 px-2 border-b-2 font-medium text-sm transition border-transparent text-gray-600 hover:text-gray-900';
+            });
+
+            document.getElementById('tab-' + tab).className = 'tab-button py-4 px-2 border-b-2 font-medium text-sm transition border-blue-600 text-blue-600';
+
+            activeTab = tab;
+
+            // Initialize charts for the active tab
+            initChartsForTab(tab);
+        }
+
+        // Initialize charts based on active tab
+        function initChartsForTab(tab) {
+            switch(tab) {
+                case 'overview':
+                    initQualityChart();
+                    initTrendChart();
+                    break;
+                case 'quality':
+                    initComplianceChart();
+                    break;
+                case 'compliance':
+                    initComplianceDetailChart();
+                    break;
+                case 'emotion':
+                    initEmotionChart();
+                    break;
+            }
+        }
+
+        // Chart initialization functions
+        function initQualityChart() {
+            if (charts.quality) {
+                charts.quality.destroy();
+            }
+            const ctx = document.getElementById('qualityChart').getContext('2d');
+            charts.quality = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: qualityScoreData.map(item => item.name),
+                    datasets: [{
+                        data: qualityScoreData.map(item => item.value),
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function initTrendChart() {
+            if (charts.trend) {
+                charts.trend.destroy();
+            }
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            charts.trend = new Chart(ctx, {
+                type: 'line',
+                data: trendData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                afterBody: function(context) {
+                                    const dataIndex = context[0].dataIndex;
+                                    const rawData = trendRawData[dataIndex];
+                                    return [
+                                        `中位數: ${rawData.median}分`,
+                                        `質檢通話: ${rawData.calls}通`,
+                                        `Q1-Q3: ${rawData.q1}-${rawData.q3}分`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 70,
+                            max: 95,
+                            title: {
+                                display: true,
+                                text: '分數'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '日期'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initComplianceChart() {
+            if (charts.compliance) {
+                charts.compliance.destroy();
+            }
+            const ctx = document.getElementById('complianceChart').getContext('2d');
+            charts.compliance = new Chart(ctx, {
+                type: 'bar',
+                data: complianceData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true
+                        },
+                        y: {
+                            stacked: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function initComplianceDetailChart() {
+            if (charts.complianceDetail) {
+                charts.complianceDetail.destroy();
+            }
+            const ctx = document.getElementById('complianceDetailChart').getContext('2d');
+            charts.complianceDetail = new Chart(ctx, {
+                type: 'bar',
+                data: complianceData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            stacked: true
+                        },
+                        y: {
+                            stacked: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function initEmotionChart() {
+            if (charts.emotion) {
+                charts.emotion.destroy();
+            }
+            const ctx = document.getElementById('emotionChart').getContext('2d');
+            charts.emotion = new Chart(ctx, {
+                type: 'pie',
+                data: emotionData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Populate top issues list
+        function populateTopIssues() {
+            const container = document.getElementById('topIssuesList');
+            container.innerHTML = '';
+            
+            topIssues.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md transition cursor-pointer';
+                
+                const trendIcon = item.trend === 'up' ? 'trending-up' : 
+                                 item.trend === 'down' ? 'trending-down' : 'minus';
+                const trendColor = item.trend === 'up' ? 'text-red-600' : 
+                                  item.trend === 'down' ? 'text-green-600' : 'text-gray-600';
+                
+                const progressPercent = Math.min((item.count / topIssues[0].count) * 100, 100);
+                
+                div.innerHTML = `
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-start space-x-3 flex-1">
+                            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold text-sm flex-shrink-0">
+                                #${index + 1}
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-1">
+                                    <h4 class="text-base font-semibold text-gray-900">${item.issue}</h4>
+                                    <span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600">
+                                        ${item.category}
+                                    </span>
+                                </div>
+                                <div class="flex items-center space-x-4 text-sm text-gray-600 mb-2">
+                                    <span>扣分次數: <span class="font-semibold text-gray-900">${item.count}次</span></span>
+                                    <span>•</span>
+                                    <span>扣分率: <span class="font-semibold text-gray-900">${item.rate}%</span></span>
+                                    <span>•</span>
+                                    <span>影響通話: <span class="font-semibold text-gray-900">${item.affectedCalls}通</span></span>
+                                </div>
+                                <div class="flex items-center space-x-4 text-sm text-gray-600">
+                                    <span>總扣分: <span class="font-semibold text-orange-600">${item.totalDeduction}分</span></span>
+                                    <span>•</span>
+                                    <span>平均: <span class="font-semibold text-gray-900">${item.avgDeduction}分/次</span></span>
+                                    <span>•</span>
+                                    <span>影響客服: <span class="font-semibold text-gray-900">${item.affectedAgents}人</span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-end space-y-1 ml-4">
+                            <div class="flex items-center text-sm font-semibold ${trendColor}">
+                                <i data-lucide="${trendIcon}" class="w-4 h-4 mr-1"></i>
+                                ${item.changePercent > 0 ? '+' : ''}${item.changePercent}%
+                            </div>
+                            <span class="text-xs text-gray-500">較昨日</span>
+                        </div>
+                    </div>
+                    <div class="relative h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="absolute h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all" 
+                             style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                        <span>滿分配分: ${item.fullScore}分</span>
+                        <div class="flex items-center space-x-3">
+                            <button onclick="showAudioDetail('${item.issue}')" class="text-blue-600 hover:text-blue-700 font-medium">查看明細</button>
+                            <button class="text-blue-600 hover:text-blue-700 font-medium">播放案例</button>
+                            <button class="text-blue-600 hover:text-blue-700 font-medium">改善建議</button>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            });
+            
+            lucide.createIcons();
+        }
+
+        // Populate agents table
+        function populateAgentsTable() {
+            const tbody = document.getElementById('agentsTable');
+            tbody.innerHTML = '';
+            
+            agentPerformance.forEach((agent, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50';
+                
+                const rankClass = index === 0 ? 'bg-yellow-100 text-yellow-800' :
+                                 index === 1 ? 'bg-gray-100 text-gray-800' :
+                                 index === 2 ? 'bg-orange-100 text-orange-800' :
+                                 'bg-gray-50 text-gray-600';
+                
+                const statusClass = agent.score >= 90 ? 'bg-green-100 text-green-800' :
+                                   agent.score >= 80 ? 'bg-blue-100 text-blue-800' :
+                                   'bg-yellow-100 text-yellow-800';
+                
+                const statusText = agent.score >= 90 ? '優秀' : 
+                                  agent.score >= 80 ? '良好' : '待改善';
+                
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full font-bold ${rankClass}">
+                            ${index + 1}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${agent.name}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-semibold text-gray-900">${agent.score}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${agent.calls}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${agent.fcr}%</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">
+                            ${statusText}
+                        </span>
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Export report function
+        function exportReport() {
+            alert('匯出報表功能開發中...');
+        }
+
+        // Update last update time
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('zh-TW', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('lastUpdate').textContent = `最後更新: ${timeString}`;
+        }
+
+        // Initialize the dashboard
+        function initDashboard() {
+            populateTopIssues();
+            populateAgentsTable();
+            initChartsForTab('overview');
+            updateLastUpdateTime();
+            
+            // Update time every minute
+            setInterval(updateLastUpdateTime, 60000);
+        }
+
+        // Audio detail functions
+        function showAudioDetail(issueType) {
+            currentIssueType = issueType;
+            
+            // Hide all content
+            document.querySelectorAll('[id$="-content"]').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Show audio detail content
+            document.getElementById('audio-detail-content').style.display = 'block';
+            
+            // Update page title and category
+            document.getElementById('detailPageTitle').textContent = `${issueType} - 音檔明細`;
+            document.getElementById('detailIssueCategory').textContent = issueType;
+            
+            // Load data for current issue type
+            allCurrentAudioData = audioDataByIssue[issueType] || [];
+            currentAudioData = [...allCurrentAudioData];
+            
+            // Reset to first page
+            currentAudioPage = 1;
+            
+            // Update stats and render
+            updateAudioStats();
+            renderAudioTable();
+            setupAudioPagination();
+        }
+
+        function backToOverview() {
+            // Hide audio detail content
+            document.getElementById('audio-detail-content').style.display = 'none';
+            
+            // Show overview content
+            document.getElementById('overview-content').style.display = 'block';
+            
+            // Update active tab
+            setActiveTab('overview');
+        }
+
+        function updateAudioStats() {
+            const highSeverity = currentAudioData.filter(item => item.severity === 'high').length;
+            const mediumSeverity = currentAudioData.filter(item => item.severity === 'medium').length;
+            const lowSeverity = currentAudioData.filter(item => item.severity === 'low').length;
+            
+            const totalDuration = currentAudioData.reduce((sum, item) => {
+                const [min, sec] = item.duration.split(':').map(Number);
+                return sum + min * 60 + sec;
+            }, 0);
+            const avgDurationSeconds = totalDuration / currentAudioData.length || 0;
+            const avgMin = Math.floor(avgDurationSeconds / 60);
+            const avgSec = Math.floor(avgDurationSeconds % 60);
+            
+            document.getElementById('highSeverityCount').textContent = highSeverity;
+            document.getElementById('mediumSeverityCount').textContent = mediumSeverity;
+            document.getElementById('lowSeverityCount').textContent = lowSeverity;
+            document.getElementById('avgDuration').textContent = `${avgMin}:${avgSec.toString().padStart(2, '0')}`;
+            document.getElementById('detailTotalCount').textContent = `總計 ${currentAudioData.length} 筆`;
+        }
+
+        function renderAudioTable() {
+            const tbody = document.getElementById('audioTableBody');
+            tbody.innerHTML = '';
+            
+            const startIndex = (currentAudioPage - 1) * audioPageSize;
+            const endIndex = Math.min(startIndex + audioPageSize, currentAudioData.length);
+            const pageData = currentAudioData.slice(startIndex, endIndex);
+            
+            pageData.forEach((audio, index) => {
+                const row = createAudioRow(audio, startIndex + index);
+                tbody.appendChild(row);
+            });
+            
+            lucide.createIcons();
+        }
+
+        function createAudioRow(audio, index) {
+            const tr = document.createElement('tr');
+            const severityClass = `severity-${audio.severity}`;
+            tr.className = `audio-row ${severityClass}`;
+            
+            const severityText = {
+                high: '高',
+                medium: '中',
+                low: '低'
+            };
+            
+            const severityColor = {
+                high: 'text-red-600',
+                medium: 'text-orange-600',
+                low: 'text-green-600'
+            };
+            
+            tr.innerHTML = `
+                <td class="px-4 py-4">
+                    <button onclick="playAudio('${audio.fileName}')" class="play-button bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition">
+                        <i data-lucide="play" class="w-4 h-4"></i>
+                    </button>
+                </td>
+                <td class="px-4 py-4">
+                    <div class="text-sm font-medium text-gray-900">${audio.fileName}</div>
+                    <div class="text-sm text-gray-600">時長: ${audio.duration}</div>
+                    <div class="text-sm text-gray-600">大小: ${Math.floor(Math.random() * 5 + 2)}.${Math.floor(Math.random() * 99)}MB</div>
+                </td>
+                <td class="px-4 py-4">
+                    <div class="text-sm text-gray-900">${audio.callTime}</div>
+                    <div class="text-sm text-gray-600">客戶: ${audio.customerName} (${audio.customerId})</div>
+                    <div class="text-sm text-gray-600">通話類型: 保險諮詢</div>
+                </td>
+                <td class="px-4 py-4">
+                    <div class="text-sm font-medium text-gray-900">${audio.agentName}</div>
+                    <div class="text-sm text-gray-600">ID: ${audio.agentId}</div>
+                    <div class="text-sm text-gray-600">建立: ${audio.createdByName}</div>
+                </td>
+                <td class="px-4 py-4">
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span class="text-sm font-medium ${severityColor[audio.severity]}">${severityText[audio.severity]}嚴重度</span>
+                        <span class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-800">-${audio.deduction}分</span>
+                    </div>
+                    <div class="text-sm text-gray-600">指標: ${currentIssueType}</div>
+                    <div class="text-sm text-gray-600">時間點: ${Math.floor(Math.random() * 3 + 1)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}</div>
+                </td>
+                <td class="px-4 py-4">
+                    <div class="flex flex-col space-y-1">
+                        <button onclick="showSttModal('${audio.fileName}')" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                            查看STT
+                        </button>
+                        <button onclick="downloadAudio('${audio.fileName}')" class="text-green-600 hover:text-green-700 text-sm font-medium">
+                            下載音檔
+                        </button>
+                        <button onclick="addToTraining('${audio.fileName}')" class="text-purple-600 hover:text-purple-700 text-sm font-medium">
+                            加入訓練
+                        </button>
+                    </div>
+                </td>
+            `;
+            
+            return tr;
+        }
+
+        function setupAudioPagination() {
+            totalAudioPages = Math.ceil(currentAudioData.length / audioPageSize);
+            
+            const showingFrom = (currentAudioPage - 1) * audioPageSize + 1;
+            const showingTo = Math.min(currentAudioPage * audioPageSize, currentAudioData.length);
+            
+            document.getElementById('showingFrom').textContent = showingFrom;
+            document.getElementById('showingTo').textContent = showingTo;
+            document.getElementById('totalItems').textContent = currentAudioData.length;
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentAudioPage === 1;
+            document.getElementById('nextBtn').disabled = currentAudioPage === totalAudioPages;
+            
+            // Generate page numbers
+            const pageNumbers = document.getElementById('pageNumbers');
+            pageNumbers.innerHTML = '';
+            
+            for (let i = 1; i <= totalAudioPages; i++) {
+                if (i === 1 || i === totalAudioPages || (i >= currentAudioPage - 2 && i <= currentAudioPage + 2)) {
+                    const button = document.createElement('button');
+                    button.className = `px-3 py-2 border text-sm font-medium ${i === currentAudioPage ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`;
+                    button.textContent = i;
+                    button.onclick = () => goToAudioPage(i);
+                    pageNumbers.appendChild(button);
+                } else if (i === currentAudioPage - 3 || i === currentAudioPage + 3) {
+                    const span = document.createElement('span');
+                    span.textContent = '...';
+                    span.className = 'px-2 py-2 text-gray-500';
+                    pageNumbers.appendChild(span);
+                }
+            }
+        }
+
+        function goToAudioPage(page) {
+            currentAudioPage = page;
+            renderAudioTable();
+            setupAudioPagination();
+        }
+
+        function previousPage() {
+            if (currentAudioPage > 1) {
+                goToAudioPage(currentAudioPage - 1);
+            }
+        }
+
+        function nextPage() {
+            if (currentAudioPage < totalAudioPages) {
+                goToAudioPage(currentAudioPage + 1);
+            }
+        }
+
+        function applyFilters() {
+            const timeRange = document.getElementById('timeRange').value;
+            const agentFilter = document.getElementById('agentFilter').value;
+            const severityFilter = document.getElementById('severityFilter').value;
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            
+            currentAudioData = allCurrentAudioData.filter(audio => {
+                // Agent filter
+                if (agentFilter && audio.agentId !== agentFilter) return false;
+                
+                // Severity filter
+                if (severityFilter && audio.severity !== severityFilter) return false;
+                
+                // Search filter
+                if (searchInput && 
+                    !audio.fileName.toLowerCase().includes(searchInput) &&
+                    !audio.customerId.toLowerCase().includes(searchInput) &&
+                    !audio.customerName.toLowerCase().includes(searchInput)) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            currentAudioPage = 1;
+            updateAudioStats();
+            renderAudioTable();
+            setupAudioPagination();
+        }
+
+        // Modal functions
+        function showSttModal(fileName) {
+            const audio = allCurrentAudioData.find(a => a.fileName === fileName);
+            if (!audio) return;
+            
+            document.getElementById('modalFileName').textContent = audio.fileName;
+            document.getElementById('modalDuration').textContent = audio.duration;
+            document.getElementById('modalAgent').textContent = `${audio.agentName} (${audio.agentId})`;
+            document.getElementById('modalSttContent').textContent = audio.sttText;
+            
+            document.getElementById('sttModal').classList.remove('hidden');
+        }
+
+        function closeSttModal() {
+            document.getElementById('sttModal').classList.add('hidden');
+        }
+
+        // Action functions
+        function playAudio(fileName) {
+            alert(`播放音檔: ${fileName}`);
+        }
+
+        function downloadAudio(fileName) {
+            alert(`下載音檔: ${fileName}`);
+        }
+
+        function addToTraining(fileName) {
+            alert(`已將 ${fileName} 加入訓練素材庫`);
+        }
+
+        function exportAudioList() {
+            alert('匯出音檔清單功能開發中...');
+        }
+
+        function exportSttText() {
+            const sttContent = document.getElementById('modalSttContent').textContent;
+            const blob = new Blob([sttContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'stt_transcript.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>

@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>詞庫列表查詢 - SysTalk AUDIT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: #2c3e50;
+            color: #333;
+            height: 100vh;
+            display: flex;
+        }
+        
+        /* 頂部導航欄 */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #4a69bd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .nav-menu {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-left: 30px;
+        }
+        
+        .nav-menu a {
+            color: #ccc;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .nav-menu a.active,
+        .nav-menu a:hover {
+            color: white;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .user-info {
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            color: #4a69bd;
+            font-weight: bold;
+        }
+        
+        /* 側邊欄 */
+        .sidebar {
+            width: 240px;
+            background: #34495e;
+            padding-top: 60px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 0;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            color: #bdc3c7;
+            text-decoration: none;
+            padding: 12px 20px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: #2c3e50;
+            color: #3498db;
+        }
+        
+        .sidebar-menu .icon {
+            margin-right: 10px;
+            width: 20px;
+        }
+        
+        /* 主要內容區域 */
+        .main-content {
+            margin-left: 240px;
+            margin-top: 60px;
+            padding: 30px;
+            flex: 1;
+            background: #ecf0f1;
+            min-height: calc(100vh - 60px);
+            display: flex;
+        }
+        
+        /* 左側群組列表 */
+        .groups-panel {
+            width: 400px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .groups-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .groups-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 10px 40px 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .search-input:focus {
+            border-color: #4a69bd;
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        
+        .groups-list {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+        
+        .group-item {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .group-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .group-item:last-child {
+            border-bottom: none;
+        }
+        
+        .group-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .group-name {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .group-icon {
+            color: #4a69bd;
+            margin-right: 8px;
+        }
+        
+        .group-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 4px 8px;
+            border: none;
+            background: none;
+            color: #666;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .group-stats {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .group-description {
+            color: #888;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        /* 右側詳細信息區域 */
+        .details-panel {
+            flex: 1;
+            margin-left: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .empty-state {
+            color: #999;
+        }
+        
+        .empty-icon {
+            font-size: 64px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .empty-text {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                flex-direction: column;
+            }
+            
+            .groups-panel {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+            
+            .details-panel {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 頂部導航欄 -->
+    <nav class="top-nav">
+        <div class="logo">
+            📊 SysTalk AUDIT
+        </div>
+        <ul class="nav-menu">
+            <li><a href="#">AI 質檢結果</a></li>
+            <li><a href="#" class="active">AI 質檢管理</a></li>
+            <li><a href="#">音檔管理</a></li>
+            <li><a href="#">質檢報告</a></li>
+        </ul>
+        <div class="user-info">
+            Irene Lin
+            <div class="user-avatar">I</div>
+        </div>
+    </nav>
+
+    <!-- 側邊欄 -->
+    <aside class="sidebar">
+        <ul class="sidebar-menu">
+            <li>
+                <a href="#">
+                    <span class="icon">💡</span>
+                    Prompt建置
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="icon">🎯</span>
+                    質檢主題
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <span class="icon">📏</span>
+                    質分規則
+                </a>
+            </li>
+            <li>
+                <a href="#" class="active">
+                    <span class="icon">📚</span>
+                    詞庫
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- 主要內容區域 -->
+    <main class="main-content">
+        <!-- 群組列表面板 -->
+        <div class="groups-panel">
+            <div class="groups-header">
+                <h2 class="groups-title">詞庫列表</h2>
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="可搜尋群組、標籤或意圖" id="searchInput">
+                    <span class="search-icon">🔍</span>
+                </div>
+            </div>
+            
+            <div class="groups-list" id="groupsList">
+                <div class="group-item" data-group="群組1">
+                    <div class="group-header">
+                        <div class="group-name">
+                            <span class="group-icon">📚</span>
+                            客服問候語
+                        </div>
+                        <div class="group-actions">
+                            <button class="action-btn" onclick="editGroup('客服問候語')">✏️</button>
+                            <button class="action-btn" onclick="deleteGroup('客服問候語')">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="group-stats">
+                        標籤：5，意圖：3
+                    </div>
+                    <div class="group-description">
+                        包含各種客服開場和問候相關的詞彙，用於檢測客服人員是否有適當的問候和開場白...
+                    </div>
+                </div>
+
+                <div class="group-item" data-group="群組2">
+                    <div class="group-header">
+                        <div class="group-name">
+                            <span class="group-icon">📚</span>
+                            產品介紹
+                        </div>
+                        <div class="group-actions">
+                            <button class="action-btn" onclick="editGroup('產品介紹')">✏️</button>
+                            <button class="action-btn" onclick="deleteGroup('產品介紹')">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="group-stats">
+                        標籤：5，意圖：3
+                    </div>
+                    <div class="group-description">
+                        涵蓋產品介紹相關的詞彙和意圖，幫助識別客服是否有效介紹產品特色和優勢...
+                    </div>
+                </div>
+
+                <div class="group-item" data-group="群組3">
+                    <div class="group-header">
+                        <div class="group-name">
+                            <span class="group-icon">📚</span>
+                            問題處理
+                        </div>
+                        <div class="group-actions">
+                            <button class="action-btn" onclick="editGroup('問題處理')">✏️</button>
+                            <button class="action-btn" onclick="deleteGroup('問題處理')">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="group-stats">
+                        標籤：5，意圖：3
+                    </div>
+                    <div class="group-description">
+                        用於處理客戶問題和投訴的相關詞彙，確保客服人員能妥善處理客戶困擾...
+                    </div>
+                </div>
+
+                <div class="group-item" data-group="群組4">
+                    <div class="group-header">
+                        <div class="group-name">
+                            <span class="group-icon">📚</span>
+                            結束語
+                        </div>
+                        <div class="group-actions">
+                            <button class="action-btn" onclick="editGroup('結束語')">✏️</button>
+                            <button class="action-btn" onclick="deleteGroup('結束語')">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="group-stats">
+                        標籤：5，意圖：3
+                    </div>
+                    <div class="group-description">
+                        對話結尾使用的詞彙，確保客服人員能以適當的方式結束與客戶的對話...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 詳細信息面板 -->
+        <div class="details-panel">
+            <div class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <div class="empty-text">
+                    查無資料，可查詢群組、標籤及意圖名稱
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 模擬資料庫
+        const vocabularyData = {
+            '群組1': {
+                name: '客服問候語',
+                tags: ['問候', '歡迎', '開場', '禮貌用語', '服務態度'],
+                intents: ['打招呼', '歡迎客戶', '服務開始'],
+                description: '包含各種客服開場和問候相關的詞彙，用於檢測客服人員是否有適當的問候和開場白。',
+                examples: [
+                    { type: '標籤', content: '您好', description: '基本問候用語' },
+                    { type: '標籤', content: '歡迎', description: '歡迎詞彙' },
+                    { type: '意圖', content: '打招呼', description: '主動向客戶問好的意圖' }
+                ]
+            },
+            '群組2': {
+                name: '產品介紹',
+                tags: ['產品特色', '功能說明', '優勢介紹', '規格說明', '價格資訊'],
+                intents: ['介紹產品', '說明功能', '報價查詢'],
+                description: '涵蓋產品介紹相關的詞彙和意圖，幫助識別客服是否有效介紹產品特色和優勢。',
+                examples: [
+                    { type: '標籤', content: '高品質', description: '產品品質描述' },
+                    { type: '標籤', content: '性價比', description: '價值描述' },
+                    { type: '意圖', content: '介紹產品', description: '向客戶介紹產品的意圖' }
+                ]
+            },
+            '群組3': {
+                name: '問題處理',
+                tags: ['道歉用語', '解決方案', '後續處理', '補償措施', '改善承諾'],
+                intents: ['處理投訴', '提供解決方案', '道歉回應'],
+                description: '用於處理客戶問題和投訴的相關詞彙，確保客服人員能妥善處理客戶困擾。',
+                examples: [
+                    { type: '標籤', content: '很抱歉', description: '道歉表達' },
+                    { type: '標籤', content: '立即處理', description: '處理態度' },
+                    { type: '意圖', content: '處理投訴', description: '處理客戶不滿的意圖' }
+                ]
+            },
+            '群組4': {
+                name: '結束語',
+                tags: ['感謝用語', '結束問候', '後續聯繫', '服務滿意度', '再次服務'],
+                intents: ['感謝客戶', '結束對話', '邀請回饋'],
+                description: '對話結尾使用的詞彙，確保客服人員能以適當的方式結束與客戶的對話。',
+                examples: [
+                    { type: '標籤', content: '謝謝您', description: '感謝表達' },
+                    { type: '標籤', content: '再次聯繫', description: '後續服務邀請' },
+                    { type: '意圖', content: '感謝客戶', description: '向客戶表達感謝的意圖' }
+                ]
+            }
+        };
+
+        // 搜索功能
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const groupItems = document.querySelectorAll('.group-item');
+            
+            if (searchTerm.trim() === '') {
+                // 清空搜索時顯示所有群組並重置右側面板
+                groupItems.forEach(item => {
+                    item.style.display = 'block';
+                });
+                showEmptyState();
+                return;
+            }
+            
+            let hasResults = false;
+            let searchResults = [];
+            
+            // 搜索所有群組的數據
+            Object.keys(vocabularyData).forEach(groupKey => {
+                const group = vocabularyData[groupKey];
+                const groupMatches = [];
+                
+                // 檢查群組名稱
+                if (group.name.toLowerCase().includes(searchTerm)) {
+                    groupMatches.push({ type: '群組', content: group.name, group: groupKey });
+                }
+                
+                // 檢查標籤
+                group.tags.forEach(tag => {
+                    if (tag.toLowerCase().includes(searchTerm)) {
+                        groupMatches.push({ type: '標籤', content: tag, group: groupKey });
+                    }
+                });
+                
+                // 檢查意圖
+                group.intents.forEach(intent => {
+                    if (intent.toLowerCase().includes(searchTerm)) {
+                        groupMatches.push({ type: '意圖', content: intent, group: groupKey });
+                    }
+                });
+                
+                if (groupMatches.length > 0) {
+                    searchResults = searchResults.concat(groupMatches);
+                }
+            });
+            
+            // 顯示搜索結果
+            if (searchResults.length > 0) {
+                showSearchResults(searchTerm, searchResults);
+                hasResults = true;
+            }
+            
+            // 過濾群組列表
+            groupItems.forEach(item => {
+                const groupName = item.querySelector('.group-name').textContent.toLowerCase();
+                const description = item.querySelector('.group-description').textContent.toLowerCase();
+                const groupKey = item.dataset.group;
+                const group = vocabularyData[groupKey];
+                
+                let shouldShow = false;
+                
+                // 檢查群組名稱和描述
+                if (groupName.includes(searchTerm) || description.includes(searchTerm)) {
+                    shouldShow = true;
+                }
+                
+                // 檢查標籤和意圖
+                if (group) {
+                    group.tags.forEach(tag => {
+                        if (tag.toLowerCase().includes(searchTerm)) shouldShow = true;
+                    });
+                    group.intents.forEach(intent => {
+                        if (intent.toLowerCase().includes(searchTerm)) shouldShow = true;
+                    });
+                }
+                
+                item.style.display = shouldShow ? 'block' : 'none';
+            });
+            
+            if (!hasResults) {
+                showNoResults(searchTerm);
+            }
+        });
+
+        // 顯示搜索結果
+        function showSearchResults(searchTerm, results) {
+            const detailsPanel = document.querySelector('.details-panel');
+            
+            let resultsByGroup = {};
+            results.forEach(result => {
+                if (!resultsByGroup[result.group]) {
+                    resultsByGroup[result.group] = [];
+                }
+                resultsByGroup[result.group].push(result);
+            });
+            
+            let resultsHtml = `
+                <div style="text-align: left; width: 100%; max-height: calc(100vh - 200px); overflow-y: auto;">
+                    <h3 style="color: #2c3e50; margin-bottom: 20px;">搜索結果："${searchTerm}"</h3>
+                    <div style="margin-bottom: 15px; color: #666;">找到 ${results.length} 個相關結果</div>
+            `;
+            
+            Object.keys(resultsByGroup).forEach(groupKey => {
+                const group = vocabularyData[groupKey];
+                const groupResults = resultsByGroup[groupKey];
+                
+                resultsHtml += `
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #4a69bd;">
+                        <h4 style="color: #2c3e50; margin-bottom: 15px; cursor: pointer;" onclick="selectGroup('${groupKey}')">
+                            📚 ${group.name} <span style="font-size: 12px; color: #666;">(${groupResults.length} 個結果)</span>
+                        </h4>
+                        <div style="display: grid; gap: 10px;">
+                `;
+                
+                groupResults.forEach(result => {
+                    const bgColor = result.type === '標籤' ? '#007bff' : result.type === '意圖' ? '#28a745' : '#6c757d';
+                    resultsHtml += `
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="background: ${bgColor}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; min-width: 40px; text-align: center;">${result.type}</span>
+                            <span style="color: #333; font-weight: 500;">${highlightSearchTerm(result.content, searchTerm)}</span>
+                        </div>
+                    `;
+                });
+                
+                resultsHtml += `
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button style="background: #4a69bd; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 12px;" onclick="selectGroup('${groupKey}')">
+                                查看完整群組
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            resultsHtml += '</div>';
+            detailsPanel.innerHTML = resultsHtml;
+        }
+
+        // 高亮搜索詞
+        function highlightSearchTerm(text, searchTerm) {
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            return text.replace(regex, '<mark style="background: #fff3cd; padding: 1px 2px;">$1</mark>');
+        }
+
+        // 顯示無結果狀態
+        function showNoResults(searchTerm) {
+            const detailsPanel = document.querySelector('.details-panel');
+            detailsPanel.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <div class="empty-text">
+                        找不到包含"${searchTerm}"的群組、標籤或意圖<br>
+                        請嘗試其他關鍵字
+                    </div>
+                </div>
+            `;
+        }
+
+        // 顯示空狀態
+        function showEmptyState() {
+            const detailsPanel = document.querySelector('.details-panel');
+            detailsPanel.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <div class="empty-text">
+                        查無資料，可查詢群組、標籤及意圖名稱
+                    </div>
+                </div>
+            `;
+        }
+
+        // 選擇群組
+        function selectGroup(groupKey) {
+            // 清除搜索
+            document.getElementById('searchInput').value = '';
+            
+            // 顯示所有群組
+            document.querySelectorAll('.group-item').forEach(item => {
+                item.style.display = 'block';
+                item.style.background = '';
+            });
+            
+            // 選中對應群組
+            const targetGroup = document.querySelector(`[data-group="${groupKey}"]`);
+            if (targetGroup) {
+                targetGroup.style.background = '#e3f2fd';
+                showGroupDetails(groupKey);
+            }
+        }
+
+        // 群組點擊事件
+        document.querySelectorAll('.group-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                // 如果點擊的是按鈕，不觸發群組選擇
+                if (e.target.classList.contains('action-btn')) {
+                    return;
+                }
+                
+                // 移除其他項目的選中狀態
+                document.querySelectorAll('.group-item').forEach(i => {
+                    i.style.background = '';
+                });
+                
+                // 設置當前項目為選中狀態
+                this.style.background = '#e3f2fd';
+                
+                // 顯示群組詳細信息
+                showGroupDetails(this.dataset.group);
+            });
+        });
+
+        // 顯示群組詳細信息
+        function showGroupDetails(groupKey) {
+            const group = vocabularyData[groupKey];
+            if (!group) return;
+            
+            const detailsPanel = document.querySelector('.details-panel');
+            detailsPanel.innerHTML = `
+                <div style="text-align: left; width: 100%; max-height: calc(100vh - 200px); overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="color: #2c3e50; margin: 0;">${group.name}</h3>
+                        <button style="background: #4a69bd; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px;" onclick="openDetailPage('${groupKey}')">
+                            查看完整內容
+                        </button>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="color: #495057; margin-bottom: 15px;">標籤列表 (${group.tags.length})</h4>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;">
+                            ${group.tags.map(tag => 
+                                `<span style="background: #007bff; color: white; padding: 6px 12px; border-radius: 12px; font-size: 13px; cursor: pointer;" onclick="searchTag('${tag}')">${tag}</span>`
+                            ).join('')}
+                        </div>
+                        
+                        <h4 style="color: #495057; margin-bottom: 15px;">意圖列表 (${group.intents.length})</h4>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            ${group.intents.map(intent => 
+                                `<span style="background: #28a745; color: white; padding: 6px 12px; border-radius: 12px; font-size: 13px; cursor: pointer;" onclick="searchIntent('${intent}')">${intent}</span>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="color: #495057; margin-bottom: 15px;">使用範例</h4>
+                        <div style="display: grid; gap: 12px;">
+                            ${group.examples.map(example => `
+                                <div style="background: white; padding: 15px; border-radius: 6px; border-left: 3px solid ${example.type === '標籤' ? '#007bff' : '#28a745'};">
+                                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                                        <span style="background: ${example.type === '標籤' ? '#007bff' : '#28a745'}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px;">${example.type}</span>
+                                        <strong style="color: #333;">${example.content}</strong>
+                                    </div>
+                                    <div style="color: #666; font-size: 14px;">${example.description}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                        <h4 style="color: #495057; margin-bottom: 15px;">群組描述</h4>
+                        <p style="color: #666; line-height: 1.6;">${group.description}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 打開詳細頁面
+        function openDetailPage(groupKey) {
+            // 可以傳遞參數到詳細頁面
+            window.open('vocabulary-detail.html?group=' + groupKey, '_blank');
+        }
+
+        // 搜索特定標籤
+        function searchTag(tag) {
+            document.getElementById('searchInput').value = tag;
+            document.getElementById('searchInput').dispatchEvent(new Event('input'));
+        }
+
+        // 搜索特定意圖
+        function searchIntent(intent) {
+            document.getElementById('searchInput').value = intent;
+            document.getElementById('searchInput').dispatchEvent(new Event('input'));
+        }
+
+        // 編輯群組
+        function editGroup(groupName) {
+            alert(`編輯 ${groupName}`);
+        }
+
+        // 刪除群組
+        function deleteGroup(groupName) {
+            if (confirm(`確定要刪除 ${groupName} 嗎？`)) {
+                alert(`已刪除 ${groupName}`);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>建立標籤分類 - 優化版UI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        /* 模態框頭部 */
+        .modal-header {
+            padding: 28px 32px 24px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            z-index: 10;
+        }
+        
+        .modal-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .title-icon {
+            font-size: 24px;
+        }
+        
+        .close-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: #f8f9fa;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+        
+        .close-btn:hover {
+            background: #e9ecef;
+            color: #333;
+            transform: scale(1.05);
+        }
+        
+        /* 模態框內容 */
+        .modal-body {
+            padding: 32px;
+        }
+        
+        .form-section {
+            margin-bottom: 32px;
+        }
+        
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-icon {
+            font-size: 18px;
+        }
+        
+        .required {
+            color: #e74c3c;
+            margin-left: 4px;
+        }
+        
+        /* 表單控件 */
+        .form-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #fff;
+            font-family: inherit;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #4a69bd;
+            box-shadow: 0 0 0 4px rgba(74, 105, 189, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .form-input::placeholder {
+            color: #adb5bd;
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        .char-counter {
+            text-align: right;
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 6px;
+        }
+        
+        /* 顏色選擇器 */
+        .color-section {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 24px;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s;
+        }
+        
+        .color-section:hover {
+            border-color: #4a69bd;
+            background: #f5f7ff;
+        }
+        
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .color-option {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .color-option.selected {
+            border-color: #2c3e50;
+            transform: scale(1.05);
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #2c3e50;
+        }
+        
+        .color-option::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .color-option.selected::after {
+            opacity: 1;
+        }
+        
+        /* 預設顏色 */
+        .color-blue { background: linear-gradient(135deg, #4a69bd, #3d5aa0); }
+        .color-green { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .color-red { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .color-yellow { background: linear-gradient(135deg, #f1c40f, #f39c12); }
+        .color-purple { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        .color-orange { background: linear-gradient(135deg, #e67e22, #d35400); }
+        .color-teal { background: linear-gradient(135deg, #1abc9c, #16a085); }
+        .color-gray { background: linear-gradient(135deg, #95a5a6, #7f8c8d); }
+        .color-pink { background: linear-gradient(135deg, #e91e63, #ad1457); }
+        .color-indigo { background: linear-gradient(135deg, #3f51b5, #303f9f); }
+        
+        .color-picker-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            border: 2px dashed #dee2e6;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #6c757d;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .color-picker-btn:hover {
+            border-color: #4a69bd;
+            color: #4a69bd;
+            transform: scale(1.05);
+        }
+        
+        .color-picker-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        /* 文字顏色選擇 */
+        .text-color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .text-color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .text-color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .text-color-option.selected {
+            border-color: #2c3e50;
+            transform: scale(1.05);
+        }
+        
+        /* 文字顏色樣式 */
+        .text-white { background: #ffffff; color: #2c3e50; border: 2px solid #dee2e6; }
+        .text-black { background: #2c3e50; color: white; }
+        .text-gray { background: #6c757d; color: white; }
+        .text-light { background: #f8f9fa; color: #495057; border: 2px solid #dee2e6; }
+        .text-primary { background: #4a69bd; color: white; }
+        .text-success { background: #28a745; color: white; }
+        .text-warning { background: #ffc107; color: #212529; }
+        .text-danger { background: #dc3545; color: white; }
+        .text-info { background: #17a2b8; color: white; }
+        
+        /* 預覽區域 */
+        .preview-section {
+            margin-top: 24px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .preview-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .preview-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: default;
+            min-width: 80px;
+            justify-content: center;
+        }
+        
+        /* 模態框底部 */
+        .modal-footer {
+            padding: 24px 32px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background: #fafbfc;
+            border-radius: 0 0 20px 20px;
+            position: sticky;
+            bottom: 0;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .btn-cancel {
+            background: white;
+            color: #6c757d;
+            border: 2px solid #dee2e6;
+        }
+        
+        .btn-cancel:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4a69bd, #3d5aa0);
+            color: white;
+            box-shadow: 0 4px 12px rgba(74, 105, 189, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(74, 105, 189, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .modal {
+                max-width: 95%;
+                margin: 10px;
+                border-radius: 16px;
+            }
+            
+            .modal-header,
+            .modal-body,
+            .modal-footer {
+                padding: 20px;
+            }
+            
+            .color-grid,
+            .text-color-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            
+            .modal-title {
+                font-size: 20px;
+            }
+        }
+        
+        /* 動畫效果 */
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="modal">
+        <!-- 模態框頭部 -->
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <span class="title-icon">🏷️</span>
+                建立標籤分類
+            </h2>
+            <button class="close-btn" onclick="closeModal()">✕</button>
+        </div>
+        
+        <!-- 模態框內容 -->
+        <div class="modal-body">
+            <!-- 分類名稱 -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span class="section-icon">📝</span>
+                    分類名稱
+                    <span class="required">*</span>
+                </div>
+                <input type="text" class="form-input" placeholder="請輸入分類名稱（必填）" id="categoryName" maxlength="20">
+                <div class="char-counter">
+                    <span id="nameCounter">0</span>/20
+                </div>
+            </div>
+            
+            <!-- 描述 -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span class="section-icon">📄</span>
+                    分類描述
+                </div>
+                <textarea class="form-input form-textarea" placeholder="請輸入分類的詳細描述..." id="categoryDesc" maxlength="200"></textarea>
+                <div class="char-counter">
+                    <span id="descCounter">0</span>/200
+                </div>
+            </div>
+            
+            <!-- 顏色設定 -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span class="section-icon">🎨</span>
+                    外觀設定
+                </div>
+                
+                <div class="color-section">
+                    <div class="section-title" style="margin-bottom: 16px; font-size: 14px;">
+                        標籤背景顏色
+                    </div>
+                    
+                    <div class="color-grid">
+                        <div class="color-option color-blue selected" data-color="#4a69bd" onclick="selectBgColor(this)"></div>
+                        <div class="color-option color-green" data-color="#2ecc71" onclick="selectBgColor(this)"></div>
+                        <div class="color-option color-red" data-color="#e74c3c" onclick="selectBgColor(this)"></div>
+                        <div class="color-option color-yellow" data-color="#f1c40f" onclick="selectBgColor(this)"></div>
+                        <div class="color-option color-purple" data-color="#9b59b6" onclick="selectBgColor(this)"></div>
+                        <div class="color-option color-orange" data-color="#e67e22" onclick="selectBgColor(this)"></div>
+                        <div class="color-option color-teal" data-color="#1abc9c" onclick="selectBgColor(this)"></div>
+                        <div class="color-option color-gray" data-color="#95a5a6" onclick="selectBgColor(this)"></div>
+                        <div class="color-option color-pink" data-color="#e91e63" onclick="selectBgColor(this)"></div>
+                        <div class="color-option color-indigo" data-color="#3f51b5" onclick="selectBgColor(this)"></div>
+                        <div class="color-picker-btn">
+                            🎨
+                            <input type="color" class="color-picker-input" onchange="customBgColor(this)">
+                        </div>
+                    </div>
+                    
+                    <div class="section-title" style="margin: 24px 0 16px 0; font-size: 14px;">
+                        文字顏色
+                    </div>
+                    
+                    <div class="text-color-grid">
+                        <div class="text-color-option text-white selected" data-text-color="#ffffff" onclick="selectTextColor(this)">A</div>
+                        <div class="text-color-option text-black" data-text-color="#2c3e50" onclick="selectTextColor(this)">A</div>
+                        <div class="text-color-option text-gray" data-text-color="#6c757d" onclick="selectTextColor(this)">A</div>
+                        <div class="text-color-option text-light" data-text-color="#f8f9fa" onclick="selectTextColor(this)">A</div>
+                        <div class="text-color-option text-primary" data-text-color="#4a69bd" onclick="selectTextColor(this)">A</div>
+                        <div class="text-color-option text-success" data-text-color="#28a745" onclick="selectTextColor(this)">A</div>
+                        <div class="text-color-option text-warning" data-text-color="#ffc107" onclick="selectTextColor(this)">A</div>
+                        <div class="text-color-option text-danger" data-text-color="#dc3545" onclick="selectTextColor(this)">A</div>
+                        <div class="text-color-option text-info" data-text-color="#17a2b8" onclick="selectTextColor(this)">A</div>
+                        <div class="color-picker-btn">
+                            🎨
+                            <input type="color" class="color-picker-input" onchange="customTextColor(this)">
+                        </div>
+                    </div>
+                    
+                    <!-- 預覽區域 -->
+                    <div class="preview-section">
+                        <div class="preview-title">
+                            👁️ 預覽效果
+                        </div>
+                        <div class="preview-tag" id="previewTag">
+                            輸入名稱
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 模態框底部 -->
+        <div class="modal-footer">
+            <button class="btn btn-cancel" onclick="closeModal()">
+                取消
+            </button>
+            <button class="btn btn-primary" onclick="createCategory()" id="createBtn" disabled>
+                <span>✨</span>
+                建立分類
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentBgColor = '#4a69bd';
+        let currentTextColor = '#ffffff';
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePreview();
+            setupEventListeners();
+        });
+        
+        // 設置事件監聽器
+        function setupEventListeners() {
+            // 分類名稱輸入
+            document.getElementById('categoryName').addEventListener('input', function() {
+                updateCharCounter('categoryName', 'nameCounter', 20);
+                updatePreview();
+                validateForm();
+            });
+            
+            // 描述輸入
+            document.getElementById('categoryDesc').addEventListener('input', function() {
+                updateCharCounter('categoryDesc', 'descCounter', 200);
+            });
+        }
+        
+        // 更新字符計數器
+        function updateCharCounter(inputId, counterId, maxLength) {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(counterId);
+            const length = input.value.length;
+            counter.textContent = length;
+            
+            if (length > maxLength * 0.8) {
+                counter.style.color = '#e74c3c';
+            } else {
+                counter.style.color = '#6c757d';
+            }
+        }
+        
+        // 選擇背景顏色
+        function selectBgColor(element) {
+            // 移除其他選中狀態
+            document.querySelectorAll('.color-option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // 設置當前選中
+            element.classList.add('selected');
+            currentBgColor = element.dataset.color;
+            updatePreview();
+        }
+        
+        // 選擇文字顏色
+        function selectTextColor(element) {
+            // 移除其他選中狀態
+            document.querySelectorAll('.text-color-option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // 設置當前選中
+            element.classList.add('selected');
+            currentTextColor = element.dataset.textColor;
+            updatePreview();
+        }
+        
+        // 自定義背景顏色
+        function customBgColor(input) {
+            // 移除預設顏色的選中狀態
+            document.querySelectorAll('.color-option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            currentBgColor = input.value;
+            updatePreview();
+        }
+        
+        // 自定義文字顏色
+        function customTextColor(input) {
+            // 移除預設文字顏色的選中狀態
+            document.querySelectorAll('.text-color-option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            currentTextColor = input.value;
+            updatePreview();
+        }
+        
+        // 更新預覽
+        function updatePreview() {
+            const previewTag = document.getElementById('previewTag');
+            const categoryName = document.getElementById('categoryName').value.trim();
+            
+            previewTag.textContent = categoryName || '輸入名稱';
+            previewTag.style.backgroundColor = currentBgColor;
+            previewTag.style.color = currentTextColor;
+        }
+        
+        // 驗證表單
+        function validateForm() {
+            const categoryName = document.getElementById('categoryName').value.trim();
+            const createBtn = document.getElementById('createBtn');
+            
+            if (categoryName.length > 0) {
+                createBtn.disabled = false;
+            } else {
+                createBtn.disabled = true;
+            }
+        }
+        
+        // 關閉模態框
+        function closeModal() {
+            document.querySelector('.modal').style.animation = 'modalSlideOut 0.3s ease-in forwards';
+            setTimeout(() => {
+                console.log('關閉模態框');
+            }, 300);
+        }
+        
+        // 創建分類
+        function createCategory() {
+            const categoryName = document.getElementById('categoryName').value.trim();
+            const categoryDesc = document.getElementById('categoryDesc').value.trim();
+            
+            if (!categoryName) {
+                alert('請填寫分類名稱');
+                return;
+            }
+            
+            const category = {
+                name: categoryName,
+                description: categoryDesc,
+                backgroundColor: currentBgColor,
+                textColor: currentTextColor,
+                createdAt: new Date().toISOString()
+            };
+            
+            console.log('創建分類:', category);
+            
+            // 顯示成功動畫
+            const createBtn = document.getElementById('createBtn');
+            createBtn.innerHTML = '<span>✅</span> 創建成功！';
+            createBtn.disabled = true;
+            
+            setTimeout(() => {
+                closeModal();
+            }, 1000);
+        }
+        
+        // 添加退出動畫
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes modalSlideOut {
+                from {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateY(-20px) scale(0.95);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

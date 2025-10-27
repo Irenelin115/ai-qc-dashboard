@@ -1,0 +1,543 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+header {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem 0;
+    text-align: center;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    color: #2d3748;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+header p {
+    color: #4a5568;
+    font-size: 1.1rem;
+}
+
+main {
+    margin: 0;
+    padding: 0;
+    height: calc(100vh - 120px);
+}
+
+.app-container {
+    display: flex;
+    height: 100%;
+    max-width: 1400px;
+    margin: 2rem auto;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 250px;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-menu {
+    padding: 2rem 0;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+    margin: 0.2rem 0;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-left-color: rgba(255, 255, 255, 0.3);
+}
+
+.nav-item.active {
+    background: rgba(255, 255, 255, 0.15);
+    border-left-color: white;
+    font-weight: 600;
+}
+
+.nav-item .icon {
+    font-size: 1.2rem;
+    margin-right: 0.8rem;
+    width: 24px;
+    text-align: center;
+}
+
+.nav-item span {
+    font-size: 1rem;
+}
+
+.content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.content-section {
+    display: none;
+    flex: 1;
+    padding: 2.5rem;
+    overflow-y: auto;
+    background: white;
+}
+
+.content-section.active {
+    display: block;
+}
+
+.content-section h3 {
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+
+.input-section {
+    margin-bottom: 2rem;
+}
+
+.input-section h3 {
+    color: #2d3748;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+#stt-text {
+    width: 100%;
+    height: 120px;
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    resize: vertical;
+    margin-bottom: 1rem;
+}
+
+#stt-text:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+#detect-intent {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+#detect-intent:hover {
+    background: #5a67d8;
+}
+
+.result-section h3 {
+    color: #2d3748;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+#intent-result {
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.intent-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.confidence {
+    color: #667eea;
+    font-weight: 500;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.action-buttons button {
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+#confirm-result {
+    background: #48bb78;
+    color: white;
+}
+
+#confirm-result:enabled:hover {
+    background: #38a169;
+}
+
+#manual-review {
+    background: #ed8936;
+    color: white;
+}
+
+#manual-review:enabled:hover {
+    background: #dd6b20;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.intent-list {
+    margin-bottom: 2rem;
+}
+
+.intent-item {
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.intent-name {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.intent-desc {
+    width: 100%;
+    height: 60px;
+    padding: 0.5rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    resize: vertical;
+    margin-bottom: 0.5rem;
+}
+
+.remove-intent {
+    background: #f56565;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.remove-intent:hover {
+    background: #e53e3e;
+}
+
+#add-intent {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+#add-intent:hover {
+    background: #5a67d8;
+}
+
+.prompt-template {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e2e8f0;
+}
+
+.prompt-template h3 {
+    color: #2d3748;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+#prompt-text {
+    width: 100%;
+    height: 300px;
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: 'Courier New', monospace;
+    resize: vertical;
+    margin-bottom: 1rem;
+}
+
+#save-prompt {
+    background: #48bb78;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+#save-prompt:hover {
+    background: #38a169;
+}
+
+.add-sample {
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+#sample-intent {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+#sample-text {
+    width: 100%;
+    height: 80px;
+    padding: 0.7rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    font-size: 1rem;
+    resize: vertical;
+    margin-bottom: 1rem;
+}
+
+#add-sample {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+#add-sample:hover {
+    background: #5a67d8;
+}
+
+.sample-item {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #667eea;
+}
+
+.sample-intent {
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.sample-text {
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.remove-sample {
+    background: #f56565;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.remove-sample:hover {
+    background: #e53e3e;
+}
+
+.review-item {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #ed8936;
+}
+
+.review-text {
+    font-size: 1.1rem;
+    color: #2d3748;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #f7fafc;
+    border-radius: 6px;
+}
+
+.ai-result {
+    margin-bottom: 1rem;
+    padding: 0.8rem;
+    background: #e6fffa;
+    border-radius: 6px;
+}
+
+.ai-result .label {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.ai-result .intent {
+    color: #319795;
+    font-weight: 600;
+    margin: 0 0.5rem;
+}
+
+.ai-result .confidence {
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+.manual-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.manual-intent {
+    padding: 0.6rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.approve {
+    background: #48bb78;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.approve:hover {
+    background: #38a169;
+}
+
+.reject {
+    background: #f56565;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.reject:hover {
+    background: #e53e3e;
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    .app-container {
+        flex-direction: column;
+        margin: 1rem;
+        height: auto;
+        min-height: calc(100vh - 140px);
+    }
+    
+    .sidebar {
+        width: 100%;
+        height: auto;
+    }
+    
+    .nav-menu {
+        display: flex;
+        padding: 1rem 0;
+        overflow-x: auto;
+    }
+    
+    .nav-item {
+        min-width: 120px;
+        text-align: center;
+        flex-direction: column;
+        padding: 0.8rem;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+    }
+    
+    .nav-item.active {
+        border-left: none;
+        border-bottom-color: white;
+    }
+    
+    .nav-item .icon {
+        margin-right: 0;
+        margin-bottom: 0.3rem;
+    }
+    
+    .content-section {
+        padding: 1.5rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .manual-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

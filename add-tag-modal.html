@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增標籤 - 改進版UI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 580px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        /* 模態框頭部 */
+        .modal-header {
+            padding: 24px 32px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            border-radius: 16px 16px 0 0;
+            z-index: 10;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        
+        .close-btn:hover {
+            background: #e9ecef;
+            color: #333;
+        }
+        
+        /* 模態框內容 */
+        .modal-body {
+            padding: 32px;
+        }
+        
+        .form-section {
+            margin-bottom: 32px;
+        }
+        
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-icon {
+            font-size: 18px;
+        }
+        
+        /* 表單控件 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: #fff;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #4a69bd;
+            box-shadow: 0 0 0 3px rgba(74, 105, 189, 0.1);
+        }
+        
+        .form-input::placeholder {
+            color: #adb5bd;
+        }
+        
+        /* 同義詞區域 */
+        .synonyms-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px dashed #dee2e6;
+            transition: all 0.2s;
+        }
+        
+        .synonyms-container:hover {
+            border-color: #4a69bd;
+            background: #f5f7ff;
+        }
+        
+        .synonyms-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+            min-height: 40px;
+            align-items: flex-start;
+            align-content: flex-start;
+        }
+        
+        .synonym-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+        }
+        
+        .synonym-tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .synonym-remove {
+            width: 16px;
+            height: 16px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: all 0.2s;
+        }
+        
+        .synonym-remove:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .add-synonym-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .add-synonym-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            font-size: 13px;
+            background: white;
+        }
+        
+        .add-synonym-input:focus {
+            outline: none;
+            border-color: #4a69bd;
+        }
+        
+        .add-btn {
+            padding: 10px 16px;
+            background: #4a69bd;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .add-btn:hover {
+            background: #3d5aa0;
+            transform: translateY(-1px);
+        }
+        
+        .auto-generate-btn {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            color: #2d3436;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .auto-generate-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .synonyms-empty {
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .empty-icon {
+            font-size: 32px;
+            opacity: 0.5;
+        }
+        
+        /* 設定選項 */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        
+        .setting-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .setting-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .setting-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .setting-description {
+            font-size: 12px;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+        
+        /* 開關樣式 */
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: #dee2e6;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .toggle-switch.active {
+            background: #4a69bd;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(20px);
+        }
+        
+        /* 單選按鈕 */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        
+        .radio-input {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #dee2e6;
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .radio-input.checked {
+            border-color: #4a69bd;
+        }
+        
+        .radio-input.checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: #4a69bd;
+            border-radius: 50%;
+        }
+        
+        .radio-label {
+            font-size: 14px;
+            color: #495057;
+            cursor: pointer;
+        }
+        
+        /* 日期輸入 */
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .date-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .date-separator {
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .date-note {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 8px;
+            font-style: italic;
+        }
+        
+        /* 模態框底部 */
+        .modal-footer {
+            padding: 24px 32px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background: #fafbfc;
+            border-radius: 0 0 16px 16px;
+            position: sticky;
+            bottom: 0;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 80px;
+        }
+        
+        .btn-cancel {
+            background: white;
+            color: #6c757d;
+            border: 2px solid #dee2e6;
+        }
+        
+        .btn-cancel:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+        }
+        
+        .btn-primary {
+            background: #4a69bd;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #3d5aa0;
+            transform: translateY(-1px);
+        }
+        
+        /* 模式切換按鈕 */
+        .mode-switch {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 4px;
+            gap: 4px;
+        }
+        
+        .mode-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            color: #6c757d;
+        }
+        
+        .mode-btn.active {
+            background: white;
+            color: #4a69bd;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .mode-btn:hover:not(.active) {
+            color: #495057;
+        }
+
+        /* 批量輸入區域 */
+        .batch-input-section {
+            display: none;
+        }
+        
+        .batch-input-section.active {
+            display: block;
+        }
+        
+        .batch-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.2s;
+        }
+        
+        .batch-textarea:focus {
+            outline: none;
+            border-color: #4a69bd;
+            box-shadow: 0 0 0 3px rgba(74, 105, 189, 0.1);
+        }
+        
+        .batch-help {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        
+        .batch-help-example {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            border-left: 3px solid #4a69bd;
+        }
+
+        /* 預覽區域 */
+        .preview-section {
+            display: none;
+            margin-top: 24px;
+        }
+        
+        .preview-section.active {
+            display: block;
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .preview-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .preview-actions-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .preview-count {
+            font-size: 14px;
+            color: #6c757d;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+
+        .batch-ai-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .batch-ai-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .batch-ai-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .batch-ai-btn.processing {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            color: #2d3436;
+        }
+
+        .ai-processing-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .preview-item.ai-generated {
+            border-left: 3px solid #667eea;
+            background: #f0f4ff;
+        }
+
+        .ai-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-left: 8px;
+        }
+        
+        .preview-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+        }
+        
+        .preview-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .preview-item:last-child {
+            border-bottom: none;
+        }
+        
+        .preview-item.duplicate {
+            background: #fff3cd;
+            border-left: 3px solid #ffc107;
+        }
+        
+        .preview-item.error {
+            background: #f8d7da;
+            border-left: 3px solid #dc3545;
+        }
+        
+        .preview-main {
+            flex: 1;
+        }
+        
+        .preview-standard {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+        
+        .preview-synonyms {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .preview-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .preview-btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .preview-btn-edit {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .preview-btn-remove {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        
+        .preview-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* 隱藏單筆模式 */
+        .single-mode-section {
+            display: block;
+        }
+        
+        .single-mode-section.hidden {
+            display: none;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .modal {
+                max-width: 95%;
+                margin: 10px;
+            }
+            
+            .modal-header,
+            .modal-body,
+            .modal-footer {
+                padding: 20px;
+            }
+            
+            .settings-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .date-range {
+                flex-direction: column;
+            }
+            
+            .add-synonym-container {
+                flex-direction: column;
+            }
+            
+            .add-synonym-input {
+                margin-bottom: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="modal">
+        <!-- 模態框頭部 -->
+        <div class="modal-header">
+            <h2 class="modal-title">新增標籤</h2>
+            <div class="mode-switch">
+                <button class="mode-btn active" onclick="switchMode('single')">單筆新增</button>
+                <button class="mode-btn" onclick="switchMode('batch')">批量新增</button>
+            </div>
+            <button class="close-btn" onclick="closeModal()">✕</button>
+        </div>
+        
+        <!-- 模態框內容 -->
+        <div class="modal-body">
+            <!-- 批量輸入區域 -->
+            <div class="form-section batch-input-section" id="batchInputSection">
+                <div class="section-title">
+                    <span class="section-icon">📝</span>
+                    批量輸入標籤
+                </div>
+                <div class="form-group">
+                    <label class="form-label">標籤列表</label>
+                    <textarea class="batch-textarea" placeholder="請輸入標籤，支援多種格式..." id="batchInput" oninput="parseBatchInput()"></textarea>
+                    <div class="batch-help">
+                        支援格式：每行一個標籤，或使用逗號、分號分隔。可以用冒號指定同義詞。
+                    </div>
+                    <div class="batch-help-example">
+                        範例：<br>
+                        客訴:申訴,投訴,叫主管<br>
+                        產品問題:商品問題,品質問題<br>
+                        服務態度,客服態度<br>
+                        退換貨;退貨;換貨
+                    </div>
+                </div>
+                
+                <!-- 預覽區域 -->
+                <div class="preview-section" id="previewSection">
+                    <div class="preview-header">
+                        <span class="preview-title">標籤預覽</span>
+                        <div class="preview-actions-header">
+                            <button class="batch-ai-btn" onclick="batchGenerateSynonyms()" id="batchAiBtn">
+                                <span>✨</span>
+                                批量生成同義詞
+                            </button>
+                            <span class="preview-count" id="previewCount">0 個標籤</span>
+                        </div>
+                    </div>
+                    <div class="preview-list" id="previewList">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 單筆輸入區域 -->
+            <div class="form-section single-mode-section" id="singleModeSection">
+                <!-- 標準詞 -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <span class="section-icon">🏷️</span>
+                        標準詞
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">標籤名稱</label>
+                        <input type="text" class="form-input" placeholder="請輸入標籤名稱" value="客訴" id="standardWord">
+                    </div>
+                </div>
+            
+                <!-- 同義詞 -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <span class="section-icon">🔗</span>
+                        同義詞
+                        <button class="auto-generate-btn" onclick="autoGenerate()">
+                            <span>✨</span>
+                            一鍵生成
+                        </button>
+                    </div>
+                    
+                    <div class="synonyms-container">
+                        <div class="synonyms-list" id="synonymsList">
+                            <div class="synonym-tag">
+                                申訴
+                                <button class="synonym-remove" onclick="removeSynonym(this)">×</button>
+                            </div>
+                            <div class="synonym-tag">
+                                投訴
+                                <button class="synonym-remove" onclick="removeSynonym(this)">×</button>
+                            </div>
+                            <div class="synonym-tag">
+                                叫主管
+                                <button class="synonym-remove" onclick="removeSynonym(this)">×</button>
+                            </div>
+                            <div class="synonym-tag">
+                                差評
+                                <button class="synonym-remove" onclick="removeSynonym(this)">×</button>
+                            </div>
+                        </div>
+                        
+                        <div class="add-synonym-container">
+                            <input type="text" class="add-synonym-input" placeholder="輸入同義詞，按 Enter 或點擊新增" id="synonymInput">
+                            <button class="add-btn" onclick="addSynonym()">新增</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 設定選項 -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span class="section-icon">⚙️</span>
+                    標籤設定
+                </div>
+                
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <div class="setting-header">
+                            <div class="setting-title">標籤狀態</div>
+                            <div class="toggle-switch active" onclick="toggleSwitch(this)">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                        <div class="setting-description">啟用後此標籤將可在系統中使用</div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-header">
+                            <div class="setting-title">報表統計</div>
+                        </div>
+                        <div class="setting-description">選擇在報表中的統計方式</div>
+                        <div class="radio-group">
+                            <div class="radio-item" onclick="selectRadio(this, 'standard')">
+                                <div class="radio-input checked"></div>
+                                <div class="radio-label">統一紀錄標準詞</div>
+                            </div>
+                            <div class="radio-item" onclick="selectRadio(this, 'both')">
+                                <div class="radio-input"></div>
+                                <div class="radio-label">合計標準詞及同義詞</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 上下架時間 -->
+            <div class="form-section">
+                <div class="section-title">
+                    <span class="section-icon">📅</span>
+                    上下架時間
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">生效時間範圍</label>
+                    <div class="date-range">
+                        <input type="date" class="date-input" id="startDate">
+                        <span class="date-separator">至</span>
+                        <input type="date" class="date-input" id="endDate">
+                    </div>
+                    <div class="date-note">
+                        留空時間表示沒有時間限制，過了下架時間會自動轉為下架狀態
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 模態框底部 -->
+        <div class="modal-footer">
+            <button class="btn btn-cancel" onclick="closeModal()">取消</button>
+            <button class="btn btn-primary" onclick="createTag()">建立</button>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'single';
+        let batchTags = [];
+        
+        // 關閉模態框
+        function closeModal() {
+            console.log('關閉模態框');
+        }
+        
+        // 切換模式
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            // 更新按鈕狀態
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[onclick="switchMode('${mode}')"]`).classList.add('active');
+            
+            // 切換區域顯示
+            const batchSection = document.getElementById('batchInputSection');
+            const singleSection = document.getElementById('singleModeSection');
+            
+            if (mode === 'batch') {
+                batchSection.classList.add('active');
+                singleSection.classList.add('hidden');
+            } else {
+                batchSection.classList.remove('active');
+                singleSection.classList.remove('hidden');
+            }
+        }
+        
+        // 解析批量輸入
+        function parseBatchInput() {
+            const input = document.getElementById('batchInput').value;
+            const previewSection = document.getElementById('previewSection');
+            const previewList = document.getElementById('previewList');
+            const previewCount = document.getElementById('previewCount');
+            
+            if (!input.trim()) {
+                previewSection.classList.remove('active');
+                batchTags = [];
+                return;
+            }
+            
+            batchTags = [];
+            const lines = input.split('\n');
+            const existingStandards = new Set();
+            
+            lines.forEach((line, index) => {
+                if (!line.trim()) return;
+                
+                // 支援多種分隔符：逗號、分號、換行
+                const parts = line.split(/[,;]/).map(part => part.trim()).filter(part => part);
+                
+                parts.forEach(part => {
+                    if (!part) return;
+                    
+                    let standard, synonyms = [];
+                    
+                    // 檢查是否包含冒號（標準詞:同義詞格式）
+                    if (part.includes(':')) {
+                        const colonParts = part.split(':');
+                        standard = colonParts[0].trim();
+                        if (colonParts[1]) {
+                            synonyms = colonParts[1].split(',').map(s => s.trim()).filter(s => s);
+                        }
+                    } else {
+                        standard = part;
+                    }
+                    
+                    if (standard) {
+                        const isDuplicate = existingStandards.has(standard);
+                        existingStandards.add(standard);
+                        
+                        batchTags.push({
+                            standard: standard,
+                            synonyms: synonyms,
+                            isDuplicate: isDuplicate,
+                            originalLine: index + 1
+                        });
+                    }
+                });
+            });
+            
+            renderPreview();
+        }
+        
+        // 渲染預覽
+        function renderPreview() {
+            const previewSection = document.getElementById('previewSection');
+            const previewList = document.getElementById('previewList');
+            const previewCount = document.getElementById('previewCount');
+            
+            if (batchTags.length === 0) {
+                previewSection.classList.remove('active');
+                return;
+            }
+            
+            previewSection.classList.add('active');
+            previewCount.textContent = `${batchTags.length} 個標籤`;
+            
+            previewList.innerHTML = batchTags.map((tag, index) => `
+                <div class="preview-item ${tag.isDuplicate ? 'duplicate' : ''} ${tag.aiGenerated ? 'ai-generated' : ''}">
+                    <div class="preview-main">
+                        <div class="preview-standard">
+                            ${tag.standard}
+                            ${tag.aiGenerated ? '<span class="ai-badge">AI</span>' : ''}
+                        </div>
+                        ${tag.synonyms.length > 0 ? 
+                            `<div class="preview-synonyms">同義詞：${tag.synonyms.join(', ')}</div>` : 
+                            '<div class="preview-synonyms">無同義詞</div>'
+                        }
+                        ${tag.isDuplicate ? 
+                            '<div class="preview-synonyms" style="color: #ffc107;">重複標籤</div>' : ''
+                        }
+                    </div>
+                    <div class="preview-actions">
+                        <button class="preview-btn preview-btn-edit" onclick="editBatchTag(${index})">編輯</button>
+                        <button class="preview-btn preview-btn-remove" onclick="removeBatchTag(${index})">移除</button>
+                        ${tag.synonyms.length === 0 ? 
+                            `<button class="preview-btn preview-btn-edit" onclick="generateSingleSynonym(${index})" style="background: #e8f5e8; color: #2e7d32;">生成</button>` : ''
+                        }
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // 編輯批量標籤
+        function editBatchTag(index) {
+            const tag = batchTags[index];
+            const newStandard = prompt('編輯標準詞：', tag.standard);
+            if (newStandard !== null && newStandard.trim()) {
+                tag.standard = newStandard.trim();
+                
+                const synonymsStr = prompt('編輯同義詞（用逗號分隔）：', tag.synonyms.join(', '));
+                if (synonymsStr !== null) {
+                    tag.synonyms = synonymsStr.split(',').map(s => s.trim()).filter(s => s);
+                }
+                
+                // 重新檢查重複
+                checkDuplicates();
+                renderPreview();
+            }
+        }
+        
+        // 移除批量標籤
+        function removeBatchTag(index) {
+            batchTags.splice(index, 1);
+            checkDuplicates();
+            renderPreview();
+        }
+        
+        // 檢查重複標籤
+        function checkDuplicates() {
+            const standards = new Set();
+            batchTags.forEach(tag => {
+                tag.isDuplicate = standards.has(tag.standard);
+                standards.add(tag.standard);
+            });
+        }
+
+        // 批量生成同義詞
+        async function batchGenerateSynonyms() {
+            if (batchTags.length === 0) {
+                alert('請先輸入標籤內容');
+                return;
+            }
+
+            const btn = document.getElementById('batchAiBtn');
+            const originalText = btn.innerHTML;
+            
+            // 更新按鈕狀態
+            btn.disabled = true;
+            btn.className = 'batch-ai-btn processing';
+            btn.innerHTML = '<div class="ai-processing-indicator"></div>處理中...';
+
+            try {
+                // 篩選出沒有同義詞的標籤
+                const tagsNeedingSynonyms = batchTags.filter(tag => tag.synonyms.length === 0);
+                
+                if (tagsNeedingSynonyms.length === 0) {
+                    alert('所有標籤都已有同義詞！');
+                    return;
+                }
+
+                const confirmMsg = `將為 ${tagsNeedingSynonyms.length} 個標籤生成同義詞，是否繼續？`;
+                if (!confirm(confirmMsg)) {
+                    return;
+                }
+
+                // 模擬AI生成過程
+                for (let i = 0; i < tagsNeedingSynonyms.length; i++) {
+                    const tag = tagsNeedingSynonyms[i];
+                    
+                    // 更新進度
+                    btn.innerHTML = `<div class="ai-processing-indicator"></div>處理中... (${i + 1}/${tagsNeedingSynonyms.length})`;
+                    
+                    // 模擬AI處理時間
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    
+                    // 模擬AI生成的同義詞
+                    const aiSynonyms = generateAISynonyms(tag.standard);
+                    tag.synonyms = aiSynonyms;
+                    tag.aiGenerated = true;
+                    
+                    // 實時更新預覽
+                    renderPreview();
+                }
+
+                alert(`成功為 ${tagsNeedingSynonyms.length} 個標籤生成同義詞！`);
+
+            } catch (error) {
+                console.error('批量生成同義詞失敗:', error);
+                alert('生成同義詞時發生錯誤，請稍後再試');
+            } finally {
+                // 恢復按鈕狀態
+                btn.disabled = false;
+                btn.className = 'batch-ai-btn';
+                btn.innerHTML = originalText;
+            }
+        }
+
+        // 單個標籤生成同義詞
+        async function generateSingleSynonym(index) {
+            const tag = batchTags[index];
+            const aiSynonyms = generateAISynonyms(tag.standard);
+            tag.synonyms = aiSynonyms;
+            tag.aiGenerated = true;
+            renderPreview();
+        }
+
+        // 模擬AI生成同義詞
+        function generateAISynonyms(standard) {
+            const synonymsMap = {
+                '客訴': ['申訴', '投訴', '抱怨', '不滿'],
+                '產品問題': ['商品問題', '品質問題', '產品缺陷', '商品瑕疵'],
+                '服務態度': ['客服態度', '服務品質', '接待態度', '服務水準'],
+                '退換貨': ['退貨', '換貨', '退換', '商品退換'],
+                '配送問題': ['物流問題', '運送問題', '配送延誤', '送貨問題'],
+                '價格問題': ['定價問題', '收費問題', '費用問題', '價錢問題'],
+                '系統問題': ['網站問題', '平台問題', '技術問題', '系統故障'],
+                '帳戶問題': ['登入問題', '會員問題', '密碼問題', '帳號問題']
+            };
+
+            // 完全匹配
+            if (synonymsMap[standard]) {
+                return synonymsMap[standard];
+            }
+
+            // 模糊匹配
+            for (const [key, values] of Object.entries(synonymsMap)) {
+                if (standard.includes(key) || key.includes(standard)) {
+                    return values.slice(0, 3); // 返回前3個
+                }
+            }
+
+            // 通用同義詞生成
+            const commonSynonyms = [
+                standard + '相關',
+                standard + '類型',
+                standard + '狀況'
+            ];
+
+            return commonSynonyms.slice(0, 2);
+        }
+        
+        // 切換開關
+        function toggleSwitch(element) {
+            element.classList.toggle('active');
+        }
+        
+        // 選擇單選按鈕
+        function selectRadio(element, value) {
+            // 清除同組的選中狀態
+            const group = element.closest('.radio-group');
+            group.querySelectorAll('.radio-input').forEach(radio => {
+                radio.classList.remove('checked');
+            });
+            
+            // 設置當前選中
+            element.querySelector('.radio-input').classList.add('checked');
+        }
+        
+        // 移除同義詞
+        function removeSynonym(button) {
+            button.closest('.synonym-tag').remove();
+            checkEmptyState();
+        }
+        
+        // 添加同義詞
+        function addSynonym() {
+            const input = document.getElementById('synonymInput');
+            const value = input.value.trim();
+            
+            if (value) {
+                const synonymsList = document.getElementById('synonymsList');
+                
+                // 移除空狀態
+                const emptyState = synonymsList.querySelector('.synonyms-empty');
+                if (emptyState) {
+                    emptyState.remove();
+                }
+                
+                // 創建新標籤
+                const tag = document.createElement('div');
+                tag.className = 'synonym-tag';
+                tag.innerHTML = `
+                    ${value}
+                    <button class="synonym-remove" onclick="removeSynonym(this)">×</button>
+                `;
+                
+                synonymsList.appendChild(tag);
+                input.value = '';
+            }
+        }
+        
+        // 檢查空狀態
+        function checkEmptyState() {
+            const synonymsList = document.getElementById('synonymsList');
+            const tags = synonymsList.querySelectorAll('.synonym-tag');
+            
+            if (tags.length === 0) {
+                synonymsList.innerHTML = `
+                    <div class="synonyms-empty">
+                        <div class="empty-icon">🏷️</div>
+                        <div>尚未添加同義詞</div>
+                        <div>在下方輸入框中添加相關詞彙</div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Enter 鍵添加同義詞
+        document.getElementById('synonymInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addSynonym();
+            }
+        });
+        
+        // 一鍵生成同義詞
+        function autoGenerate() {
+            const standardWord = document.getElementById('standardWord').value;
+            if (!standardWord) {
+                alert('請先輸入標準詞');
+                return;
+            }
+            
+            // 模擬AI生成的同義詞
+            const suggestions = ['抱怨', '不滿', '反映', '意見', '問題回報'];
+            const synonymsList = document.getElementById('synonymsList');
+            
+            suggestions.forEach(word => {
+                const tag = document.createElement('div');
+                tag.className = 'synonym-tag';
+                tag.innerHTML = `
+                    ${word}
+                    <button class="synonym-remove" onclick="removeSynonym(this)">×</button>
+                `;
+                synonymsList.appendChild(tag);
+            });
+        }
+        
+        // 創建標籤
+        function createTag() {
+            if (currentMode === 'batch') {
+                createBatchTags();
+            } else {
+                createSingleTag();
+            }
+        }
+        
+        // 創建單個標籤
+        function createSingleTag() {
+            const standardWord = document.getElementById('standardWord').value.trim();
+            if (!standardWord) {
+                alert('請輸入標籤名稱');
+                return;
+            }
+            
+            const synonyms = Array.from(document.querySelectorAll('#synonymsList .synonym-tag'))
+                .map(tag => tag.textContent.replace('×', '').trim());
+            
+            console.log('創建單個標籤:', {
+                standard: standardWord,
+                synonyms: synonyms
+            });
+            
+            alert('標籤創建成功！');
+        }
+        
+        // 創建批量標籤
+        function createBatchTags() {
+            if (batchTags.length === 0) {
+                alert('請先輸入標籤內容');
+                return;
+            }
+            
+            const duplicates = batchTags.filter(tag => tag.isDuplicate);
+            if (duplicates.length > 0) {
+                const confirmMsg = `發現 ${duplicates.length} 個重複標籤，是否繼續建立？\n重複標籤：${duplicates.map(t => t.standard).join(', ')}`;
+                if (!confirm(confirmMsg)) {
+                    return;
+                }
+            }
+            
+            console.log('創建批量標籤:', batchTags);
+            alert(`成功創建 ${batchTags.length} 個標籤！`);
+        }
+    </script>
+</body>
+</html>
