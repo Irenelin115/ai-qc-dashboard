@@ -328,6 +328,11 @@
                         id="tab-agents">
                     客服績效
                 </button>
+                <button onclick="setActiveTab('tags')" 
+                        class="tab-button py-4 px-2 border-b-2 font-medium text-sm transition border-transparent text-gray-600 hover:text-gray-900" 
+                        id="tab-tags">
+                    語音標籤
+                </button>
             </nav>
         </div>
     </div>
@@ -885,6 +890,177 @@
                 </div>
             </div>
         </div>
+
+        <!-- Tags Tab -->
+        <div id="tags-content" class="space-y-6" style="display: none;">
+            <!-- 語音標籤總覽 -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="stat-card bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1 tooltip">總標籤數量
+                                <span class="tooltip-icon">?</span>
+                                <span class="tooltip-text">
+                                    <strong>總標籤數量</strong><br>
+                                    使用 jieba 分詞識別出的所有標籤總數<br>
+                                    <em>包含商品、活動、意圖等各類標籤</em>
+                                </span>
+                            </p>
+                            <p class="text-3xl font-bold text-gray-900">1,247</p>
+                            <div class="flex items-center mt-2 text-sm trend-up">
+                                <i data-lucide="tag" class="w-4 h-4 mr-1"></i>
+                                <span>本週新增 156</span>
+                            </div>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded-full">
+                            <i data-lucide="tags" class="w-8 h-8 text-purple-600"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1 tooltip">商品標籤
+                                <span class="tooltip-icon">?</span>
+                                <span class="tooltip-text">
+                                    <strong>商品標籤</strong><br>
+                                    從語音中識別出的保險商品名稱<br>
+                                    <em>如：意外險、壽險、醫療險等</em>
+                                </span>
+                            </p>
+                            <p class="text-3xl font-bold text-gray-900">89</p>
+                            <div class="flex items-center mt-2 text-sm trend-up">
+                                <i data-lucide="package" class="w-4 h-4 mr-1"></i>
+                                <span>覆蓋率 94%</span>
+                            </div>
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-full">
+                            <i data-lucide="package" class="w-8 h-8 text-green-600"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1 tooltip">意圖類型
+                                <span class="tooltip-icon">?</span>
+                                <span class="tooltip-text">
+                                    <strong>意圖類型</strong><br>
+                                    識別出的客戶意圖分類數量<br>
+                                    <em>如：購買、詢問、申請、理賠等</em>
+                                </span>
+                            </p>
+                            <p class="text-3xl font-bold text-gray-900">12</p>
+                            <div class="flex items-center mt-2 text-sm text-blue-600">
+                                <i data-lucide="target" class="w-4 h-4 mr-1"></i>
+                                <span>準確率 91%</span>
+                            </div>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-full">
+                            <i data-lucide="target" class="w-8 h-8 text-blue-600"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1 tooltip">活動標籤
+                                <span class="tooltip-icon">?</span>
+                                <span class="tooltip-text">
+                                    <strong>活動標籤</strong><br>
+                                    識別出的促銷活動和優惠方案<br>
+                                    <em>如：新春專案、限時優惠等</em>
+                                </span>
+                            </p>
+                            <p class="text-3xl font-bold text-gray-900">23</p>
+                            <div class="flex items-center mt-2 text-sm trend-up">
+                                <i data-lucide="gift" class="w-4 h-4 mr-1"></i>
+                                <span>熱門度 +15%</span>
+                            </div>
+                        </div>
+                        <div class="bg-orange-50 p-3 rounded-full">
+                            <i data-lucide="gift" class="w-8 h-8 text-orange-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商品標籤分析 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">熱門商品標籤 TOP 10</h3>
+                    <div class="space-y-3" id="productTagsList">
+                        <!-- 商品標籤列表 -->
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">客戶意圖分布</h3>
+                    <div class="chart-container">
+                        <canvas id="intentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 活動標籤和趨勢分析 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">活動標籤統計</h3>
+                    <div class="space-y-3" id="activityTagsList">
+                        <!-- 活動標籤列表 -->
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">標籤趨勢分析 (近7天)</h3>
+                    <div class="chart-container">
+                        <canvas id="tagTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 標籤詳細分析表格 -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900">標籤詳細分析</h3>
+                        <div class="flex items-center space-x-4">
+                            <select id="tagTypeFilter" class="border border-gray-300 rounded px-3 py-1 text-sm">
+                                <option value="all">全部類型</option>
+                                <option value="product">商品標籤</option>
+                                <option value="intent">意圖標籤</option>
+                                <option value="activity">活動標籤</option>
+                            </select>
+                            <button onclick="exportTagReport()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                                <i data-lucide="download" class="w-4 h-4 mr-2 inline"></i>
+                                匯出標籤報表
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">標籤名稱</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">類型</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">出現次數</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">覆蓋通話</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">成功率</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">趨勢</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="tagDetailTable">
+                            <!-- 標籤詳細數據 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- STT Modal -->
@@ -1241,6 +1417,82 @@
         // 當前顯示的議題數據（會根據選擇的TOP數量變化）
         let topIssues = allTopIssues.slice(0, 5); // 預設顯示TOP 5
 
+        // 語音標籤分析數據
+        const productTags = [
+            { name: '醫療險', count: 245, coverage: 156, successRate: 73.2, trend: 'up', changePercent: 15.3 },
+            { name: '意外險', count: 198, coverage: 134, successRate: 68.5, trend: 'up', changePercent: 8.7 },
+            { name: '壽險', count: 167, coverage: 112, successRate: 81.2, trend: 'stable', changePercent: 0 },
+            { name: '汽車險', count: 143, coverage: 98, successRate: 65.8, trend: 'down', changePercent: -5.2 },
+            { name: '機車險', count: 127, coverage: 89, successRate: 72.1, trend: 'up', changePercent: 12.1 },
+            { name: '旅遊險', count: 98, coverage: 67, successRate: 78.9, trend: 'up', changePercent: 22.5 },
+            { name: '儲蓄險', count: 89, coverage: 62, successRate: 69.7, trend: 'stable', changePercent: 1.2 },
+            { name: '投資型保單', count: 76, coverage: 54, successRate: 58.3, trend: 'down', changePercent: -8.9 },
+            { name: '癌症險', count: 65, coverage: 47, successRate: 74.6, trend: 'up', changePercent: 18.7 },
+            { name: '失能險', count: 52, coverage: 38, successRate: 71.3, trend: 'up', changePercent: 9.8 }
+        ];
+
+        const intentData = {
+            labels: ['購買保單', '詢問商品', '申請理賠', '保單變更', '續保', '退保', '保費查詢', '理賠進度', '其他'],
+            datasets: [{
+                data: [285, 198, 167, 134, 98, 76, 65, 43, 34],
+                backgroundColor: [
+                    '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', 
+                    '#06b6d4', '#84cc16', '#f97316', '#6b7280'
+                ]
+            }]
+        };
+
+        const activityTags = [
+            { name: '新春專案', count: 89, period: '2024/01-03', status: 'active', performance: 'excellent' },
+            { name: '母親節優惠', count: 76, period: '2024/05', status: 'ended', performance: 'good' },
+            { name: '暑期旅遊險', count: 65, period: '2024/06-08', status: 'active', performance: 'good' },
+            { name: '中秋團圓方案', count: 54, period: '2024/09', status: 'ended', performance: 'average' },
+            { name: '雙11特惠', count: 43, period: '2024/11', status: 'planned', performance: 'pending' },
+            { name: '年終回饋', count: 38, period: '2024/12', status: 'planned', performance: 'pending' },
+            { name: '開學季專案', count: 32, period: '2024/08-09', status: 'ended', performance: 'good' },
+            { name: '情人節限定', count: 27, period: '2024/02', status: 'ended', performance: 'average' }
+        ];
+
+        const tagTrendData = {
+            labels: ['10/11', '10/12', '10/13', '10/14', '10/15', '10/16', '10/17'],
+            datasets: [
+                {
+                    label: '商品標籤',
+                    data: [156, 168, 172, 184, 189, 195, 198],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4
+                },
+                {
+                    label: '意圖標籤',
+                    data: [89, 92, 87, 95, 98, 101, 105],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4
+                },
+                {
+                    label: '活動標籤',
+                    data: [23, 21, 25, 28, 32, 35, 38],
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    tension: 0.4
+                }
+            ]
+        };
+
+        const allTagsData = [
+            { name: '醫療險', type: 'product', count: 245, coverage: 156, successRate: 73.2, trend: 'up' },
+            { name: '購買保單', type: 'intent', count: 285, coverage: 198, successRate: 82.1, trend: 'up' },
+            { name: '新春專案', type: 'activity', count: 89, coverage: 67, successRate: 75.3, trend: 'stable' },
+            { name: '意外險', type: 'product', count: 198, coverage: 134, successRate: 68.5, trend: 'up' },
+            { name: '詢問商品', type: 'intent', count: 198, coverage: 142, successRate: 79.8, trend: 'stable' },
+            { name: '壽險', type: 'product', count: 167, coverage: 112, successRate: 81.2, trend: 'stable' },
+            { name: '申請理賠', type: 'intent', count: 167, coverage: 123, successRate: 85.6, trend: 'up' },
+            { name: '母親節優惠', type: 'activity', count: 76, coverage: 58, successRate: 71.2, trend: 'down' },
+            { name: '汽車險', type: 'product', count: 143, coverage: 98, successRate: 65.8, trend: 'down' },
+            { name: '保單變更', type: 'intent', count: 134, coverage: 95, successRate: 77.3, trend: 'stable' }
+        ];
+
         const agentPerformance = [
             { name: '張小明', score: 92, calls: 156, fcr: 89 },
             { name: '李美玲', score: 88, calls: 142, fcr: 85 },
@@ -1442,6 +1694,9 @@
                     break;
                 case 'emotion':
                     initEmotionChart();
+                    break;
+                case 'tags':
+                    initTagsPage();
                     break;
             }
         }
@@ -2063,6 +2318,208 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        }
+
+        // 語音標籤頁面功能
+        function initTagsPage() {
+            populateProductTagsList();
+            populateActivityTagsList();
+            populateTagDetailTable();
+            initIntentChart();
+            initTagTrendChart();
+        }
+
+        function populateProductTagsList() {
+            const container = document.getElementById('productTagsList');
+            container.innerHTML = '';
+            
+            productTags.forEach((tag, index) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition';
+                
+                const trendIcon = tag.trend === 'up' ? 'trending-up' : 
+                                 tag.trend === 'down' ? 'trending-down' : 'minus';
+                const trendColor = tag.trend === 'up' ? 'text-green-600' : 
+                                  tag.trend === 'down' ? 'text-red-600' : 'text-gray-600';
+                
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold text-xs">
+                            ${index + 1}
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">${tag.name}</div>
+                            <div class="text-sm text-gray-600">覆蓋 ${tag.coverage} 通電話</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-gray-900">${tag.count} 次</div>
+                        <div class="flex items-center text-sm ${trendColor}">
+                            <i data-lucide="${trendIcon}" class="w-3 h-3 mr-1"></i>
+                            <span>${tag.changePercent > 0 ? '+' : ''}${tag.changePercent}%</span>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            });
+            
+            lucide.createIcons();
+        }
+
+        function populateActivityTagsList() {
+            const container = document.getElementById('activityTagsList');
+            container.innerHTML = '';
+            
+            activityTags.forEach((tag, index) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition';
+                
+                const statusClass = tag.status === 'active' ? 'bg-green-100 text-green-800' :
+                                   tag.status === 'ended' ? 'bg-gray-100 text-gray-800' :
+                                   'bg-blue-100 text-blue-800';
+                
+                const performanceClass = tag.performance === 'excellent' ? 'text-green-600' :
+                                        tag.performance === 'good' ? 'text-blue-600' :
+                                        tag.performance === 'average' ? 'text-orange-600' :
+                                        'text-gray-600';
+                
+                div.innerHTML = `
+                    <div>
+                        <div class="font-medium text-gray-900">${tag.name}</div>
+                        <div class="text-sm text-gray-600">${tag.period}</div>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <span class="px-2 py-0.5 text-xs rounded-full ${statusClass}">
+                                ${tag.status === 'active' ? '進行中' : tag.status === 'ended' ? '已結束' : '計劃中'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold text-gray-900">${tag.count} 次</div>
+                        <div class="text-sm ${performanceClass}">
+                            ${tag.performance === 'excellent' ? '優秀' : 
+                              tag.performance === 'good' ? '良好' : 
+                              tag.performance === 'average' ? '一般' : '待評估'}
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            });
+        }
+
+        function populateTagDetailTable() {
+            const tbody = document.getElementById('tagDetailTable');
+            tbody.innerHTML = '';
+            
+            allTagsData.forEach((tag) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50';
+                
+                const typeClass = tag.type === 'product' ? 'bg-green-100 text-green-800' :
+                                 tag.type === 'intent' ? 'bg-blue-100 text-blue-800' :
+                                 'bg-orange-100 text-orange-800';
+                
+                const typeName = tag.type === 'product' ? '商品' :
+                                tag.type === 'intent' ? '意圖' : '活動';
+                
+                const trendIcon = tag.trend === 'up' ? 'trending-up' : 
+                                 tag.trend === 'down' ? 'trending-down' : 'minus';
+                const trendColor = tag.trend === 'up' ? 'text-green-600' : 
+                                  tag.trend === 'down' ? 'text-red-600' : 'text-gray-600';
+                
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${tag.name}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${typeClass}">
+                            ${typeName}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${tag.count}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${tag.coverage}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${tag.successRate}%</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center ${trendColor}">
+                            <i data-lucide="${trendIcon}" class="w-4 h-4 mr-1"></i>
+                            <span class="text-sm">${tag.trend === 'up' ? '上升' : tag.trend === 'down' ? '下降' : '穩定'}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button class="text-blue-600 hover:text-blue-700 mr-3">查看</button>
+                        <button class="text-green-600 hover:text-green-700">分析</button>
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+            
+            lucide.createIcons();
+        }
+
+        function initIntentChart() {
+            if (charts.intent) {
+                charts.intent.destroy();
+            }
+            const ctx = document.getElementById('intentChart').getContext('2d');
+            charts.intent = new Chart(ctx, {
+                type: 'doughnut',
+                data: intentData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function initTagTrendChart() {
+            if (charts.tagTrend) {
+                charts.tagTrend.destroy();
+            }
+            const ctx = document.getElementById('tagTrendChart').getContext('2d');
+            charts.tagTrend = new Chart(ctx, {
+                type: 'line',
+                data: tagTrendData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '標籤數量'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: '日期'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function exportTagReport() {
+            alert('標籤報表匯出功能開發中...');
         }
 
         // 友善時間查詢功能
