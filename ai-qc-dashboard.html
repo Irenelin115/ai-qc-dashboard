@@ -1622,7 +1622,6 @@
                 const trendColor = item.trend === 'up' ? 'text-red-600' : 
                                   item.trend === 'down' ? 'text-green-600' : 'text-gray-600';
                 
-                const progressPercent = Math.min((item.count / topIssues[0].count) * 100, 100);
                 
                 div.innerHTML = `
                     <div class="flex items-start justify-between mb-3">
@@ -1702,10 +1701,6 @@
                             </div>
                             <span class="text-xs text-gray-500">較昨日</span>
                         </div>
-                    </div>
-                    <div class="relative h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="absolute h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all" 
-                             style="width: ${progressPercent}%"></div>
                     </div>
                     <div class="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
                         <span>滿分配分: ${item.fullScore}分</span>
