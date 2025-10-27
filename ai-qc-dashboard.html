@@ -691,6 +691,10 @@
                     </div>
                     <div class="flex items-center space-x-4">
                         <span class="text-sm text-gray-600" id="detailTotalCount">總計 0 筆</span>
+                        <button onclick="showSeveritySettings()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition mr-2">
+                            <i data-lucide="settings" class="w-4 h-4 mr-2 inline"></i>
+                            嚴重度設定
+                        </button>
                         <button onclick="exportAudioList()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
                             <i data-lucide="download" class="w-4 h-4 mr-2 inline"></i>
                             匯出清單
@@ -1096,6 +1100,134 @@
                         </button>
                         <button onclick="closeSttModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition">
                             關閉
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Severity Settings Modal -->
+    <div id="severitySettingsModal" class="custom-date-modal hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="custom-date-content bg-white rounded-lg shadow-xl max-w-lg w-full">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900">嚴重度扣分設定</h3>
+                        <button onclick="closeSeveritySettings()" class="text-gray-400 hover:text-gray-600">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="space-y-6">
+                        <div class="text-sm text-gray-600 mb-4">
+                            設定不同嚴重度等級的扣分分數範圍，用於自動分類音檔的嚴重程度。
+                        </div>
+                        
+                        <!-- 高嚴重度設定 -->
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <div class="w-4 h-4 bg-red-600 rounded-full"></div>
+                                <h4 class="font-semibold text-red-900">高嚴重度</h4>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">最低分數</label>
+                                    <input type="number" id="highSeverityMin" min="1" max="20" 
+                                           class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-red-500" 
+                                           placeholder="8">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">最高分數</label>
+                                    <input type="number" id="highSeverityMax" min="1" max="20" 
+                                           class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-red-500" 
+                                           placeholder="20">
+                                </div>
+                            </div>
+                            <div class="mt-2 text-xs text-red-700">
+                                範例：保密規定違反、未執行身份驗證等嚴重違規
+                            </div>
+                        </div>
+
+                        <!-- 中嚴重度設定 -->
+                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <div class="w-4 h-4 bg-orange-600 rounded-full"></div>
+                                <h4 class="font-semibold text-orange-900">中嚴重度</h4>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">最低分數</label>
+                                    <input type="number" id="mediumSeverityMin" min="1" max="20" 
+                                           class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500" 
+                                           placeholder="4">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">最高分數</label>
+                                    <input type="number" id="mediumSeverityMax" min="1" max="20" 
+                                           class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500" 
+                                           placeholder="7">
+                                </div>
+                            </div>
+                            <div class="mt-2 text-xs text-orange-700">
+                                範例：問題未完全解決、專業知識不足等一般違規
+                            </div>
+                        </div>
+
+                        <!-- 低嚴重度設定 -->
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex items-center space-x-2 mb-3">
+                                <div class="w-4 h-4 bg-green-600 rounded-full"></div>
+                                <h4 class="font-semibold text-green-900">低嚴重度</h4>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">最低分數</label>
+                                    <input type="number" id="lowSeverityMin" min="1" max="20" 
+                                           class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-green-500" 
+                                           placeholder="1">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">最高分數</label>
+                                    <input type="number" id="lowSeverityMax" min="1" max="20" 
+                                           class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-green-500" 
+                                           placeholder="3">
+                                </div>
+                            </div>
+                            <div class="mt-2 text-xs text-green-700">
+                                範例：缺少結束語、未使用客戶姓名等輕微問題
+                            </div>
+                        </div>
+
+                        <!-- 預設選項 -->
+                        <div class="border-t pt-4">
+                            <h4 class="font-medium text-gray-900 mb-3">快速設定</h4>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="applyPresetSeverity('default')" 
+                                        class="px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 transition">
+                                    預設範圍 (1-3, 4-7, 8-20)
+                                </button>
+                                <button onclick="applyPresetSeverity('strict')" 
+                                        class="px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 transition">
+                                    嚴格模式 (1-2, 3-5, 6-20)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-between">
+                    <button onclick="resetSeveritySettings()" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition">
+                        重置為預設
+                    </button>
+                    <div class="flex space-x-3">
+                        <button onclick="closeSeveritySettings()" 
+                                class="px-4 py-2 text-sm border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition">
+                            取消
+                        </button>
+                        <button onclick="applySeveritySettings()" 
+                                class="px-4 py-2 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 transition">
+                            套用設定
                         </button>
                     </div>
                 </div>
@@ -2754,6 +2886,193 @@
             initChartsForTab('overview');
             updateLastUpdateTime();
             initTimeSelectors(); // 新增：初始化時間選擇器
+            
+            // Update time every minute
+            setInterval(updateLastUpdateTime, 60000);
+        }
+
+        // Severity Settings Functions
+        let severitySettings = {
+            high: { min: 8, max: 20 },
+            medium: { min: 4, max: 7 },
+            low: { min: 1, max: 3 }
+        };
+
+        // Load severity settings from localStorage
+        function loadSeveritySettings() {
+            const saved = localStorage.getItem('severitySettings');
+            if (saved) {
+                severitySettings = JSON.parse(saved);
+            }
+            updateSeverityInputs();
+            updateSeverityTooltips();
+        }
+
+        // Save severity settings to localStorage
+        function saveSeveritySettings() {
+            localStorage.setItem('severitySettings', JSON.stringify(severitySettings));
+        }
+
+        // Show severity settings modal
+        function showSeveritySettings() {
+            updateSeverityInputs();
+            document.getElementById('severitySettingsModal').classList.remove('hidden');
+        }
+
+        // Close severity settings modal
+        function closeSeveritySettings() {
+            document.getElementById('severitySettingsModal').classList.add('hidden');
+        }
+
+        // Update input fields with current settings
+        function updateSeverityInputs() {
+            document.getElementById('highSeverityMin').value = severitySettings.high.min;
+            document.getElementById('highSeverityMax').value = severitySettings.high.max;
+            document.getElementById('mediumSeverityMin').value = severitySettings.medium.min;
+            document.getElementById('mediumSeverityMax').value = severitySettings.medium.max;
+            document.getElementById('lowSeverityMin').value = severitySettings.low.min;
+            document.getElementById('lowSeverityMax').value = severitySettings.low.max;
+        }
+
+        // Apply severity settings
+        function applySeveritySettings() {
+            const highMin = parseInt(document.getElementById('highSeverityMin').value);
+            const highMax = parseInt(document.getElementById('highSeverityMax').value);
+            const mediumMin = parseInt(document.getElementById('mediumSeverityMin').value);
+            const mediumMax = parseInt(document.getElementById('mediumSeverityMax').value);
+            const lowMin = parseInt(document.getElementById('lowSeverityMin').value);
+            const lowMax = parseInt(document.getElementById('lowSeverityMax').value);
+
+            // Validation
+            if (highMin >= highMax || mediumMin >= mediumMax || lowMin >= lowMax) {
+                alert('最低分數必須小於最高分數');
+                return;
+            }
+
+            if (lowMax >= mediumMin || mediumMax >= highMin) {
+                alert('分數範圍不能重疊，請確保：低嚴重度 < 中嚴重度 < 高嚴重度');
+                return;
+            }
+
+            // Update settings
+            severitySettings = {
+                high: { min: highMin, max: highMax },
+                medium: { min: mediumMin, max: mediumMax },
+                low: { min: lowMin, max: lowMax }
+            };
+
+            saveSeveritySettings();
+            updateSeverityTooltips();
+            updateAudioDetailSeverityDisplay();
+            closeSeveritySettings();
+            
+            showSuccessMessage('嚴重度設定已更新');
+        }
+
+        // Reset to default settings
+        function resetSeveritySettings() {
+            severitySettings = {
+                high: { min: 8, max: 20 },
+                medium: { min: 4, max: 7 },
+                low: { min: 1, max: 3 }
+            };
+            updateSeverityInputs();
+        }
+
+        // Apply preset severity settings
+        function applyPresetSeverity(presetType) {
+            if (presetType === 'default') {
+                severitySettings = {
+                    high: { min: 8, max: 20 },
+                    medium: { min: 4, max: 7 },
+                    low: { min: 1, max: 3 }
+                };
+            } else if (presetType === 'strict') {
+                severitySettings = {
+                    high: { min: 6, max: 20 },
+                    medium: { min: 3, max: 5 },
+                    low: { min: 1, max: 2 }
+                };
+            }
+            updateSeverityInputs();
+        }
+
+        // Classify severity based on score
+        function classifySeverity(score) {
+            if (score >= severitySettings.high.min && score <= severitySettings.high.max) {
+                return 'high';
+            } else if (score >= severitySettings.medium.min && score <= severitySettings.medium.max) {
+                return 'medium';
+            } else if (score >= severitySettings.low.min && score <= severitySettings.low.max) {
+                return 'low';
+            }
+            return 'low'; // Default fallback
+        }
+
+        // Update severity tooltips with dynamic ranges
+        function updateSeverityTooltips() {
+            const tooltips = {
+                high: `高嚴重度 (${severitySettings.high.min}-${severitySettings.high.max}分)：保密規定違反、未執行身份驗證等嚴重違規`,
+                medium: `中嚴重度 (${severitySettings.medium.min}-${severitySettings.medium.max}分)：問題未完全解決、專業知識不足等一般違規`,
+                low: `低嚴重度 (${severitySettings.low.min}-${severitySettings.low.max}分)：缺少結束語、回應時間稍長等輕微違規`
+            };
+
+            // Update tooltip content in audio detail page if it exists
+            const severityElements = document.querySelectorAll('[data-severity-tooltip]');
+            severityElements.forEach(element => {
+                const severityType = element.getAttribute('data-severity-tooltip');
+                if (tooltips[severityType]) {
+                    element.setAttribute('title', tooltips[severityType]);
+                }
+            });
+        }
+
+        // Update audio detail page severity display
+        function updateAudioDetailSeverityDisplay() {
+            // Re-classify all audio items based on new severity settings
+            if (typeof currentData !== 'undefined' && currentData.length > 0) {
+                currentData.forEach(audio => {
+                    audio.severity = classifySeverity(audio.deduction);
+                });
+                
+                // Re-render the table if we're on audio detail page
+                if (typeof renderTable === 'function') {
+                    renderTable();
+                }
+                
+                // Update stats if function exists
+                if (typeof updateStats === 'function') {
+                    updateStats();
+                }
+            }
+        }
+
+        // Show success message
+        function showSuccessMessage(message) {
+            const messageEl = document.createElement('div');
+            messageEl.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            messageEl.textContent = message;
+            document.body.appendChild(messageEl);
+            
+            setTimeout(() => {
+                messageEl.style.opacity = '0';
+                messageEl.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => {
+                    if (messageEl.parentNode) {
+                        messageEl.parentNode.removeChild(messageEl);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Enhanced initDashboard to load severity settings
+        function initDashboard() {
+            populateTopIssues();
+            populateAgentsTable();
+            initChartsForTab('overview');
+            updateLastUpdateTime();
+            initTimeSelectors();
+            loadSeveritySettings(); // Load custom severity settings
             
             // Update time every minute
             setInterval(updateLastUpdateTime, 60000);
