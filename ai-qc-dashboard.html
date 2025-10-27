@@ -382,7 +382,7 @@
             <!-- Top Issues -->
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">高頻扣分指標 TOP 5</h3>
+                    <h3 class="text-lg font-semibold text-gray-900" id="topIssuesTitle">高頻扣分指標 TOP 5</h3>
                     <div class="flex items-center space-x-2 text-sm time-controls">
                         <!-- 時間選擇器 -->
                         <div class="relative">
@@ -413,6 +413,18 @@
                                 <input type="checkbox" id="enableComparison" onchange="toggleComparison()" class="mr-1 rounded text-blue-600 focus:ring-blue-500">
                                 <span class="text-gray-600">與上期比較</span>
                             </label>
+                        </div>
+                        
+                        <!-- TOP 數量選擇器 -->
+                        <div class="flex items-center space-x-2 border-l pl-2 ml-2">
+                            <label class="text-sm font-medium text-gray-700">顯示:</label>
+                            <select id="topCount" onchange="updateTopIssuesDisplay()" class="border border-gray-300 rounded px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500">
+                                <option value="5" selected>TOP 5</option>
+                                <option value="10">TOP 10</option>
+                                <option value="15">TOP 15</option>
+                                <option value="20">TOP 20</option>
+                                <option value="all">全部顯示</option>
+                            </select>
                         </div>
                         
                         <select class="border border-gray-300 rounded px-3 py-1 text-sm">
@@ -869,7 +881,7 @@
             { date: '10/17', score: 88, calls: 700, median: 89, q1: 84, q3: 93 }
         ];
 
-        const topIssues = [
+        const allTopIssues = [
             { 
                 issue: '未使用禮貌用語', 
                 count: 45, 
@@ -934,8 +946,206 @@
                 changePercent: -15.0,
                 category: '結束語',
                 fullScore: 4
+            },
+            { 
+                issue: '音量控制不當', 
+                count: 19, 
+                rate: 2.7,
+                totalDeduction: 76,
+                avgDeduction: 4.0,
+                affectedCalls: 19,
+                affectedAgents: 11,
+                trend: 'up',
+                changePercent: 5.6,
+                category: '通話品質',
+                fullScore: 4
+            },
+            { 
+                issue: '未確認客戶需求', 
+                count: 18, 
+                rate: 2.6,
+                totalDeduction: 108,
+                avgDeduction: 6.0,
+                affectedCalls: 18,
+                affectedAgents: 9,
+                trend: 'stable',
+                changePercent: 0,
+                category: '需求確認',
+                fullScore: 6
+            },
+            { 
+                issue: '轉接流程錯誤', 
+                count: 16, 
+                rate: 2.3,
+                totalDeduction: 96,
+                avgDeduction: 6.0,
+                affectedCalls: 16,
+                affectedAgents: 8,
+                trend: 'down',
+                changePercent: -11.1,
+                category: '流程規範',
+                fullScore: 6
+            },
+            { 
+                issue: '未做通話記錄', 
+                count: 15, 
+                rate: 2.1,
+                totalDeduction: 90,
+                avgDeduction: 6.0,
+                affectedCalls: 15,
+                affectedAgents: 10,
+                trend: 'up',
+                changePercent: 7.1,
+                category: '記錄規範',
+                fullScore: 6
+            },
+            { 
+                issue: '話術不標準', 
+                count: 14, 
+                rate: 2.0,
+                totalDeduction: 56,
+                avgDeduction: 4.0,
+                affectedCalls: 14,
+                affectedAgents: 7,
+                trend: 'stable',
+                changePercent: 0,
+                category: '標準話術',
+                fullScore: 4
+            },
+            { 
+                issue: '客戶情緒安撫不當', 
+                count: 13, 
+                rate: 1.9,
+                totalDeduction: 78,
+                avgDeduction: 6.0,
+                affectedCalls: 13,
+                affectedAgents: 6,
+                trend: 'down',
+                changePercent: -7.1,
+                category: '情緒處理',
+                fullScore: 6
+            },
+            { 
+                issue: '保密規定違反', 
+                count: 12, 
+                rate: 1.7,
+                totalDeduction: 144,
+                avgDeduction: 12.0,
+                affectedCalls: 12,
+                affectedAgents: 5,
+                trend: 'up',
+                changePercent: 20.0,
+                category: '合規要求',
+                fullScore: 12
+            },
+            { 
+                issue: '系統操作錯誤', 
+                count: 11, 
+                rate: 1.6,
+                totalDeduction: 44,
+                avgDeduction: 4.0,
+                affectedCalls: 11,
+                affectedAgents: 8,
+                trend: 'stable',
+                changePercent: 0,
+                category: '系統操作',
+                fullScore: 4
+            },
+            { 
+                issue: '未提供替代方案', 
+                count: 10, 
+                rate: 1.4,
+                totalDeduction: 60,
+                avgDeduction: 6.0,
+                affectedCalls: 10,
+                affectedAgents: 6,
+                trend: 'down',
+                changePercent: -9.1,
+                category: '解決方案',
+                fullScore: 6
+            },
+            { 
+                issue: '通話環境噪音', 
+                count: 9, 
+                rate: 1.3,
+                totalDeduction: 36,
+                avgDeduction: 4.0,
+                affectedCalls: 9,
+                affectedAgents: 7,
+                trend: 'up',
+                changePercent: 12.5,
+                category: '通話品質',
+                fullScore: 4
+            },
+            { 
+                issue: '未使用客戶姓名', 
+                count: 8, 
+                rate: 1.1,
+                totalDeduction: 24,
+                avgDeduction: 3.0,
+                affectedCalls: 8,
+                affectedAgents: 5,
+                trend: 'stable',
+                changePercent: 0,
+                category: '個人化服務',
+                fullScore: 3
+            },
+            { 
+                issue: '產品介紹不完整', 
+                count: 7, 
+                rate: 1.0,
+                totalDeduction: 42,
+                avgDeduction: 6.0,
+                affectedCalls: 7,
+                affectedAgents: 4,
+                trend: 'down',
+                changePercent: -12.5,
+                category: '產品知識',
+                fullScore: 6
+            },
+            { 
+                issue: '語速過快或過慢', 
+                count: 6, 
+                rate: 0.9,
+                totalDeduction: 18,
+                avgDeduction: 3.0,
+                affectedCalls: 6,
+                affectedAgents: 4,
+                trend: 'up',
+                changePercent: 20.0,
+                category: '溝通技巧',
+                fullScore: 3
+            },
+            { 
+                issue: '重複詢問相同問題', 
+                count: 5, 
+                rate: 0.7,
+                totalDeduction: 20,
+                avgDeduction: 4.0,
+                affectedCalls: 5,
+                affectedAgents: 3,
+                trend: 'stable',
+                changePercent: 0,
+                category: '溝通效率',
+                fullScore: 4
+            },
+            { 
+                issue: '未執行身份驗證', 
+                count: 4, 
+                rate: 0.6,
+                totalDeduction: 48,
+                avgDeduction: 12.0,
+                affectedCalls: 4,
+                affectedAgents: 2,
+                trend: 'down',
+                changePercent: -20.0,
+                category: '安全規範',
+                fullScore: 12
             }
         ];
+
+        // 當前顯示的議題數據（會根據選擇的TOP數量變化）
+        let topIssues = allTopIssues.slice(0, 5); // 預設顯示TOP 5
 
         const agentPerformance = [
             { name: '張小明', score: 92, calls: 156, fcr: 89 },
@@ -1285,6 +1495,22 @@
                     }
                 }
             });
+        }
+
+        // 更新 TOP 議題顯示數量
+        function updateTopIssuesDisplay() {
+            const selectedCount = document.getElementById('topCount').value;
+            
+            if (selectedCount === 'all') {
+                topIssues = [...allTopIssues];
+                document.getElementById('topIssuesTitle').textContent = `高頻扣分指標 TOP ${allTopIssues.length}`;
+            } else {
+                const count = parseInt(selectedCount);
+                topIssues = allTopIssues.slice(0, count);
+                document.getElementById('topIssuesTitle').textContent = `高頻扣分指標 TOP ${count}`;
+            }
+            
+            populateTopIssues();
         }
 
         // Populate top issues list
