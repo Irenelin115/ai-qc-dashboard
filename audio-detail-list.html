@@ -7,13 +7,12 @@
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
-        .audio-row {
-            transition: all 0.2s ease;
+        .audio-card {
+            transition: all 0.3s ease;
         }
-        .audio-row:hover {
-            background-color: #f8fafc;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        .audio-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
         .play-button {
             transition: all 0.2s ease;
@@ -31,15 +30,21 @@
         }
         .severity-high {
             border-left: 4px solid #ef4444;
-            background-color: #fef2f2;
+            background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
         }
         .severity-medium {
             border-left: 4px solid #f59e0b;
-            background-color: #fffbeb;
+            background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
         }
         .severity-low {
             border-left: 4px solid #10b981;
-            background-color: #f0fdf4;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+        }
+        .info-card {
+            transition: all 0.2s ease;
+        }
+        .info-card:hover {
+            transform: scale(1.02);
         }
         .filter-chip {
             transition: all 0.2s ease;
@@ -138,45 +143,57 @@
     <!-- Summary Stats -->
     <div class="max-w-7xl mx-auto px-6 py-4">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white rounded-lg shadow p-4">
-                <div class="text-sm text-gray-600">高嚴重度</div>
-                <div class="text-2xl font-bold text-red-600" id="highSeverityCount">0</div>
+            <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-lg shadow-sm border border-red-200 p-4 hover:shadow-md transition-all">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-sm font-medium text-red-700">高嚴重度</div>
+                        <div class="text-2xl font-bold text-red-600" id="highSeverityCount">0</div>
+                    </div>
+                    <div class="text-red-500">
+                        <i data-lucide="alert-circle" class="w-8 h-8"></i>
+                    </div>
+                </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-4">
-                <div class="text-sm text-gray-600">中嚴重度</div>
-                <div class="text-2xl font-bold text-orange-600" id="mediumSeverityCount">0</div>
+            <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg shadow-sm border border-orange-200 p-4 hover:shadow-md transition-all">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-sm font-medium text-orange-700">中嚴重度</div>
+                        <div class="text-2xl font-bold text-orange-600" id="mediumSeverityCount">0</div>
+                    </div>
+                    <div class="text-orange-500">
+                        <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+                    </div>
+                </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-4">
-                <div class="text-sm text-gray-600">低嚴重度</div>
-                <div class="text-2xl font-bold text-green-600" id="lowSeverityCount">0</div>
+            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-sm border border-green-200 p-4 hover:shadow-md transition-all">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-sm font-medium text-green-700">低嚴重度</div>
+                        <div class="text-2xl font-bold text-green-600" id="lowSeverityCount">0</div>
+                    </div>
+                    <div class="text-green-500">
+                        <i data-lucide="check-circle" class="w-8 h-8"></i>
+                    </div>
+                </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-4">
-                <div class="text-sm text-gray-600">平均時長</div>
-                <div class="text-2xl font-bold text-blue-600" id="avgDuration">0</div>
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-sm border border-blue-200 p-4 hover:shadow-md transition-all">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-sm font-medium text-blue-700">平均時長</div>
+                        <div class="text-2xl font-bold text-blue-600" id="avgDuration">0</div>
+                    </div>
+                    <div class="text-blue-500">
+                        <i data-lucide="clock" class="w-8 h-8"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Audio List -->
     <div class="max-w-7xl mx-auto px-6 pb-6">
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full">
-                    <thead class="bg-gray-50 border-b">
-                        <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">播放</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">檔案資訊</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">通話詳情</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">人員資訊</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">扣分詳情</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="audioTableBody">
-                        <!-- Audio rows will be populated by JavaScript -->
-                    </tbody>
-                </table>
-            </div>
+        <div class="space-y-4" id="audioCardContainer">
+            <!-- Audio cards will be populated by JavaScript -->
         </div>
 
         <!-- Pagination -->
@@ -592,28 +609,28 @@
             document.getElementById('totalCount').textContent = `總計 ${currentData.length} 筆`;
         }
 
-        // Render table
+        // Render cards
         function renderTable() {
-            const tbody = document.getElementById('audioTableBody');
-            tbody.innerHTML = '';
+            const container = document.getElementById('audioCardContainer');
+            container.innerHTML = '';
             
             const startIndex = (currentPage - 1) * pageSize;
             const endIndex = Math.min(startIndex + pageSize, currentData.length);
             const pageData = currentData.slice(startIndex, endIndex);
             
             pageData.forEach((audio, index) => {
-                const row = createAudioRow(audio, startIndex + index);
-                tbody.appendChild(row);
+                const card = createAudioCard(audio, startIndex + index);
+                container.appendChild(card);
             });
             
             lucide.createIcons();
         }
 
-        // Create audio row
-        function createAudioRow(audio, index) {
-            const tr = document.createElement('tr');
+        // Create audio card
+        function createAudioCard(audio, index) {
+            const card = document.createElement('div');
             const severityClass = `severity-${audio.severity}`;
-            tr.className = `audio-row ${severityClass}`;
+            card.className = `audio-card bg-white rounded-lg shadow-sm border hover:shadow-md ${severityClass}`;
             
             const severityText = {
                 high: '高',
@@ -622,56 +639,108 @@
             };
             
             const severityColor = {
-                high: 'text-red-600',
-                medium: 'text-orange-600',
-                low: 'text-green-600'
+                high: 'bg-red-100 text-red-800 border-red-200',
+                medium: 'bg-orange-100 text-orange-800 border-orange-200',
+                low: 'bg-green-100 text-green-800 border-green-200'
+            };
+
+            const severityIcon = {
+                high: '🔴',
+                medium: '🟡', 
+                low: '🟢'
             };
             
-            tr.innerHTML = `
-                <td class="px-4 py-4">
-                    <button onclick="playAudio('${audio.fileName}')" class="play-button bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition">
-                        <i data-lucide="play" class="w-4 h-4"></i>
-                    </button>
-                </td>
-                <td class="px-4 py-4">
-                    <div class="text-sm font-medium text-gray-900">${audio.fileName}</div>
-                    <div class="text-sm text-gray-600">時長: ${audio.duration}</div>
-                    <div class="text-sm text-gray-600">大小: ${Math.floor(Math.random() * 5 + 2)}.${Math.floor(Math.random() * 99)}MB</div>
-                </td>
-                <td class="px-4 py-4">
-                    <div class="text-sm text-gray-900">${audio.callTime}</div>
-                    <div class="text-sm text-gray-600">客戶: ${audio.customerName} (${audio.customerId})</div>
-                    <div class="text-sm text-gray-600">通話類型: 保險諮詢</div>
-                </td>
-                <td class="px-4 py-4">
-                    <div class="text-sm font-medium text-gray-900">${audio.agentName}</div>
-                    <div class="text-sm text-gray-600">ID: ${audio.agentId}</div>
-                    <div class="text-sm text-gray-600">建立: ${audio.createdByName}</div>
-                </td>
-                <td class="px-4 py-4">
-                    <div class="flex items-center space-x-2 mb-1">
-                        <span class="text-sm font-medium ${severityColor[audio.severity]}">${severityText[audio.severity]}嚴重度</span>
-                        <span class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-800">-${audio.deduction}分</span>
+            card.innerHTML = `
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <!-- 左側：檔案基本資訊 -->
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <button onclick="playAudio('${audio.fileName}')" class="play-button bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 transition flex-shrink-0">
+                                    <i data-lucide="play" class="w-5 h-5"></i>
+                                </button>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-1">${audio.fileName}</h3>
+                                    <div class="flex items-center space-x-4 text-sm text-gray-600">
+                                        <span class="flex items-center"><i data-lucide="clock" class="w-4 h-4 mr-1"></i>${audio.duration}</span>
+                                        <span class="flex items-center"><i data-lucide="hard-drive" class="w-4 h-4 mr-1"></i>${Math.floor(Math.random() * 5 + 2)}.${Math.floor(Math.random() * 99)}MB</span>
+                                        <span class="flex items-center"><i data-lucide="calendar" class="w-4 h-4 mr-1"></i>${audio.callTime}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 右側：嚴重度標籤 -->
+                        <div class="flex items-center space-x-2">
+                            <span class="px-3 py-1 text-sm font-medium rounded-full border ${severityColor[audio.severity]}">
+                                ${severityIcon[audio.severity]} ${severityText[audio.severity]}嚴重度
+                            </span>
+                            <span class="px-2 py-1 text-xs font-bold rounded-full bg-red-100 text-red-800">-${audio.deduction}分</span>
+                        </div>
                     </div>
-                    <div class="text-sm text-gray-600">指標: ${currentIssueType}</div>
-                    <div class="text-sm text-gray-600">時間點: ${Math.floor(Math.random() * 3 + 1)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}</div>
-                </td>
-                <td class="px-4 py-4">
-                    <div class="flex flex-col space-y-1">
-                        <button onclick="showSttModal('${audio.fileName}')" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                            查看STT
-                        </button>
-                        <button onclick="downloadAudio('${audio.fileName}')" class="text-green-600 hover:text-green-700 text-sm font-medium">
-                            下載音檔
-                        </button>
-                        <button onclick="addToTraining('${audio.fileName}')" class="text-purple-600 hover:text-purple-700 text-sm font-medium">
-                            加入訓練
-                        </button>
+                    
+                    <!-- 詳細資訊卡片 -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <!-- 客戶資訊 -->
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                <i data-lucide="user" class="w-4 h-4 mr-2"></i>客戶資訊
+                            </h4>
+                            <div class="space-y-1 text-sm">
+                                <div class="text-gray-900 font-medium">${audio.customerName}</div>
+                                <div class="text-gray-600">ID: ${audio.customerId}</div>
+                                <div class="text-gray-600">通話類型: 保險諮詢</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 客服資訊 -->
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                <i data-lucide="headphones" class="w-4 h-4 mr-2"></i>客服資訊
+                            </h4>
+                            <div class="space-y-1 text-sm">
+                                <div class="text-gray-900 font-medium">${audio.agentName}</div>
+                                <div class="text-gray-600">ID: ${audio.agentId}</div>
+                                <div class="text-gray-600">建立: ${audio.createdByName}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 扣分詳情 -->
+                        <div class="bg-yellow-50 rounded-lg p-4">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                <i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i>扣分詳情
+                            </h4>
+                            <div class="space-y-1 text-sm">
+                                <div class="text-gray-900 font-medium">指標: ${currentIssueType}</div>
+                                <div class="text-gray-600">時間點: ${Math.floor(Math.random() * 3 + 1)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}</div>
+                                <div class="text-gray-600">影響: 服務品質</div>
+                            </div>
+                        </div>
                     </div>
-                </td>
+                    
+                    <!-- 操作按鈕 -->
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                        <div class="flex space-x-3">
+                            <button onclick="showSttModal('${audio.fileName}')" class="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
+                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i>查看STT
+                            </button>
+                            <button onclick="downloadAudio('${audio.fileName}')" class="inline-flex items-center px-3 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition">
+                                <i data-lucide="download" class="w-4 h-4 mr-2"></i>下載音檔
+                            </button>
+                            <button onclick="addToTraining('${audio.fileName}')" class="inline-flex items-center px-3 py-2 text-sm font-medium text-purple-600 bg-purple-50 rounded-lg hover:bg-purple-100 transition">
+                                <i data-lucide="brain" class="w-4 h-4 mr-2"></i>加入訓練
+                            </button>
+                        </div>
+                        
+                        <!-- 快速資訊 -->
+                        <div class="text-xs text-gray-500">
+                            #${String(index + 1).padStart(3, '0')}
+                        </div>
+                    </div>
+                </div>
             `;
             
-            return tr;
+            return card;
         }
 
         // Setup pagination
