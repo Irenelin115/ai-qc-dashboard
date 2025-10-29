@@ -1914,14 +1914,11 @@
                     initQualityChart();
                     initTrendChart();
                     break;
-                case 'quality':
-                    initComplianceChart();
-                    break;
-                case 'compliance':
-                    initComplianceDetailChart();
-                    break;
-                case 'emotion':
-                    initEmotionChart();
+                case 'analysis':
+                    // Initialize all three charts for the integrated analysis tab
+                    initComplianceChart();      // Quality analysis chart
+                    initComplianceDetailChart(); // Compliance detection chart
+                    initEmotionChart();         // Emotion analysis chart
                     break;
                 case 'tags':
                     initTagsPage();
