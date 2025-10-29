@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI質檢系統儀表板</title>
+    <title>SysTalk.Audit儀表板</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
@@ -288,7 +288,7 @@
     <header class="bg-white shadow-sm border-b">
         <div class="max-w-7xl mx-auto px-6 py-4">
             <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-bold text-gray-900">AI質檢系統儀表板</h1>
+                <h1 class="text-2xl font-bold text-gray-900">SysTalk.Audit儀表板</h1>
                 <div class="flex items-center space-x-4">
                     <span class="text-sm text-gray-600" id="lastUpdate">最後更新: 2025/10/17 14:30</span>
                     <button onclick="exportReport()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
@@ -2936,7 +2936,7 @@
         function updatePageTitle(timeRangeText) {
             const titleElement = document.querySelector('h1');
             if (titleElement) {
-                const baseTitle = 'AI質檢系統儀表板';
+                const baseTitle = 'SysTalk.Audit儀表板';
                 titleElement.textContent = `${baseTitle} - ${timeRangeText}`;
             }
         }
@@ -3363,7 +3363,7 @@
         function generateExportContent() {
             const date = new Date().toLocaleDateString('zh-TW');
             return `
-AI質檢系統 - 品質改善方案
+SysTalk.Audit - 品質改善方案
 生成日期: ${date}
 
 === 問題識別 ===
@@ -3378,7 +3378,7 @@ ${document.getElementById('implementationPlan').innerText}
 === 預期改善效果 ===
 ${document.getElementById('expectedResults').innerText}
 
-本方案由AI質檢系統自動生成，建議結合實際情況進行調整。
+本方案由SysTalk.Audit系統自動生成，建議結合實際情況進行調整。
             `.trim();
         }
 
