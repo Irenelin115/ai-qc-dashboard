@@ -2004,28 +2004,70 @@
             });
         }
 
-        function initComplianceChart() {
-            if (charts.compliance) {
-                charts.compliance.destroy();
-            }
-            const ctx = document.getElementById('complianceChart').getContext('2d');
-            charts.compliance = new Chart(ctx, {
-                type: 'bar',
-                data: complianceData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            stacked: true
-                        },
-                        y: {
-                            stacked: true
+
+function initComplianceChart() {
+    if (charts.compliance) {
+        charts.compliance.destroy();
+    }
+    const ctx = document.getElementById('complianceChart').getContext('2d');
+    
+    charts.compliance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: complianceData.labels,
+            datasets: [
+                {
+                    label: '合格',
+                    data: complianceData.datasets[0].data,
+                    backgroundColor: '#10b981'
+                },
+                {
+                    label: '不合格',
+                    data: complianceData.datasets[1].data,
+                    backgroundColor: '#ef4444'
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'y', // 水平呈現
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: true,
+                    title: {
+                        display: true,
+                        text: '通數'
+                    }
+                },
+                y: {
+                    stacked: true
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed.x !== undefined ? context.parsed.x : context.parsed.y;
+                            const total = complianceData.datasets.reduce((sum, ds) => sum + ds.data[context.dataIndex], 0);
+                            const pct = total ? ((value / total) * 100).toFixed(1) : '0.0';
+                            return `${context.dataset.label}: ${value} (${pct}%)`;
                         }
                     }
+                },
+                legend: {
+                    position: 'bottom'
                 }
-            });
+            },
+            onClick: (evt, elements) => {
+                if (!elements || !elements.length) return;
+                const el = elements[0];
+                const label = charts.compliance.data.labels[el.index];
+                showComplianceDetail(label);
+            }
         }
+    });
+}
 
         function initComplianceDetailChart() {
             if (charts.complianceDetail) {
@@ -2891,7 +2933,193 @@
 
         function closeCustomDateModal() {
             document.getElementById('customDateModal').classList.add('hidden');
-            // 重置下拉選單到之前的值
+            // 重置下拉選單            // ...existing code...
+                    function initComplianceChart() {
+    if (charts.compliance) {
+        charts.compliance.destroy();
+    }
+    const ctx = document.getElementById('complianceChart').getContext('2d');
+    
+    // 使用水平堆疊長條，適合多個評分項目並支援點擊 drill-down
+    charts.compliance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: complianceData.labels,
+            datasets: [
+                {
+                    label: '合格',
+                    data: complianceData.datasets[0].data,
+                    backgroundColor: '#10b981'
+                },
+                {
+                    label: '不合格',
+                    data: complianceData.datasets[1].data,
+                    backgroundColor: '#ef4444'
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'y', // 水平呈現
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: true,
+                    title: {
+                        display: true,
+                        text: '通數'
+                    }
+                },
+                y: {
+                    stacked: true
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed.x !== undefined ? context.parsed.x : context.parsed.y;
+                            const total = complianceData.datasets.reduce((sum, ds) => sum + ds.data[context.dataIndex], 0);
+                            const pct = total ? ((value / total) * 100).toFixed(1) : '0.0';
+                            return `${context.dataset.label}: ${value} (${pct}%)`;
+                        }
+                    }
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            onClick: (evt, elements) => {
+                if (!elements || !elements.length) return;
+                const el = elements[0];
+                const label = charts.compliance.data.labels[el.index];
+                showComplianceDetail(label);
+            }
+        }
+    });
+}
+            
+                    // Drill-down handler：嘗試以標籤對應到音檔明細並切換到音檔明細頁
+                    function showComplianceDetail(label) {
+                        // 直接對應 audioDataByIssue 的 key
+                        if (audioDataByIssue[label]) {
+                            showAudioDetail(label);
+                            return;
+                        }
+            
+                        // 嘗試以包含關鍵字方式匹配
+                        const foundKey = Object.keys(audioDataByIssue).find(k => k.includes(label) || label.includes(k));
+                        if (foundKey) {
+                            showAudioDetail(foundKey);
+                            return;
+                        }
+            
+                        // 嘗試以 topIssues 的 category 去找到相關 issue
+                        const byCategory = allTopIssues.find(item => item.category === label);
+                        if (byCategory && audioDataByIssue[byCategory.issue]) {
+                            showAudioDetail(byCategory.issue);
+                            return;
+                        }
+            
+                        // 若找不到，顯示提示並切換到高頻指標列表
+                        alert(`找不到與「${label}」直接對應的明細，將顯示高頻指標列表。`);
+                        setActiveTab('overview');
+                        // 若需要可改為打開 analysis tab 或顯示一個 modal
+                    }
+            // ...existing code...            // ...existing code...
+                    function initComplianceChart() {
+                        if (charts.compliance) {
+                            charts.compliance.destroy();
+                        }
+                        const ctx = document.getElementById('complianceChart').getContext('2d');
+            
+                        // 使用水平堆疊長條，適合多個評分項目並支援點擊 drill-down
+                        charts.compliance = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: complianceData.labels,
+                                datasets: [
+                                    {
+                                        label: '合格',
+                                        data: complianceData.datasets[0].data,
+                                        backgroundColor: '#10b981'
+                                    },
+                                    {
+                                        label: '不合格',
+                                        data: complianceData.datasets[1].data,
+                                        backgroundColor: '#ef4444'
+                                    }
+                                ]
+                            },
+                            options: {
+                                indexAxis: 'y', // 水平呈現
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    x: {
+                                        stacked: true,
+                                        title: {
+                                            display: true,
+                                            text: '通數'
+                                        }
+                                    },
+                                    y: {
+                                        stacked: true
+                                    }
+                                },
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                const value = context.parsed.x !== undefined ? context.parsed.x : context.parsed.y;
+                                                const total = complianceData.datasets.reduce((sum, ds) => sum + ds.data[context.dataIndex], 0);
+                                                const pct = total ? ((value / total) * 100).toFixed(1) : '0.0';
+                                                return `${context.dataset.label}: ${value} (${pct}%)`;
+                                            }
+                                        }
+                                    },
+                                    legend: {
+                                        position: 'bottom'
+                                    }
+                                },
+                                onClick: (evt, elements) => {
+                                    if (!elements || !elements.length) return;
+                                    const el = elements[0];
+                                    const label = charts.compliance.data.labels[el.index];
+                                    showComplianceDetail(label);
+                                }
+                            }
+                        });
+                    }
+            
+                    // Drill-down handler：嘗試以標籤對應到音檔明細並切換到音檔明細頁
+                    function showComplianceDetail(label) {
+                        // 直接對應 audioDataByIssue 的 key
+                        if (audioDataByIssue[label]) {
+                            showAudioDetail(label);
+                            return;
+                        }
+            
+                        // 嘗試以包含關鍵字方式匹配
+                        const foundKey = Object.keys(audioDataByIssue).find(k => k.includes(label) || label.includes(k));
+                        if (foundKey) {
+                            showAudioDetail(foundKey);
+                            return;
+                        }
+            
+                        // 嘗試以 topIssues 的 category 去找到相關 issue
+                        const byCategory = allTopIssues.find(item => item.category === label);
+                        if (byCategory && audioDataByIssue[byCategory.issue]) {
+                            showAudioDetail(byCategory.issue);
+                            return;
+                        }
+            
+                        // 若找不到，顯示提示並切換到高頻指標列表
+                        alert(`找不到與「${label}」直接對應的明細，將顯示高頻指標列表。`);
+                        setActiveTab('overview');
+                        // 若需要可改為打開 analysis tab 或顯示一個 modal
+                    }
+            // ...existing code...到之前的值
             document.getElementById('overviewTimeRange').value = 'thisweek';
         }
 
