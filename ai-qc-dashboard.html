@@ -572,9 +572,86 @@
         <!-- Quality Tab -->
         <div id="quality-content" class="space-y-6" style="display: none;">
             <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">評分項目明細</h3>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">評分項目明細</h3>
+                    <button onclick="generateImprovementPlan()" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-blue-700 transition flex items-center space-x-2">
+                        <i data-lucide="brain" class="w-4 h-4"></i>
+                        <span>AI生成改善方案</span>
+                    </button>
+                </div>
                 <div class="chart-container">
                     <canvas id="complianceChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- 改善方案區域 -->
+            <div id="improvementPlanSection" class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg shadow p-6 border border-blue-200" style="display: none;">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <i data-lucide="lightbulb" class="w-5 h-5 mr-2 text-yellow-500"></i>
+                        AI智能改善方案
+                    </h3>
+                    <div class="flex space-x-2">
+                        <button onclick="exportImprovementPlan()" class="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition">
+                            <i data-lucide="download" class="w-4 h-4 inline mr-1"></i>匯出方案
+                        </button>
+                        <button onclick="closeImprovementPlan()" class="text-sm bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600 transition">
+                            <i data-lucide="x" class="w-4 h-4 inline mr-1"></i>關閉
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 載入狀態 -->
+                <div id="improvementLoading" class="text-center py-8">
+                    <div class="inline-flex items-center">
+                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mr-3"></div>
+                        <span class="text-gray-600">AI正在分析品質數據並生成改善方案...</span>
+                    </div>
+                </div>
+                
+                <!-- 改善方案內容 -->
+                <div id="improvementContent" style="display: none;">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- 問題分析 -->
+                        <div class="bg-white rounded-lg p-5 border border-red-200">
+                            <h4 class="font-semibold text-red-700 mb-3 flex items-center">
+                                <i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i>問題識別
+                            </h4>
+                            <div id="problemAnalysis" class="space-y-3 text-sm">
+                                <!-- 問題分析內容將由JavaScript填入 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 改善建議 -->
+                        <div class="bg-white rounded-lg p-5 border border-green-200">
+                            <h4 class="font-semibold text-green-700 mb-3 flex items-center">
+                                <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>改善建議
+                            </h4>
+                            <div id="improvementSuggestions" class="space-y-3 text-sm">
+                                <!-- 改善建議內容將由JavaScript填入 -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 實施計畫 -->
+                    <div class="mt-6 bg-white rounded-lg p-5 border border-blue-200">
+                        <h4 class="font-semibold text-blue-700 mb-3 flex items-center">
+                            <i data-lucide="calendar" class="w-4 h-4 mr-2"></i>30天實施計畫
+                        </h4>
+                        <div id="implementationPlan" class="space-y-4">
+                            <!-- 實施計畫內容將由JavaScript填入 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 預期效果 -->
+                    <div class="mt-6 bg-white rounded-lg p-5 border border-purple-200">
+                        <h4 class="font-semibold text-purple-700 mb-3 flex items-center">
+                            <i data-lucide="trending-up" class="w-4 h-4 mr-2"></i>預期改善效果
+                        </h4>
+                        <div id="expectedResults" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- 預期效果內容將由JavaScript填入 -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -3076,6 +3153,233 @@
             
             // Update time every minute
             setInterval(updateLastUpdateTime, 60000);
+        }
+
+        // AI Improvement Plan Functions
+        function generateImprovementPlan() {
+            // 顯示改善方案區域
+            document.getElementById('improvementPlanSection').style.display = 'block';
+            document.getElementById('improvementLoading').style.display = 'block';
+            document.getElementById('improvementContent').style.display = 'none';
+            
+            // 滾動到改善方案區域
+            document.getElementById('improvementPlanSection').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+            
+            // 模擬AI分析過程
+            setTimeout(() => {
+                generateImprovementContent();
+                document.getElementById('improvementLoading').style.display = 'none';
+                document.getElementById('improvementContent').style.display = 'block';
+                lucide.createIcons(); // 重新初始化圖標
+            }, 3000);
+        }
+
+        function generateImprovementContent() {
+            // 根據complianceData分析問題
+            const problems = analyzeQualityProblems();
+            const suggestions = generateSuggestions(problems);
+            const plan = generateImplementationPlan(problems);
+            const results = generateExpectedResults(problems);
+            
+            // 填入問題分析
+            document.getElementById('problemAnalysis').innerHTML = problems.map(problem => 
+                `<div class="flex items-start space-x-2">
+                    <div class="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                        <div class="font-medium text-gray-900">${problem.title}</div>
+                        <div class="text-gray-600">${problem.description}</div>
+                        <div class="text-red-600 text-xs mt-1">影響度: ${problem.impact}</div>
+                    </div>
+                </div>`
+            ).join('');
+            
+            // 填入改善建議
+            document.getElementById('improvementSuggestions').innerHTML = suggestions.map(suggestion => 
+                `<div class="flex items-start space-x-2">
+                    <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                        <div class="font-medium text-gray-900">${suggestion.title}</div>
+                        <div class="text-gray-600">${suggestion.description}</div>
+                        <div class="text-green-600 text-xs mt-1">優先級: ${suggestion.priority}</div>
+                    </div>
+                </div>`
+            ).join('');
+            
+            // 填入實施計畫
+            document.getElementById('implementationPlan').innerHTML = plan.map((phase, index) => 
+                `<div class="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
+                    <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        ${index + 1}
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-900">${phase.title}</div>
+                        <div class="text-sm text-gray-600">${phase.description}</div>
+                        <div class="text-xs text-blue-600 mt-1">時程: ${phase.timeline}</div>
+                    </div>
+                </div>`
+            ).join('');
+            
+            // 填入預期效果
+            document.getElementById('expectedResults').innerHTML = results.map(result => 
+                `<div class="text-center p-4 bg-white rounded-lg border">
+                    <div class="text-2xl font-bold ${result.color} mb-1">${result.value}</div>
+                    <div class="text-sm text-gray-600">${result.title}</div>
+                    <div class="text-xs text-gray-500 mt-1">${result.timeframe}</div>
+                </div>`
+            ).join('');
+        }
+
+        function analyzeQualityProblems() {
+            const data = complianceData;
+            const problems = [];
+            
+            // 分析各項目的失敗率
+            data.labels.forEach((label, index) => {
+                const passed = data.datasets[0].data[index];
+                const failed = data.datasets[1].data[index];
+                const total = passed + failed;
+                const failureRate = (failed / total * 100).toFixed(1);
+                
+                if (failed > 80) { // 不合格數量較高
+                    problems.push({
+                        title: `${label}環節失敗率偏高`,
+                        description: `不合格率達${failureRate}%，有${failed}個案例需要改善`,
+                        impact: failureRate > 12 ? '高' : '中'
+                    });
+                }
+            });
+            
+            return problems;
+        }
+
+        function generateSuggestions(problems) {
+            const suggestionMap = {
+                '開場白': {
+                    title: '標準化開場白流程',
+                    description: '建立標準開場白話術庫，包含問候語、自我介紹、服務說明',
+                    priority: '高'
+                },
+                '身份驗證': {
+                    title: '簡化身份驗證流程',
+                    description: '優化驗證步驟，提供快速驗證工具，減少遺漏風險',
+                    priority: '高'
+                },
+                '問題確認': {
+                    title: '建立問題確認檢核表',
+                    description: '設計標準化問題確認流程，確保客戶需求準確理解',
+                    priority: '中'
+                },
+                '解決方案': {
+                    title: '加強解決方案培訓',
+                    description: '建立解決方案資料庫，提供常見問題處理指南',
+                    priority: '高'
+                },
+                '結束語': {
+                    title: '推廣結束語最佳實務',
+                    description: '將現有良好做法標準化，推廣到其他環節',
+                    priority: '低'
+                }
+            };
+            
+            return problems.map(problem => {
+                const category = problem.title.split('環節')[0];
+                return suggestionMap[category] || {
+                    title: '通用品質改善',
+                    description: '強化培訓並建立標準作業程序',
+                    priority: '中'
+                };
+            });
+        }
+
+        function generateImplementationPlan(problems) {
+            return [
+                {
+                    title: '第一週：問題分析與標準制定',
+                    description: '深入分析品質問題根因，制定標準作業流程',
+                    timeline: '1-7天'
+                },
+                {
+                    title: '第二週：培訓計畫設計',
+                    description: '針對問題環節設計專項培訓課程和教材',
+                    timeline: '8-14天'
+                },
+                {
+                    title: '第三週：試點實施',
+                    description: '選擇部分團隊進行試點，收集改善數據',
+                    timeline: '15-21天'
+                },
+                {
+                    title: '第四週：全面推廣',
+                    description: '將成功做法推廣到全部團隊，建立監控機制',
+                    timeline: '22-30天'
+                }
+            ];
+        }
+
+        function generateExpectedResults(problems) {
+            const avgImprovement = problems.length > 0 ? 8 + Math.floor(Math.random() * 7) : 10;
+            return [
+                {
+                    title: '整體品質提升',
+                    value: `+${avgImprovement}%`,
+                    color: 'text-green-600',
+                    timeframe: '30天內'
+                },
+                {
+                    title: '客戶滿意度',
+                    value: `+${Math.floor(avgImprovement * 0.8)}%`,
+                    color: 'text-blue-600',
+                    timeframe: '實施後'
+                },
+                {
+                    title: '訓練成本節省',
+                    value: `$${Math.floor(avgImprovement * 1.2)}K`,
+                    color: 'text-purple-600',
+                    timeframe: '每月'
+                }
+            ];
+        }
+
+        function closeImprovementPlan() {
+            document.getElementById('improvementPlanSection').style.display = 'none';
+        }
+
+        function exportImprovementPlan() {
+            const content = generateExportContent();
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `品質改善方案_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function generateExportContent() {
+            const date = new Date().toLocaleDateString('zh-TW');
+            return `
+AI質檢系統 - 品質改善方案
+生成日期: ${date}
+
+=== 問題識別 ===
+${document.getElementById('problemAnalysis').innerText}
+
+=== 改善建議 ===
+${document.getElementById('improvementSuggestions').innerText}
+
+=== 30天實施計畫 ===
+${document.getElementById('implementationPlan').innerText}
+
+=== 預期改善效果 ===
+${document.getElementById('expectedResults').innerText}
+
+本方案由AI質檢系統自動生成，建議結合實際情況進行調整。
+            `.trim();
         }
 
         // Initialize when DOM is loaded
