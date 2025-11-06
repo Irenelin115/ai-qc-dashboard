@@ -23,7 +23,8 @@
         }
         .chart-container {
             position: relative;
-            height: 300px;
+            height: 350px;
+            width: 100%;
         }
         .alert-item {
             animation: slideIn 0.5s ease-out;
@@ -404,7 +405,7 @@
                 <div class="bg-white rounded-lg shadow p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">品質分數分布</h3>
                     <div class="chart-container">
-                        <canvas id="qualityChart"></canvas>
+                        <div id="qualityChart" style="width: 100%; height: 100%;"></div>
                     </div>
                 </div>
 
@@ -412,7 +413,7 @@
                 <div class="bg-white rounded-lg shadow p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">品質趨勢 (近7天)</h3>
                     <div class="chart-container">
-                        <canvas id="trendChart"></canvas>
+                        <div id="trendChart" style="width: 100%; height: 100%;"></div>
                     </div>
                     <div class="mt-4 grid grid-cols-4 gap-4 pt-4 border-t">
                         <div>
@@ -579,7 +580,7 @@
                             </button>
                         </div>
                         <div class="chart-container">
-                            <canvas id="complianceChart"></canvas>
+                            <div id="complianceChart" style="width: 100%; height: 100%;"></div>
                         </div>
                     </div>
                     
@@ -738,7 +739,7 @@
                     <div class="bg-white rounded-lg shadow p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">合規項目檢測</h3>
                         <div class="chart-container">
-                            <canvas id="complianceDetailChart"></canvas>
+                            <div id="complianceDetailChart" style="width: 100%; height: 100%;"></div>
                         </div>
                     </div>
                     <div class="bg-white rounded-lg shadow p-6">
@@ -781,7 +782,7 @@
                     <div class="bg-white rounded-lg shadow p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">客戶情緒分布</h3>
                         <div class="chart-container">
-                            <canvas id="emotionChart"></canvas>
+                            <div id="emotionChart" style="width: 100%; height: 100%;"></div>
                         </div>
                     </div>
                     <div class="bg-white rounded-lg shadow p-6">
@@ -1143,7 +1144,7 @@
                 <div class="bg-white rounded-lg shadow p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">客戶意圖分布</h3>
                     <div class="chart-container">
-                        <canvas id="intentChart"></canvas>
+                        <div id="intentChart" style="width: 100%; height: 100%;"></div>
                     </div>
                 </div>
             </div>
@@ -1160,7 +1161,7 @@
                 <div class="bg-white rounded-lg shadow p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">標籤趨勢分析 (近7天)</h3>
                     <div class="chart-container">
-                        <canvas id="tagTrendChart"></canvas>
+                        <div id="tagTrendChart" style="width: 100%; height: 100%;"></div>
                     </div>
                 </div>
             </div>
@@ -2024,6 +2025,11 @@
             };
             
             charts.quality.setOption(option);
+            
+            // 確保圖表正確響應容器大小變化
+            setTimeout(() => {
+                charts.quality.resize();
+            }, 100);
         }
 
         function initTrendChart() {
@@ -2135,6 +2141,11 @@
             };
             
             charts.trend.setOption(option);
+            
+            // 確保圖表正確響應容器大小變化
+            setTimeout(() => {
+                charts.trend.resize();
+            }, 100);
         }
 
 
@@ -2215,6 +2226,11 @@ function initComplianceChart() {
     });
     
     charts.compliance.setOption(option);
+    
+    // 確保圖表正確響應容器大小變化
+    setTimeout(() => {
+        charts.compliance.resize();
+    }, 100);
 }
 
         function initComplianceDetailChart() {
@@ -2271,6 +2287,11 @@ function initComplianceChart() {
             };
             
             charts.complianceDetail.setOption(option);
+            
+            // 確保圖表正確響應容器大小變化
+            setTimeout(() => {
+                charts.complianceDetail.resize();
+            }, 100);
         }
 
         function initEmotionChart() {
@@ -2328,6 +2349,11 @@ function initComplianceChart() {
             };
             
             charts.emotion.setOption(option);
+            
+            // 確保圖表正確響應容器大小變化
+            setTimeout(() => {
+                charts.emotion.resize();
+            }, 100);
         }
 
         // 更新 TOP 議題顯示數量
@@ -3002,6 +3028,11 @@ function initComplianceChart() {
             };
             
             charts.intent.setOption(option);
+            
+            // 確保圖表正確響應容器大小變化
+            setTimeout(() => {
+                charts.intent.resize();
+            }, 100);
         }
 
         function initTagTrendChart() {
@@ -3069,6 +3100,11 @@ function initComplianceChart() {
             };
             
             charts.tagTrend.setOption(option);
+            
+            // 確保圖表正確響應容器大小變化
+            setTimeout(() => {
+                charts.tagTrend.resize();
+            }, 100);
         }
 
         function exportTagReport() {
