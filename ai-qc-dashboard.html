@@ -1847,14 +1847,26 @@
             });
 
             // Show selected content
-            document.getElementById(tab + '-content').style.display = 'block';
+            const selectedContent = document.getElementById(tab + '-content');
+            if (selectedContent) {
+                selectedContent.style.display = 'block';
+            } else {
+                console.warn(`Content element not found: ${tab}-content`);
+            }
 
             // Update tab buttons
             document.querySelectorAll('.tab-button').forEach(button => {
-                button.className = 'tab-button py-4 px-2 border-b-2 font-medium text-sm transition border-transparent text-gray-600 hover:text-gray-900';
+                if (button) {
+                    button.className = 'tab-button py-4 px-2 border-b-2 font-medium text-sm transition border-transparent text-gray-600 hover:text-gray-900';
+                }
             });
 
-            document.getElementById('tab-' + tab).className = 'tab-button py-4 px-2 border-b-2 font-medium text-sm transition border-blue-600 text-blue-600';
+            const activeTabButton = document.getElementById('tab-' + tab);
+            if (activeTabButton) {
+                activeTabButton.className = 'tab-button py-4 px-2 border-b-2 font-medium text-sm transition border-blue-600 text-blue-600';
+            } else {
+                console.warn(`Tab button not found: tab-${tab}`);
+            }
 
             activeTab = tab;
 
@@ -2312,15 +2324,27 @@ function initComplianceChart() {
 
         // 更新 TOP 議題顯示數量
         function updateTopIssuesDisplay() {
-            const selectedCount = document.getElementById('topCount').value;
+            const topCountElement = document.getElementById('topCount');
+            if (!topCountElement) {
+                console.warn('topCount element not found');
+                return;
+            }
+            
+            const selectedCount = topCountElement.value;
             
             if (selectedCount === 'all') {
                 topIssues = [...allTopIssues];
-                document.getElementById('topIssuesTitle').textContent = `高頻扣分指標 TOP ${allTopIssues.length}`;
+                const titleElement = document.getElementById('topIssuesTitle');
+                if (titleElement) {
+                    titleElement.textContent = `高頻扣分指標 TOP ${allTopIssues.length}`;
+                }
             } else {
                 const count = parseInt(selectedCount);
                 topIssues = allTopIssues.slice(0, count);
-                document.getElementById('topIssuesTitle').textContent = `高頻扣分指標 TOP ${count}`;
+                const titleElement = document.getElementById('topIssuesTitle');
+                if (titleElement) {
+                    titleElement.textContent = `高頻扣分指標 TOP ${count}`;
+                }
             }
             
             populateTopIssues();
@@ -3612,9 +3636,11 @@ function initComplianceChart() {
             // Update tooltip content in audio detail page if it exists
             const severityElements = document.querySelectorAll('[data-severity-tooltip]');
             severityElements.forEach(element => {
-                const severityType = element.getAttribute('data-severity-tooltip');
-                if (tooltips[severityType]) {
-                    element.setAttribute('title', tooltips[severityType]);
+                if (element && typeof element.getAttribute === 'function') {
+                    const severityType = element.getAttribute('data-severity-tooltip');
+                    if (tooltips[severityType]) {
+                        element.setAttribute('title', tooltips[severityType]);
+                    }
                 }
             });
         }
