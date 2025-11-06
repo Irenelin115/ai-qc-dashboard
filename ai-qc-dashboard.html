@@ -1866,17 +1866,23 @@
         function initChartsForTab(tab) {
             switch(tab) {
                 case 'overview':
-                    initQualityChart();
-                    initTrendChart();
+                    setTimeout(() => {
+                        initQualityChart();
+                        initTrendChart();
+                    }, 100);
                     break;
                 case 'analysis':
-                    // Initialize all three charts for the integrated analysis tab
-                    initComplianceChart();      // Quality analysis chart
-                    initComplianceDetailChart(); // Compliance detection chart
-                    initEmotionChart();         // Emotion analysis chart
+                    // Add delay to ensure containers are visible
+                    setTimeout(() => {
+                        initComplianceChart();      // Quality analysis chart
+                        initComplianceDetailChart(); // Compliance detection chart
+                        initEmotionChart();         // Emotion analysis chart
+                    }, 200);
                     break;
                 case 'tags':
-                    initTagsPage();
+                    setTimeout(() => {
+                        initTagsPage();
+                    }, 100);
                     break;
             }
         }
@@ -2210,6 +2216,13 @@ function initComplianceChart() {
                 charts.emotion.dispose();
             }
             const chartDom = document.getElementById('emotionChart');
+            
+            // 確保容器存在且可見
+            if (!chartDom) {
+                console.error('emotionChart container not found');
+                return;
+            }
+            
             charts.emotion = echarts.init(chartDom);
             
             const option = {
@@ -2261,10 +2274,12 @@ function initComplianceChart() {
             
             charts.emotion.setOption(option);
             
-            // 確保圖表正確響應容器大小變化
+            // 確保圖表正確響應容器大小變化，增加延遲時間
             setTimeout(() => {
-                charts.emotion.resize();
-            }, 100);
+                if (charts.emotion) {
+                    charts.emotion.resize();
+                }
+            }, 200);
         }
 
         // 更新 TOP 議題顯示數量
