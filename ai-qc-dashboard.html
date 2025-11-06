@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SysTalk.Audit儀表板</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
@@ -583,30 +583,73 @@
                         </div>
                     </div>
                     
-                    <!-- 品質指標 -->
+                    <!-- 關鍵營運指標 -->
                     <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">關鍵品質指標</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">關鍵營運指標</h3>
                         <div class="space-y-4">
+                            <!-- 首次解決率 -->
                             <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                                 <div>
-                                    <h4 class="font-semibold text-gray-900">開場白完整度</h4>
-                                    <p class="text-sm text-gray-600">較上週 +2.3%</p>
+                                    <h4 class="font-semibold text-gray-900">首次解決率 (FCR)</h4>
+                                    <p class="text-sm text-gray-600">目標: ≥85% | 較上週 +1.2%</p>
                                 </div>
-                                <div class="text-2xl font-bold text-blue-600">92.8%</div>
+                                <div class="text-2xl font-bold text-blue-600">87.3%</div>
                             </div>
+                            
+                            <!-- 平均通話時長 -->
                             <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                                 <div>
-                                    <h4 class="font-semibold text-gray-900">專業知識準確性</h4>
-                                    <p class="text-sm text-gray-600">較上週 +1.8%</p>
+                                    <h4 class="font-semibold text-gray-900">平均通話時長 (AHT)</h4>
+                                    <p class="text-sm text-gray-600">目標: ≤4分30秒 | 較上週 -0:18</p>
                                 </div>
-                                <div class="text-2xl font-bold text-green-600">88.5%</div>
+                                <div class="text-2xl font-bold text-green-600">4:12</div>
                             </div>
+                            
+                            <!-- 合規通過率 -->
+                            <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">合規通過率</h4>
+                                    <p class="text-sm text-gray-600">目標: ≥95% | 較上週 +0.8%</p>
+                                </div>
+                                <div class="text-2xl font-bold text-purple-600">93.2%</div>
+                            </div>
+                            
+                            <!-- 客戶滿意度 -->
+                            <div class="flex items-center justify-between p-3 bg-indigo-50 rounded-lg">
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">客戶滿意度 (CSAT)</h4>
+                                    <p class="text-sm text-gray-600">目標: ≥4.5分 | 較上週 +0.1</p>
+                                </div>
+                                <div class="text-2xl font-bold text-indigo-600">4.6</div>
+                            </div>
+                            
+                            <!-- 質檢達標率 -->
                             <div class="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
                                 <div>
-                                    <h4 class="font-semibold text-gray-900">問題解決能力</h4>
-                                    <p class="text-sm text-gray-600">較上週 -0.5%</p>
+                                    <h4 class="font-semibold text-gray-900">質檢達標率</h4>
+                                    <p class="text-sm text-gray-600">目標: ≥90% | 較上週 -1.1%</p>
                                 </div>
-                                <div class="text-2xl font-bold text-orange-600">85.2%</div>
+                                <div class="text-2xl font-bold text-orange-600">88.5%</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 風險警示 -->
+                        <div class="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <div class="flex items-start space-x-3">
+                                <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0"></i>
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-red-900 mb-2">需關注指標</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-red-700">合規通過率未達標</span>
+                                            <span class="text-red-600 font-medium">93.2% (目標95%)</span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-red-700">質檢達標率下降</span>
+                                            <span class="text-red-600 font-medium">較上週 -1.1%</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1929,188 +1972,362 @@
         // Chart initialization functions
         function initQualityChart() {
             if (charts.quality) {
-                charts.quality.destroy();
+                charts.quality.dispose();
             }
-            const ctx = document.getElementById('qualityChart').getContext('2d');
-            charts.quality = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: qualityScoreData.map(item => item.name),
-                    datasets: [{
-                        data: qualityScoreData.map(item => item.value),
-                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444']
-                    }]
+            const chartDom = document.getElementById('qualityChart');
+            charts.quality = echarts.init(chartDom);
+            
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
+                legend: {
+                    orient: 'horizontal',
+                    bottom: 'bottom',
+                    data: qualityScoreData.map(item => item.name)
+                },
+                series: [
+                    {
+                        name: '品質分數分布',
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        avoidLabelOverlap: false,
+                        itemStyle: {
+                            borderRadius: 10,
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        },
+                        label: {
+                            show: false,
+                            position: 'center'
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: 20,
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labelLine: {
+                            show: false
+                        },
+                        data: qualityScoreData.map((item, index) => ({
+                            value: item.value,
+                            name: item.name,
+                            itemStyle: {
+                                color: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'][index]
+                            }
+                        }))
                     }
-                }
-            });
+                ]
+            };
+            
+            charts.quality.setOption(option);
         }
 
         function initTrendChart() {
             if (charts.trend) {
-                charts.trend.destroy();
+                charts.trend.dispose();
             }
-            const ctx = document.getElementById('trendChart').getContext('2d');
-            charts.trend = new Chart(ctx, {
-                type: 'line',
-                data: trendData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        intersect: false,
-                        mode: 'index'
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                afterBody: function(context) {
-                                    const dataIndex = context[0].dataIndex;
-                                    const rawData = trendRawData[dataIndex];
-                                    return [
-                                        `中位數: ${rawData.median}分`,
-                                        `質檢通話: ${rawData.calls}通`,
-                                        `Q1-Q3: ${rawData.q1}-${rawData.q3}分`
-                                    ];
-                                }
+            const chartDom = document.getElementById('trendChart');
+            charts.trend = echarts.init(chartDom);
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    formatter: function(params) {
+                        const dataIndex = params[0].dataIndex;
+                        const rawData = trendRawData[dataIndex];
+                        let result = `${params[0].axisValue}<br/>`;
+                        params.forEach(function(item) {
+                            result += `${item.marker}${item.seriesName}: ${item.value}分<br/>`;
+                        });
+                        result += `中位數: ${rawData.median}分<br/>`;
+                        result += `質檢通話: ${rawData.calls}通<br/>`;
+                        result += `Q1-Q3: ${rawData.q1}-${rawData.q3}分`;
+                        return result;
+                    }
+                },
+                legend: {
+                    data: ['平均分數', '中位數'],
+                    top: 'top'
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: trendData.labels,
+                    name: '日期',
+                    nameLocation: 'middle',
+                    nameGap: 25
+                },
+                yAxis: {
+                    type: 'value',
+                    min: 70,
+                    max: 95,
+                    name: '分數',
+                    nameLocation: 'middle',
+                    nameGap: 40
+                },
+                series: [
+                    {
+                        name: '平均分數',
+                        type: 'line',
+                        smooth: true,
+                        data: trendData.datasets[0].data,
+                        lineStyle: {
+                            color: '#3b82f6',
+                            width: 3
+                        },
+                        itemStyle: {
+                            color: '#3b82f6'
+                        },
+                        areaStyle: {
+                            color: {
+                                type: 'linear',
+                                x: 0,
+                                y: 0,
+                                x2: 0,
+                                y2: 1,
+                                colorStops: [{
+                                    offset: 0, color: 'rgba(59, 130, 246, 0.3)'
+                                }, {
+                                    offset: 1, color: 'rgba(59, 130, 246, 0.1)'
+                                }]
                             }
                         }
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            min: 70,
-                            max: 95,
-                            title: {
-                                display: true,
-                                text: '分數'
-                            }
+                    {
+                        name: '中位數',
+                        type: 'line',
+                        smooth: true,
+                        data: trendData.datasets[1].data,
+                        lineStyle: {
+                            color: '#10b981',
+                            width: 2,
+                            type: 'dashed'
                         },
-                        x: {
-                            title: {
-                                display: true,
-                                text: '日期'
+                        itemStyle: {
+                            color: '#10b981'
+                        },
+                        areaStyle: {
+                            color: {
+                                type: 'linear',
+                                x: 0,
+                                y: 0,
+                                x2: 0,
+                                y2: 1,
+                                colorStops: [{
+                                    offset: 0, color: 'rgba(16, 185, 129, 0.3)'
+                                }, {
+                                    offset: 1, color: 'rgba(16, 185, 129, 0.1)'
+                                }]
                             }
                         }
                     }
-                }
-            });
+                ]
+            };
+            
+            charts.trend.setOption(option);
         }
 
 
 function initComplianceChart() {
     if (charts.compliance) {
-        charts.compliance.destroy();
+        charts.compliance.dispose();
     }
-    const ctx = document.getElementById('complianceChart').getContext('2d');
+    const chartDom = document.getElementById('complianceChart');
+    charts.compliance = echarts.init(chartDom);
     
-    charts.compliance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: complianceData.labels,
-            datasets: [
-                {
-                    label: '合格',
-                    data: complianceData.datasets[0].data,
-                    backgroundColor: '#10b981'
-                },
-                {
-                    label: '不合格',
-                    data: complianceData.datasets[1].data,
-                    backgroundColor: '#ef4444'
-                }
-            ]
-        },
-        options: {
-            indexAxis: 'y', // 水平呈現
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    stacked: true,
-                    title: {
-                        display: true,
-                        text: '通數'
-                    }
-                },
-                y: {
-                    stacked: true
-                }
+    const option = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
             },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const value = context.parsed.x !== undefined ? context.parsed.x : context.parsed.y;
-                            const total = complianceData.datasets.reduce((sum, ds) => sum + ds.data[context.dataIndex], 0);
-                            const pct = total ? ((value / total) * 100).toFixed(1) : '0.0';
-                            return `${context.dataset.label}: ${value} (${pct}%)`;
-                        }
-                    }
-                },
-                legend: {
-                    position: 'bottom'
-                }
-            },
-            onClick: (evt, elements) => {
-                if (!elements || !elements.length) return;
-                const el = elements[0];
-                const label = charts.compliance.data.labels[el.index];
-                showComplianceDetail(label);
+            formatter: function(params) {
+                let result = `${params[0].name}<br/>`;
+                let total = 0;
+                params.forEach(param => {
+                    total += param.value;
+                });
+                params.forEach(param => {
+                    const pct = total ? ((param.value / total) * 100).toFixed(1) : '0.0';
+                    result += `${param.marker}${param.seriesName}: ${param.value} (${pct}%)<br/>`;
+                });
+                return result;
             }
+        },
+        legend: {
+            data: ['合格', '不合格'],
+            bottom: 'bottom'
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '15%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'value',
+            name: '通數',
+            nameLocation: 'middle',
+            nameGap: 25
+        },
+        yAxis: {
+            type: 'category',
+            data: complianceData.labels
+        },
+        series: [
+            {
+                name: '合格',
+                type: 'bar',
+                stack: 'total',
+                itemStyle: {
+                    color: '#10b981'
+                },
+                data: complianceData.datasets[0].data
+            },
+            {
+                name: '不合格',
+                type: 'bar',
+                stack: 'total',
+                itemStyle: {
+                    color: '#ef4444'
+                },
+                data: complianceData.datasets[1].data
+            }
+        ]
+    };
+    
+    // 添加點擊事件
+    charts.compliance.on('click', function(params) {
+        if (params.componentType === 'series') {
+            const label = params.name;
+            showComplianceDetail(label);
         }
     });
+    
+    charts.compliance.setOption(option);
 }
 
         function initComplianceDetailChart() {
             if (charts.complianceDetail) {
-                charts.complianceDetail.destroy();
+                charts.complianceDetail.dispose();
             }
-            const ctx = document.getElementById('complianceDetailChart').getContext('2d');
-            charts.complianceDetail = new Chart(ctx, {
-                type: 'bar',
-                data: complianceData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    scales: {
-                        x: {
-                            stacked: true
-                        },
-                        y: {
-                            stacked: true
-                        }
+            const chartDom = document.getElementById('complianceDetailChart');
+            charts.complianceDetail = echarts.init(chartDom);
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
                     }
-                }
-            });
+                },
+                legend: {
+                    data: ['合格', '不合格'],
+                    bottom: 'bottom'
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'value'
+                },
+                yAxis: {
+                    type: 'category',
+                    data: complianceData.labels
+                },
+                series: [
+                    {
+                        name: '合格',
+                        type: 'bar',
+                        stack: 'total',
+                        itemStyle: {
+                            color: '#10b981'
+                        },
+                        data: complianceData.datasets[0].data
+                    },
+                    {
+                        name: '不合格',
+                        type: 'bar',
+                        stack: 'total',
+                        itemStyle: {
+                            color: '#ef4444'
+                        },
+                        data: complianceData.datasets[1].data
+                    }
+                ]
+            };
+            
+            charts.complianceDetail.setOption(option);
         }
 
         function initEmotionChart() {
             if (charts.emotion) {
-                charts.emotion.destroy();
+                charts.emotion.dispose();
             }
-            const ctx = document.getElementById('emotionChart').getContext('2d');
-            charts.emotion = new Chart(ctx, {
-                type: 'pie',
-                data: emotionData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
+            const chartDom = document.getElementById('emotionChart');
+            charts.emotion = echarts.init(chartDom);
+            
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'horizontal',
+                    bottom: 'bottom',
+                    data: emotionData.labels
+                },
+                series: [
+                    {
+                        name: '情緒分布',
+                        type: 'pie',
+                        radius: ['0%', '70%'],
+                        avoidLabelOverlap: false,
+                        itemStyle: {
+                            borderRadius: 10,
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        },
+                        label: {
+                            show: true,
+                            position: 'outside',
+                            formatter: '{b}: {d}%'
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: 20,
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labelLine: {
+                            show: true
+                        },
+                        data: emotionData.labels.map((label, index) => ({
+                            value: emotionData.datasets[0].data[index],
+                            name: label,
+                            itemStyle: {
+                                color: emotionData.datasets[0].backgroundColor[index]
+                            }
+                        }))
                     }
-                }
-            });
+                ]
+            };
+            
+            charts.emotion.setOption(option);
         }
 
         // 更新 TOP 議題顯示數量
@@ -2733,56 +2950,125 @@ function initComplianceChart() {
 
         function initIntentChart() {
             if (charts.intent) {
-                charts.intent.destroy();
+                charts.intent.dispose();
             }
-            const ctx = document.getElementById('intentChart').getContext('2d');
-            charts.intent = new Chart(ctx, {
-                type: 'doughnut',
-                data: intentData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
+            const chartDom = document.getElementById('intentChart');
+            charts.intent = echarts.init(chartDom);
+            
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'horizontal',
+                    bottom: 'bottom',
+                    data: intentData.labels
+                },
+                series: [
+                    {
+                        name: '意圖分析',
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        avoidLabelOverlap: false,
+                        itemStyle: {
+                            borderRadius: 10,
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        },
+                        label: {
+                            show: false,
+                            position: 'center'
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: 20,
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labelLine: {
+                            show: false
+                        },
+                        data: intentData.labels.map((label, index) => ({
+                            value: intentData.datasets[0].data[index],
+                            name: label,
+                            itemStyle: {
+                                color: intentData.datasets[0].backgroundColor[index]
+                            }
+                        }))
                     }
-                }
-            });
+                ]
+            };
+            
+            charts.intent.setOption(option);
         }
 
         function initTagTrendChart() {
             if (charts.tagTrend) {
-                charts.tagTrend.destroy();
+                charts.tagTrend.dispose();
             }
-            const ctx = document.getElementById('tagTrendChart').getContext('2d');
-            charts.tagTrend = new Chart(ctx, {
-                type: 'line',
-                data: tagTrendData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        intersect: false,
-                        mode: 'index'
+            const chartDom = document.getElementById('tagTrendChart');
+            charts.tagTrend = echarts.init(chartDom);
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: tagTrendData.datasets.map(dataset => dataset.label),
+                    top: 'top'
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: tagTrendData.labels,
+                    name: '日期',
+                    nameLocation: 'middle',
+                    nameGap: 25
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '標籤數量',
+                    nameLocation: 'middle',
+                    nameGap: 40
+                },
+                series: tagTrendData.datasets.map(dataset => ({
+                    name: dataset.label,
+                    type: 'line',
+                    smooth: true,
+                    data: dataset.data,
+                    lineStyle: {
+                        color: dataset.borderColor,
+                        width: 3
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: '標籤數量'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: '日期'
-                            }
+                    itemStyle: {
+                        color: dataset.borderColor
+                    },
+                    areaStyle: {
+                        color: {
+                            type: 'linear',
+                            x: 0,
+                            y: 0,
+                            x2: 0,
+                            y2: 1,
+                            colorStops: [{
+                                offset: 0, color: dataset.backgroundColor.replace('0.1', '0.3')
+                            }, {
+                                offset: 1, color: dataset.backgroundColor
+                            }]
                         }
                     }
-                }
-            });
+                }))
+            };
+            
+            charts.tagTrend.setOption(option);
         }
 
         function exportTagReport() {
@@ -2934,70 +3220,8 @@ function initComplianceChart() {
         function closeCustomDateModal() {
             document.getElementById('customDateModal').classList.add('hidden');
             // 重置下拉選單            // ...existing code...
-                    function initComplianceChart() {
-    if (charts.compliance) {
-        charts.compliance.destroy();
-    }
-    const ctx = document.getElementById('complianceChart').getContext('2d');
-    
-    // 使用水平堆疊長條，適合多個評分項目並支援點擊 drill-down
-    charts.compliance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: complianceData.labels,
-            datasets: [
-                {
-                    label: '合格',
-                    data: complianceData.datasets[0].data,
-                    backgroundColor: '#10b981'
-                },
-                {
-                    label: '不合格',
-                    data: complianceData.datasets[1].data,
-                    backgroundColor: '#ef4444'
-                }
-            ]
-        },
-        options: {
-            indexAxis: 'y', // 水平呈現
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    stacked: true,
-                    title: {
-                        display: true,
-                        text: '通數'
-                    }
-                },
-                y: {
-                    stacked: true
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const value = context.parsed.x !== undefined ? context.parsed.x : context.parsed.y;
-                            const total = complianceData.datasets.reduce((sum, ds) => sum + ds.data[context.dataIndex], 0);
-                            const pct = total ? ((value / total) * 100).toFixed(1) : '0.0';
-                            return `${context.dataset.label}: ${value} (${pct}%)`;
-                        }
-                    }
-                },
-                legend: {
-                    position: 'bottom'
-                }
-            },
-            onClick: (evt, elements) => {
-                if (!elements || !elements.length) return;
-                const el = elements[0];
-                const label = charts.compliance.data.labels[el.index];
-                showComplianceDetail(label);
-            }
-        }
-    });
-}
+                    // Call the main ECharts compliance chart function
+                    initComplianceChart();
             
                     // Drill-down handler：嘗試以標籤對應到音檔明細並切換到音檔明細頁
                     function showComplianceDetail(label) {
@@ -3027,70 +3251,8 @@ function initComplianceChart() {
                         // 若需要可改為打開 analysis tab 或顯示一個 modal
                     }
             // ...existing code...            // ...existing code...
-                    function initComplianceChart() {
-                        if (charts.compliance) {
-                            charts.compliance.destroy();
-                        }
-                        const ctx = document.getElementById('complianceChart').getContext('2d');
-            
-                        // 使用水平堆疊長條，適合多個評分項目並支援點擊 drill-down
-                        charts.compliance = new Chart(ctx, {
-                            type: 'bar',
-                            data: {
-                                labels: complianceData.labels,
-                                datasets: [
-                                    {
-                                        label: '合格',
-                                        data: complianceData.datasets[0].data,
-                                        backgroundColor: '#10b981'
-                                    },
-                                    {
-                                        label: '不合格',
-                                        data: complianceData.datasets[1].data,
-                                        backgroundColor: '#ef4444'
-                                    }
-                                ]
-                            },
-                            options: {
-                                indexAxis: 'y', // 水平呈現
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                    x: {
-                                        stacked: true,
-                                        title: {
-                                            display: true,
-                                            text: '通數'
-                                        }
-                                    },
-                                    y: {
-                                        stacked: true
-                                    }
-                                },
-                                plugins: {
-                                    tooltip: {
-                                        callbacks: {
-                                            label: function(context) {
-                                                const value = context.parsed.x !== undefined ? context.parsed.x : context.parsed.y;
-                                                const total = complianceData.datasets.reduce((sum, ds) => sum + ds.data[context.dataIndex], 0);
-                                                const pct = total ? ((value / total) * 100).toFixed(1) : '0.0';
-                                                return `${context.dataset.label}: ${value} (${pct}%)`;
-                                            }
-                                        }
-                                    },
-                                    legend: {
-                                        position: 'bottom'
-                                    }
-                                },
-                                onClick: (evt, elements) => {
-                                    if (!elements || !elements.length) return;
-                                    const el = elements[0];
-                                    const label = charts.compliance.data.labels[el.index];
-                                    showComplianceDetail(label);
-                                }
-                            }
-                        });
-                    }
+                    // Call the main ECharts compliance chart function
+                    initComplianceChart();
             
                     // Drill-down handler：嘗試以標籤對應到音檔明細並切換到音檔明細頁
                     function showComplianceDetail(label) {
