@@ -1864,6 +1864,13 @@
 
         // Initialize charts based on active tab
         function initChartsForTab(tab) {
+            // 確保 ECharts 已載入
+            if (typeof echarts === 'undefined') {
+                console.error('ECharts not available for tab:', tab);
+                setTimeout(() => initChartsForTab(tab), 500);
+                return;
+            }
+            
             switch(tab) {
                 case 'overview':
                     setTimeout(() => {
@@ -1874,10 +1881,11 @@
                 case 'analysis':
                     // Add delay to ensure containers are visible
                     setTimeout(() => {
+                        console.log('Initializing analysis tab charts...');
                         initComplianceChart();      // Quality analysis chart
                         initComplianceDetailChart(); // Compliance detection chart
                         initEmotionChart();         // Emotion analysis chart
-                    }, 200);
+                    }, 300);
                     break;
                 case 'tags':
                     setTimeout(() => {
@@ -2212,6 +2220,13 @@ function initComplianceChart() {
         }
 
         function initEmotionChart() {
+            // 檢查 ECharts 是否已載入
+            if (typeof echarts === 'undefined') {
+                console.error('ECharts not loaded!');
+                setTimeout(initEmotionChart, 500); // 延遲重試
+                return;
+            }
+            
             if (charts.emotion) {
                 charts.emotion.dispose();
             }
@@ -2224,7 +2239,15 @@ function initComplianceChart() {
             }
             
             console.log('Initializing emotion chart...', chartDom);
-            charts.emotion = echarts.init(chartDom);
+            console.log('ECharts version:', echarts.version);
+            
+            try {
+                charts.emotion = echarts.init(chartDom);
+                console.log('ECharts instance created:', charts.emotion);
+            } catch (error) {
+                console.error('Failed to create ECharts instance:', error);
+                return;
+            }
             
             // 使用硬編碼數據確保圖表能顯示
             const emotionChartData = [
@@ -3876,8 +3899,21 @@ ${document.getElementById('expectedResults').innerText}
             `.trim();
         }
 
+        // Ensure ECharts is loaded before initializing dashboard
+        function waitForECharts(callback) {
+            if (typeof echarts !== 'undefined') {
+                console.log('ECharts is ready, version:', echarts.version);
+                callback();
+            } else {
+                console.log('Waiting for ECharts to load...');
+                setTimeout(() => waitForECharts(callback), 100);
+            }
+        }
+        
         // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', initDashboard);
+        document.addEventListener('DOMContentLoaded', () => {
+            waitForECharts(initDashboard);
+        });
     </script>
 </body>
 </html>
