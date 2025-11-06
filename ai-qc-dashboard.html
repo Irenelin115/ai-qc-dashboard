@@ -584,71 +584,25 @@
                         </div>
                     </div>
                     
-                    <!-- 關鍵營運指標 -->
+                    <!-- 不合格排名 -->
                     <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">關鍵營運指標</h3>
-                        <div class="space-y-4">
-                            <!-- 首次解決率 -->
-                            <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                                <div>
-                                    <h4 class="font-semibold text-gray-900">首次解決率 (FCR)</h4>
-                                    <p class="text-sm text-gray-600">目標: ≥85% | 較上週 +1.2%</p>
-                                </div>
-                                <div class="text-2xl font-bold text-blue-600">87.3%</div>
-                            </div>
-                            
-                            <!-- 平均通話時長 -->
-                            <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                                <div>
-                                    <h4 class="font-semibold text-gray-900">平均通話時長 (AHT)</h4>
-                                    <p class="text-sm text-gray-600">目標: ≤4分30秒 | 較上週 -0:18</p>
-                                </div>
-                                <div class="text-2xl font-bold text-green-600">4:12</div>
-                            </div>
-                            
-                            <!-- 合規通過率 -->
-                            <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-                                <div>
-                                    <h4 class="font-semibold text-gray-900">合規通過率</h4>
-                                    <p class="text-sm text-gray-600">目標: ≥95% | 較上週 +0.8%</p>
-                                </div>
-                                <div class="text-2xl font-bold text-purple-600">93.2%</div>
-                            </div>
-                            
-                            <!-- 客戶滿意度 -->
-                            <div class="flex items-center justify-between p-3 bg-indigo-50 rounded-lg">
-                                <div>
-                                    <h4 class="font-semibold text-gray-900">客戶滿意度 (CSAT)</h4>
-                                    <p class="text-sm text-gray-600">目標: ≥4.5分 | 較上週 +0.1</p>
-                                </div>
-                                <div class="text-2xl font-bold text-indigo-600">4.6</div>
-                            </div>
-                            
-                            <!-- 質檢達標率 -->
-                            <div class="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
-                                <div>
-                                    <h4 class="font-semibold text-gray-900">質檢達標率</h4>
-                                    <p class="text-sm text-gray-600">目標: ≥90% | 較上週 -1.1%</p>
-                                </div>
-                                <div class="text-2xl font-bold text-orange-600">88.5%</div>
-                            </div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">不合格排名</h3>
+                            <span class="text-xs text-gray-500">按不合格率排序</span>
                         </div>
                         
-                        <!-- 風險警示 -->
-                        <div class="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div class="space-y-3" id="failureRankingList">
+                            <!-- 排名項目將由 JavaScript 動態生成 -->
+                        </div>
+                        
+                        <!-- 改善建議 -->
+                        <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                             <div class="flex items-start space-x-3">
-                                <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0"></i>
+                                <i data-lucide="lightbulb" class="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0"></i>
                                 <div class="flex-1">
-                                    <h4 class="font-semibold text-red-900 mb-2">需關注指標</h4>
-                                    <div class="space-y-2 text-sm">
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-red-700">合規通過率未達標</span>
-                                            <span class="text-red-600 font-medium">93.2% (目標95%)</span>
-                                        </div>
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-red-700">質檢達標率下降</span>
-                                            <span class="text-red-600 font-medium">較上週 -1.1%</span>
-                                        </div>
+                                    <h4 class="font-semibold text-yellow-900 mb-2">改善重點</h4>
+                                    <div class="space-y-1 text-sm" id="improvementSuggestions">
+                                        <!-- 改善建議將由 JavaScript 動態生成 -->
                                     </div>
                                 </div>
                             </div>
@@ -2565,6 +2519,106 @@ function initComplianceChart() {
             }
         }
 
+        // Calculate and update failure ranking
+        function updateFailureRanking() {
+            // 計算各項目的不合格率並排序
+            const failureData = complianceData.labels.map((label, index) => {
+                const passed = complianceData.datasets[0].data[index];
+                const failed = complianceData.datasets[1].data[index];
+                const total = passed + failed;
+                const failureRate = ((failed / total) * 100).toFixed(1);
+                
+                return {
+                    label: label,
+                    passed: passed,
+                    failed: failed,
+                    total: total,
+                    failureRate: parseFloat(failureRate),
+                    failureRateText: failureRate + '%'
+                };
+            });
+            
+            // 按不合格率排序（從高到低）
+            failureData.sort((a, b) => b.failureRate - a.failureRate);
+            
+            // 生成排名列表HTML
+            const rankingListElement = document.getElementById('failureRankingList');
+            if (rankingListElement) {
+                rankingListElement.innerHTML = failureData.map((item, index) => {
+                    const rankNumber = index + 1;
+                    const severityClass = getSeverityClass(item.failureRate);
+                    const iconColor = getSeverityIconColor(item.failureRate);
+                    
+                    return `
+                        <div class="flex items-center justify-between p-3 ${severityClass.bg} border ${severityClass.border} rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex items-center justify-center w-6 h-6 bg-white rounded-full text-xs font-bold ${severityClass.text}">
+                                    ${rankNumber}
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">${item.label}</h4>
+                                    <p class="text-xs text-gray-600">${item.failed}/${item.total} 案件不合格</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-lg font-bold ${severityClass.text}">${item.failureRateText}</div>
+                                <i data-lucide="trending-${item.failureRate > 10 ? 'up' : 'down'}" class="w-4 h-4 ${iconColor} mt-1"></i>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            // 生成改善建議
+            updateImprovementSuggestions(failureData);
+        }
+
+        // Get severity styling based on failure rate
+        function getSeverityClass(failureRate) {
+            if (failureRate >= 12) {
+                return {
+                    bg: 'bg-red-50',
+                    border: 'border-red-200',
+                    text: 'text-red-600'
+                };
+            } else if (failureRate >= 8) {
+                return {
+                    bg: 'bg-orange-50',
+                    border: 'border-orange-200',
+                    text: 'text-orange-600'
+                };
+            } else {
+                return {
+                    bg: 'bg-yellow-50',
+                    border: 'border-yellow-200',
+                    text: 'text-yellow-600'
+                };
+            }
+        }
+
+        // Get severity icon color
+        function getSeverityIconColor(failureRate) {
+            if (failureRate >= 12) return 'text-red-500';
+            if (failureRate >= 8) return 'text-orange-500';
+            return 'text-yellow-500';
+        }
+
+        // Update improvement suggestions based on failure data
+        function updateImprovementSuggestions(failureData) {
+            const suggestions = [
+                `重點改善「${failureData[0].label}」項目，目前不合格率最高 (${failureData[0].failureRateText})`,
+                `加強「${failureData[1].label}」培訓，不合格率 ${failureData[1].failureRateText}`,
+                failureData[0].failureRate > 12 ? '建議立即啟動專項改善計畫' : '建議定期監控並持續改善'
+            ];
+            
+            const suggestionsElement = document.getElementById('improvementSuggestions');
+            if (suggestionsElement) {
+                suggestionsElement.innerHTML = suggestions.map(suggestion => 
+                    `<div class="text-yellow-700">• ${suggestion}</div>`
+                ).join('');
+            }
+        }
+
         // Initialize the dashboard
         function initDashboard() {
             populateTopIssues();
@@ -2572,6 +2626,7 @@ function initComplianceChart() {
             initChartsForTab('overview');
             updateLastUpdateTime();
             updateComplianceRate(); // 添加合格率計算
+            updateFailureRanking(); // 添加不合格排名更新
             
             // Update time every minute
             setInterval(updateLastUpdateTime, 60000);
@@ -3421,6 +3476,7 @@ function initComplianceChart() {
             initChartsForTab('overview');
             updateLastUpdateTime();
             updateComplianceRate(); // 添加合格率計算
+            updateFailureRanking(); // 添加不合格排名更新
             initTimeSelectors(); // 新增：初始化時間選擇器
             
             // Update time every minute
@@ -3608,6 +3664,7 @@ function initComplianceChart() {
             initChartsForTab('overview');
             updateLastUpdateTime();
             updateComplianceRate(); // 添加合格率計算
+            updateFailureRanking(); // 添加不合格排名更新
             initTimeSelectors();
             loadSeveritySettings(); // Load custom severity settings
             
