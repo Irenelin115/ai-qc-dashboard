@@ -385,15 +385,15 @@
                 <div class="stat-card bg-white rounded-lg shadow p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm text-gray-600 mb-1">違規事件</p>
-                            <p class="text-3xl font-bold text-gray-900">23</p>
-                            <div class="flex items-center mt-2 text-sm trend-down">
-                                <i data-lucide="trending-down" class="w-4 h-4 mr-1"></i>
-                                <span>-8.0%</span>
+                            <p class="text-sm text-gray-600 mb-1">合格率</p>
+                            <p class="text-3xl font-bold text-gray-900" id="complianceRate">90.6%</p>
+                            <div class="flex items-center mt-2 text-sm trend-up">
+                                <i data-lucide="trending-up" class="w-4 h-4 mr-1"></i>
+                                <span>+1.5%</span>
                             </div>
                         </div>
-                        <div class="bg-blue-50 p-3 rounded-full">
-                            <i data-lucide="alert-triangle" class="w-8 h-8 text-blue-600"></i>
+                        <div class="bg-green-50 p-3 rounded-full">
+                            <i data-lucide="check-circle" class="w-8 h-8 text-green-600"></i>
                         </div>
                     </div>
                 </div>
@@ -2550,12 +2550,28 @@ function initComplianceChart() {
             document.getElementById('lastUpdate').textContent = `最後更新: ${timeString}`;
         }
 
+        // Calculate and update compliance rate
+        function updateComplianceRate() {
+            // 根據 complianceData 計算總合格率
+            const totalPassed = complianceData.datasets[0].data.reduce((sum, value) => sum + value, 0);
+            const totalFailed = complianceData.datasets[1].data.reduce((sum, value) => sum + value, 0);
+            const totalCases = totalPassed + totalFailed;
+            const complianceRate = ((totalPassed / totalCases) * 100).toFixed(1);
+            
+            // 更新顯示
+            const complianceRateElement = document.getElementById('complianceRate');
+            if (complianceRateElement) {
+                complianceRateElement.textContent = complianceRate + '%';
+            }
+        }
+
         // Initialize the dashboard
         function initDashboard() {
             populateTopIssues();
             populateAgentsTable();
             initChartsForTab('overview');
             updateLastUpdateTime();
+            updateComplianceRate(); // 添加合格率計算
             
             // Update time every minute
             setInterval(updateLastUpdateTime, 60000);
@@ -3404,6 +3420,7 @@ function initComplianceChart() {
             populateAgentsTable();
             initChartsForTab('overview');
             updateLastUpdateTime();
+            updateComplianceRate(); // 添加合格率計算
             initTimeSelectors(); // 新增：初始化時間選擇器
             
             // Update time every minute
@@ -3590,6 +3607,7 @@ function initComplianceChart() {
             populateAgentsTable();
             initChartsForTab('overview');
             updateLastUpdateTime();
+            updateComplianceRate(); // 添加合格率計算
             initTimeSelectors();
             loadSeveritySettings(); // Load custom severity settings
             
