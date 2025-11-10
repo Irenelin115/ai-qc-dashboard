@@ -788,6 +788,31 @@
                 </div>
             </div>
 
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Urgent Processing Cases Chart -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">急需處理案件趨勢</h3>
+                        <div class="flex items-center space-x-2 text-sm">
+                            <span class="text-gray-500">急需處理的音檔數量</span>
+                        </div>
+                    </div>
+                    <div id="urgentCasesChart" style="width: 100%; height: 350px;"></div>
+                </div>
+                
+                <!-- Problem Cases Chart -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">問題案件趨勢</h3>
+                        <div class="flex items-center space-x-2 text-sm">
+                            <span class="text-gray-500">問題案件的音檔數量</span>
+                        </div>
+                    </div>
+                    <div id="problemCasesChart" style="width: 100%; height: 350px;"></div>
+                </div>
+            </div>
+
             <!-- Top Issues -->
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center justify-between mb-4">
@@ -926,7 +951,7 @@
                                 <span>AI生成改善方案</span>
                             </button>
                         </div>
-                        <div class="chart-container">
+                        <div class="chart-container" style="height: 400px;">
                             <div id="complianceChart" style="width: 100%; height: 100%;"></div>
                         </div>
                     </div>
@@ -939,7 +964,45 @@
                         </div>
                         
                         <div class="space-y-3" id="failureRankingList">
-                            <!-- 排名項目將由 JavaScript 動態生成 -->
+                            <div class="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <span class="w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">1</span>
+                                    <span class="font-medium text-gray-900">服務態度不佳</span>
+                                </div>
+                                <span class="text-red-600 font-semibold">23.5%</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <span class="w-6 h-6 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center font-bold">2</span>
+                                    <span class="font-medium text-gray-900">語速過快</span>
+                                </div>
+                                <span class="text-orange-600 font-semibold">18.2%</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <span class="w-6 h-6 bg-yellow-500 text-white text-xs rounded-full flex items-center justify-center font-bold">3</span>
+                                    <span class="font-medium text-gray-900">未確認客戶需求</span>
+                                </div>
+                                <span class="text-yellow-600 font-semibold">15.8%</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <span class="w-6 h-6 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center font-bold">4</span>
+                                    <span class="font-medium text-gray-900">專業術語過多</span>
+                                </div>
+                                <span class="text-blue-600 font-semibold">12.4%</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <span class="w-6 h-6 bg-gray-500 text-white text-xs rounded-full flex items-center justify-center font-bold">5</span>
+                                    <span class="font-medium text-gray-900">未進行總結</span>
+                                </div>
+                                <span class="text-gray-600 font-semibold">9.1%</span>
+                            </div>
                         </div>
                         
                         <!-- 改善建議 -->
@@ -949,13 +1012,45 @@
                                 <div class="flex-1">
                                     <h4 class="font-semibold text-yellow-900 mb-2">改善重點</h4>
                                     <div class="space-y-1 text-sm" id="improvementSuggestions">
-                                        <!-- 改善建議將由 JavaScript 動態生成 -->
+                                        <div class="text-yellow-800">• 重點關注服務態度訓練</div>
+                                        <div class="text-yellow-800">• 建立語速標準化流程</div>
+                                        <div class="text-yellow-800">• 強化需求確認技巧</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                
+                <!-- 情緒分析區域 -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i data-lucide="smile" class="w-5 h-5 mr-2 text-green-500"></i>
+                            情緒分析
+                        </h3>
+                        <span class="text-xs text-gray-500">客戶情緒分佈與趨勢統計</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- 情緒分佈圓餅圖 -->
+                        <div>
+                            <h4 class="text-md font-medium text-gray-700 mb-3">情緒分佈</h4>
+                            <div class="chart-container" style="height: 350px;">
+                                <div id="emotionAnalysisChart" style="width: 100%; height: 100%;"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- 情緒趨勢圖 -->
+                        <div>
+                            <h4 class="text-md font-medium text-gray-700 mb-3">情緒趨勢</h4>
+                            <div class="chart-container" style="height: 350px;">
+                                <div id="emotionTrendChart" style="width: 100%; height: 100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
                 
                 <!-- 改善方案區域 -->
                 <div id="improvementPlanSection" class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg shadow p-6 border border-blue-200" style="display: none;">
@@ -2213,6 +2308,8 @@
                     setTimeout(() => {
                         initQualityChart();
                         initTrendChart();
+                        initUrgentCasesChart();
+                        initProblemCasesChart();
                     }, 100);
                     break;
                 case 'analysis':
@@ -2220,7 +2317,8 @@
                     setTimeout(() => {
                         console.log('Initializing analysis tab charts...');
                         initComplianceChart();      // Quality analysis chart
-                        initComplianceDetailChart(); // Compliance detection chart
+                        initEmotionAnalysisChart(); // Emotion analysis chart
+                        initEmotionTrendChart();    // Emotion trend chart
                     }, 300);
                     break;
                 case 'tags':
@@ -2409,6 +2507,202 @@
             }, 100);
         }
 
+        function initUrgentCasesChart() {
+            if (charts.urgentCases) {
+                charts.urgentCases.dispose();
+            }
+            const chartDom = document.getElementById('urgentCasesChart');
+            if (!chartDom) {
+                console.error('urgentCasesChart container not found');
+                return;
+            }
+            
+            charts.urgentCases = echarts.init(chartDom);
+            
+            // 生成最近7天的模擬數據
+            const dates = [];
+            const urgentCounts = [];
+            const today = new Date();
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                dates.push(date.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' }));
+                urgentCounts.push(Math.floor(Math.random() * 15) + 5); // 5-20之間的隨機數
+            }
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    formatter: function(params) {
+                        return `${params[0].axisValue}<br/>急需處理: ${params[0].value} 件`;
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: dates,
+                    axisTick: {
+                        alignWithLabel: true
+                    },
+                    axisLabel: {
+                        color: '#6B7280'
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '案件數量',
+                    nameTextStyle: {
+                        color: '#6B7280'
+                    },
+                    axisLabel: {
+                        color: '#6B7280'
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: '#E5E7EB'
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: '急需處理案件',
+                        type: 'line',
+                        data: urgentCounts,
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 6,
+                        lineStyle: {
+                            color: '#EF4444',
+                            width: 3
+                        },
+                        itemStyle: {
+                            color: '#EF4444'
+                        },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(239, 68, 68, 0.3)' },
+                                { offset: 1, color: 'rgba(239, 68, 68, 0.1)' }
+                            ])
+                        },
+                        emphasis: {
+                            scale: true
+                        }
+                    }
+                ]
+            };
+            
+            charts.urgentCases.setOption(option);
+            
+            // 確保圖表正確響應容器大小變化
+            setTimeout(() => {
+                charts.urgentCases.resize();
+            }, 100);
+        }
+
+        function initProblemCasesChart() {
+            if (charts.problemCases) {
+                charts.problemCases.dispose();
+            }
+            const chartDom = document.getElementById('problemCasesChart');
+            if (!chartDom) {
+                console.error('problemCasesChart container not found');
+                return;
+            }
+            
+            charts.problemCases = echarts.init(chartDom);
+            
+            // 生成最近7天的模擬數據
+            const dates = [];
+            const problemCounts = [];
+            const today = new Date();
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                dates.push(date.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' }));
+                problemCounts.push(Math.floor(Math.random() * 12) + 3); // 3-15之間的隨機數
+            }
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    formatter: function(params) {
+                        return `${params[0].axisValue}<br/>問題案件: ${params[0].value} 件`;
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: dates,
+                    axisTick: {
+                        alignWithLabel: true
+                    },
+                    axisLabel: {
+                        color: '#6B7280'
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '案件數量',
+                    nameTextStyle: {
+                        color: '#6B7280'
+                    },
+                    axisLabel: {
+                        color: '#6B7280'
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: '#E5E7EB'
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: '問題案件',
+                        type: 'line',
+                        data: problemCounts,
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 6,
+                        lineStyle: {
+                            color: '#F59E0B',
+                            width: 3
+                        },
+                        itemStyle: {
+                            color: '#F59E0B'
+                        },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(245, 158, 11, 0.3)' },
+                                { offset: 1, color: 'rgba(245, 158, 11, 0.1)' }
+                            ])
+                        },
+                        emphasis: {
+                            scale: true
+                        }
+                    }
+                ]
+            };
+            
+            charts.problemCases.setOption(option);
+            
+            // 確保圖表正確響應容器大小變化
+            setTimeout(() => {
+                charts.problemCases.resize();
+            }, 100);
+        }
+
 
 function initComplianceChart() {
     if (charts.compliance) {
@@ -2552,6 +2846,247 @@ function initComplianceChart() {
             // 確保圖表正確響應容器大小變化
             setTimeout(() => {
                 charts.complianceDetail.resize();
+            }, 100);
+        }
+
+        function initEmotionAnalysisChart() {
+            if (charts.emotionAnalysis) {
+                charts.emotionAnalysis.dispose();
+            }
+            const chartDom = document.getElementById('emotionAnalysisChart');
+            if (!chartDom) {
+                console.error('emotionAnalysisChart container not found');
+                return;
+            }
+            
+            charts.emotionAnalysis = echarts.init(chartDom);
+            
+            const option = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                    data: ['正面', '中立偏正面', '中立', '中立偏負面', '負面']
+                },
+                series: [
+                    {
+                        name: '情緒分佈',
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        center: ['60%', '50%'],
+                        avoidLabelOverlap: false,
+                        label: {
+                            show: false,
+                            position: 'center'
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: '18',
+                                fontWeight: 'bold'
+                            },
+                            scale: true,
+                            scaleSize: 5
+                        },
+                        labelLine: {
+                            show: false
+                        },
+                        data: [
+                            {
+                                value: 35,
+                                name: '正面',
+                                itemStyle: { color: '#10B981' }
+                            },
+                            {
+                                value: 25,
+                                name: '中立偏正面',
+                                itemStyle: { color: '#84CC16' }
+                            },
+                            {
+                                value: 20,
+                                name: '中立',
+                                itemStyle: { color: '#6B7280' }
+                            },
+                            {
+                                value: 12,
+                                name: '中立偏負面',
+                                itemStyle: { color: '#F59E0B' }
+                            },
+                            {
+                                value: 8,
+                                name: '負面',
+                                itemStyle: { color: '#EF4444' }
+                            }
+                        ]
+                    }
+                ]
+            };
+            
+            charts.emotionAnalysis.setOption(option);
+            
+            // 確保圖表正確響應容器大小變化
+            setTimeout(() => {
+                charts.emotionAnalysis.resize();
+            }, 100);
+        }
+
+        function initEmotionTrendChart() {
+            if (charts.emotionTrend) {
+                charts.emotionTrend.dispose();
+            }
+            const chartDom = document.getElementById('emotionTrendChart');
+            if (!chartDom) {
+                console.error('emotionTrendChart container not found');
+                return;
+            }
+            
+            charts.emotionTrend = echarts.init(chartDom);
+            
+            // 生成最近7天的模擬數據
+            const dates = [];
+            const positiveData = [];
+            const neutralPositiveData = [];
+            const neutralData = [];
+            const neutralNegativeData = [];
+            const negativeData = [];
+            const today = new Date();
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                dates.push(date.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' }));
+                
+                // 模擬數據，正面情緒逐漸上升，負面情緒逐漸下降
+                positiveData.push(Math.floor(Math.random() * 200) + 1400 + i * 20);
+                neutralPositiveData.push(Math.floor(Math.random() * 150) + 800 + i * 10);
+                neutralData.push(Math.floor(Math.random() * 100) + 500);
+                neutralNegativeData.push(Math.floor(Math.random() * 80) + 300 - i * 5);
+                negativeData.push(Math.floor(Math.random() * 50) + 100 - i * 3);
+            }
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'line'
+                    }
+                },
+                legend: {
+                    data: ['正面', '中立偏正面', '中立', '中立偏負面', '負面'],
+                    bottom: 'bottom'
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    top: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: dates,
+                    axisLabel: {
+                        color: '#6B7280'
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLabel: {
+                        color: '#6B7280'
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: '#E5E7EB'
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: '正面',
+                        type: 'line',
+                        data: positiveData,
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 4,
+                        lineStyle: {
+                            color: '#10B981',
+                            width: 2
+                        },
+                        itemStyle: {
+                            color: '#10B981'
+                        }
+                    },
+                    {
+                        name: '中立偏正面',
+                        type: 'line',
+                        data: neutralPositiveData,
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 4,
+                        lineStyle: {
+                            color: '#84CC16',
+                            width: 2
+                        },
+                        itemStyle: {
+                            color: '#84CC16'
+                        }
+                    },
+                    {
+                        name: '中立',
+                        type: 'line',
+                        data: neutralData,
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 4,
+                        lineStyle: {
+                            color: '#6B7280',
+                            width: 2
+                        },
+                        itemStyle: {
+                            color: '#6B7280'
+                        }
+                    },
+                    {
+                        name: '中立偏負面',
+                        type: 'line',
+                        data: neutralNegativeData,
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 4,
+                        lineStyle: {
+                            color: '#F59E0B',
+                            width: 2
+                        },
+                        itemStyle: {
+                            color: '#F59E0B'
+                        }
+                    },
+                    {
+                        name: '負面',
+                        type: 'line',
+                        data: negativeData,
+                        smooth: true,
+                        symbol: 'circle',
+                        symbolSize: 4,
+                        lineStyle: {
+                            color: '#EF4444',
+                            width: 2
+                        },
+                        itemStyle: {
+                            color: '#EF4444'
+                        }
+                    }
+                ]
+            };
+            
+            charts.emotionTrend.setOption(option);
+            
+            // 確保圖表正確響應容器大小變化
+            setTimeout(() => {
+                charts.emotionTrend.resize();
             }, 100);
         }
 
