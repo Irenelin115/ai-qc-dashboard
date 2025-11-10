@@ -1029,48 +1029,6 @@
                 </div>
             </div>
 
-            <!-- 情緒分析區域 -->
-            <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 border border-purple-200">
-                <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
-                    <i data-lucide="heart" class="w-6 h-6 mr-3 text-purple-600"></i>
-                    情緒分析
-                </h2>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">客戶情緒分布</h3>
-                        <div class="chart-container">
-                            <div id="emotionChart" style="width: 100%; height: 350px; min-height: 350px;"></div>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">情緒轉折分析</h3>
-                        <div class="space-y-4">
-                            <div class="p-4 border border-gray-200 rounded-lg">
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="font-medium">正面→負面轉換</span>
-                                    <span class="text-2xl font-bold text-red-600">12</span>
-                                </div>
-                                <p class="text-sm text-gray-600">主要原因：等待時間過長、問題未解決</p>
-                            </div>
-                            <div class="p-4 border border-gray-200 rounded-lg">
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="font-medium">負面→正面轉換</span>
-                                    <span class="text-2xl font-bold text-green-600">28</span>
-                                </div>
-                                <p class="text-sm text-gray-600">主要原因：問題快速解決、態度良好</p>
-                            </div>
-                            <div class="p-4 border border-gray-200 rounded-lg">
-                                <div class="flex items-center justify-between mb-2">
-                                    <span class="font-medium">持續負面情緒</span>
-                                    <span class="text-2xl font-bold text-orange-600">8</span>
-                                </div>
-                                <p class="text-sm text-gray-600">需要特別關注和跟進</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Audio Detail Tab -->
@@ -2263,7 +2221,6 @@
                         console.log('Initializing analysis tab charts...');
                         initComplianceChart();      // Quality analysis chart
                         initComplianceDetailChart(); // Compliance detection chart
-                        initEmotionChart();         // Emotion analysis chart
                     }, 300);
                     break;
                 case 'tags':
