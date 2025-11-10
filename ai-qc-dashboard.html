@@ -2606,9 +2606,6 @@ function initComplianceChart() {
                 return;
             }
             
-            if (charts.emotion) {
-                charts.emotion.dispose();
-            }
             const chartDom = document.getElementById('emotionChart');
             
             // 確保容器存在且可見
@@ -2616,13 +2613,32 @@ function initComplianceChart() {
                 console.error('emotionChart container not found');
                 return;
             }
+
+            // 檢查容器是否可見
+            const isVisible = chartDom.offsetWidth > 0 && chartDom.offsetHeight > 0;
+            if (!isVisible) {
+                console.warn('emotionChart container not visible, retrying...');
+                setTimeout(initEmotionChart, 300);
+                return;
+            }
+            
+            // 銷毀現有實例
+            if (charts.emotion) {
+                charts.emotion.dispose();
+                charts.emotion = null;
+            }
             
             console.log('Initializing emotion chart...', chartDom);
+            console.log('Container dimensions:', chartDom.offsetWidth, 'x', chartDom.offsetHeight);
             console.log('ECharts version:', echarts.version);
             
             try {
-                charts.emotion = echarts.init(chartDom);
-                console.log('ECharts instance created:', charts.emotion);
+                charts.emotion = echarts.init(chartDom, null, {
+                    width: chartDom.offsetWidth,
+                    height: chartDom.offsetHeight,
+                    renderer: 'canvas'
+                });
+                console.log('ECharts instance created successfully:', !!charts.emotion);
             } catch (error) {
                 console.error('Failed to create ECharts instance:', error);
                 return;
