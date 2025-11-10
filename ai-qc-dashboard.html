@@ -401,6 +401,50 @@
             animation: spin 1s linear infinite;
         }
 
+        /* 時間篩選器特殊樣式 */
+        .quick-time-btn.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .date-filter-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            border: 1px solid rgba(229, 231, 235, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .date-filter-section:hover {
+            border-color: rgba(59, 130, 246, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 日期輸入框增強 */
+        .time-selector:focus {
+            ring: 2px;
+            ring-color: #3b82f6;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+
+        /* 篩選結果動畫 */
+        .filter-result-enter {
+            animation: filterResultSlideIn 0.5s ease-out;
+        }
+
+        @keyframes filterResultSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* 響應式設計 */
         @media (max-width: 768px) {
             .time-controls {
@@ -490,6 +534,85 @@
     <main class="max-w-7xl mx-auto px-6 py-6">
         <!-- Overview Tab -->
         <div id="overview-content" class="space-y-6">
+            <!-- Time Filter Section -->
+            <div class="date-filter-section rounded-lg shadow p-6">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <!-- Date Range Section -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i data-lucide="calendar" class="w-5 h-5 mr-2 text-blue-600"></i>
+                            時間範圍
+                        </h3>
+                        
+                        <!-- Custom Date Range -->
+                        <div class="flex items-center gap-2">
+                            <input type="date" 
+                                   id="startDate" 
+                                   class="time-selector border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   value="2025-01-01">
+                            <span class="text-gray-500 font-medium">~</span>
+                            <input type="date" 
+                                   id="endDate" 
+                                   class="time-selector border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   value="2025-01-31">
+                            <button onclick="applyDateFilter()" 
+                                    class="enhanced-btn ml-2" 
+                                    title="套用篩選">
+                                <i data-lucide="search" class="w-4 h-4 mr-1"></i>
+                                查詢
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Filter Buttons -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-sm text-gray-600 mr-2">快速選擇：</span>
+                        <button onclick="setQuickFilter('thisWeek')" 
+                                class="quick-time-btn bg-gray-100 hover:bg-blue-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-all">
+                            本週
+                        </button>
+                        <button onclick="setQuickFilter('thisMonth')" 
+                                class="quick-time-btn bg-gray-100 hover:bg-blue-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-all">
+                            本月
+                        </button>
+                        <button onclick="setQuickFilter('q1')" 
+                                class="quick-time-btn bg-gray-100 hover:bg-blue-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-all">
+                            2025-Q1
+                        </button>
+                        <button onclick="setQuickFilter('thisYear')" 
+                                class="quick-time-btn bg-gray-100 hover:bg-blue-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-all">
+                            年度
+                        </button>
+                        <button onclick="setQuickFilter('lastMonth')" 
+                                class="quick-time-btn bg-gray-100 hover:bg-blue-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-all">
+                            上個月
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Current Filter Display -->
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i data-lucide="info" class="w-4 h-4 mr-2"></i>
+                            <span>目前顯示：</span>
+                            <span class="time-range-badge mx-2 px-3 py-1 rounded-full text-xs font-medium" id="currentRange">
+                                2025/01/01 ~ 2025/01/31
+                            </span>
+                            <span id="dataCount" class="text-gray-500">(共 700 筆資料)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="resetFilter()" 
+                                    class="text-gray-400 hover:text-gray-600 transition-colors text-sm"
+                                    title="重設篩選">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4 mr-1"></i>
+                                重設
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Key Metrics -->
             <div class="card-grid">
                 <div class="stat-card bg-white rounded-lg shadow p-6">
@@ -2828,6 +2951,237 @@ SysTalk.Audit 質檢報表
             URL.revokeObjectURL(url);
         }
 
+        // === 時間篩選功能 ===
+
+        // 套用自定義日期篩選
+        function applyDateFilter() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                showNotification('請選擇完整的日期範圍', 'error');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                showNotification('開始日期不能晚於結束日期', 'error');
+                return;
+            }
+
+            // 清除快速篩選按鈕的選中狀態
+            clearQuickFilterActiveState();
+            
+            // 套用篩選並更新顯示
+            applyFilter(startDate, endDate);
+        }
+
+        // 快速篩選設定
+        function setQuickFilter(period) {
+            const today = new Date();
+            let startDate, endDate;
+            
+            // 清除之前的選中狀態
+            clearQuickFilterActiveState();
+            
+            // 設定當前按鈕為選中狀態
+            event.target.classList.add('bg-blue-500', 'text-white');
+            event.target.classList.remove('bg-gray-100', 'text-gray-700');
+
+            switch(period) {
+                case 'thisWeek':
+                    const dayOfWeek = today.getDay();
+                    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+                    startDate = new Date(today);
+                    startDate.setDate(today.getDate() + mondayOffset);
+                    endDate = new Date(startDate);
+                    endDate.setDate(startDate.getDate() + 6);
+                    break;
+                    
+                case 'thisMonth':
+                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                    endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                    break;
+                    
+                case 'q1':
+                    startDate = new Date(2025, 0, 1); // 2025/01/01
+                    endDate = new Date(2025, 2, 31); // 2025/03/31
+                    break;
+                    
+                case 'thisYear':
+                    startDate = new Date(today.getFullYear(), 0, 1);
+                    endDate = new Date(today.getFullYear(), 11, 31);
+                    break;
+                    
+                case 'lastMonth':
+                    startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                    endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+                    break;
+                    
+                default:
+                    return;
+            }
+
+            // 更新日期選擇器
+            document.getElementById('startDate').value = formatDateForInput(startDate);
+            document.getElementById('endDate').value = formatDateForInput(endDate);
+            
+            // 套用篩選
+            applyFilter(formatDateForInput(startDate), formatDateForInput(endDate));
+        }
+
+        // 清除快速篩選按鈕的選中狀態
+        function clearQuickFilterActiveState() {
+            document.querySelectorAll('.quick-time-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-500', 'text-white');
+                btn.classList.add('bg-gray-100', 'text-gray-700');
+            });
+        }
+
+        // 重設篩選條件
+        function resetFilter() {
+            // 重設為本月
+            const today = new Date();
+            const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            
+            document.getElementById('startDate').value = formatDateForInput(startDate);
+            document.getElementById('endDate').value = formatDateForInput(endDate);
+            
+            // 清除選中狀態
+            clearQuickFilterActiveState();
+            
+            // 套用預設篩選
+            applyFilter(formatDateForInput(startDate), formatDateForInput(endDate));
+            
+            showNotification('已重設為本月範圍', 'info');
+        }
+
+        // 套用篩選並更新數據
+        function applyFilter(startDate, endDate) {
+            // 顯示載入狀態
+            const button = document.querySelector('button[onclick="applyDateFilter()"]');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-1 animate-spin"></i>查詢中...';
+            button.disabled = true;
+            
+            // 模擬 API 查詢
+            setTimeout(() => {
+                // 計算模擬數據
+                const daysDiff = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;
+                const simulatedDataCount = Math.floor(daysDiff * (20 + Math.random() * 15)); // 20-35筆/天
+                
+                // 更新篩選顯示
+                updateFilterDisplay(startDate, endDate, simulatedDataCount);
+                
+                // 更新統計數據
+                updateStatistics(simulatedDataCount);
+                
+                // 更新圖表數據
+                refreshChartsWithDateRange(startDate, endDate);
+                
+                // 恢復按鈕狀態
+                button.innerHTML = originalText;
+                button.disabled = false;
+                
+                showNotification(`已更新 ${formatDateRange(startDate, endDate)} 的數據`, 'success');
+            }, 1200);
+        }
+
+        // 更新篩選條件顯示
+        function updateFilterDisplay(startDate, endDate, dataCount) {
+            document.getElementById('currentRange').textContent = formatDateRange(startDate, endDate);
+            document.getElementById('dataCount').textContent = `(共 ${dataCount} 筆資料)`;
+        }
+
+        // 更新統計數據
+        function updateStatistics(baseCount) {
+            const metrics = [
+                { 
+                    selector: '.metric-highlight', 
+                    index: 0, 
+                    value: baseCount 
+                },
+                { 
+                    selector: '.metric-highlight', 
+                    index: 1, 
+                    value: (95 + Math.random() * 5).toFixed(0) + '%' 
+                },
+                { 
+                    selector: '.metric-highlight', 
+                    index: 2, 
+                    value: (85 + Math.random() * 10).toFixed(0) 
+                },
+                { 
+                    selector: '#complianceRate', 
+                    index: 0, 
+                    value: (88 + Math.random() * 8).toFixed(1) + '%' 
+                }
+            ];
+            
+            metrics.forEach(metric => {
+                const elements = document.querySelectorAll(metric.selector);
+                const element = metric.index !== undefined ? elements[metric.index] : elements[0];
+                
+                if (element) {
+                    element.style.animation = 'shimmer 0.6s ease-in-out';
+                    setTimeout(() => {
+                        element.textContent = metric.value;
+                        element.style.animation = '';
+                    }, 300);
+                }
+            });
+        }
+
+        // 使用日期範圍刷新圖表
+        function refreshChartsWithDateRange(startDate, endDate) {
+            Object.values(charts).forEach(chart => {
+                if (chart && chart.setOption) {
+                    // 這裡可以根據日期範圍生成不同的圖表數據
+                    const option = chart.getOption();
+                    if (option && option.title) {
+                        option.title[0].subtext = `數據期間：${formatDateRange(startDate, endDate)}`;
+                        chart.setOption(option, true);
+                    }
+                }
+            });
+        }
+
+        // 格式化日期範圍顯示
+        function formatDateRange(startDate, endDate) {
+            const start = startDate instanceof Date ? startDate : new Date(startDate);
+            const end = endDate instanceof Date ? endDate : new Date(endDate);
+            
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}/${month}/${day}`;
+            };
+            
+            return `${formatDate(start)} ~ ${formatDate(end)}`;
+        }
+
+        // 格式化日期為 input[type="date"] 格式
+        function formatDateForInput(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // 初始化時間篩選器
+        function initDateFilter() {
+            // 設定預設為本月
+            const today = new Date();
+            const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            
+            document.getElementById('startDate').value = formatDateForInput(startDate);
+            document.getElementById('endDate').value = formatDateForInput(endDate);
+            
+            updateFilterDisplay(formatDateForInput(startDate), formatDateForInput(endDate), 700);
+        }
+
         // Update last update time
         function updateLastUpdateTime() {
             const now = new Date();
@@ -4006,6 +4360,7 @@ SysTalk.Audit 質檢報表
             updateFailureRanking(); // 添加不合格排名更新
             initTimeSelectors();
             loadSeveritySettings(); // Load custom severity settings
+            initDateFilter(); // 初始化時間篩選器
             
             // Update time every minute
             setInterval(updateLastUpdateTime, 60000);
