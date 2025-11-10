@@ -8,12 +8,31 @@
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
+        /* 增強的統計卡片樣式 */
         .stat-card {
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(229, 231, 235, 0.8);
         }
         .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8, #6366f1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .stat-card:hover::before {
+            opacity: 1;
         }
         .tab-button {
             transition: all 0.2s ease;
@@ -21,10 +40,21 @@
         .tab-button:hover {
             background-color: #f3f4f6;
         }
+        /* 增強的圖表容器 */
         .chart-container {
             position: relative;
-            height: 350px;
+            height: 400px;
             width: 100%;
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid rgba(229, 231, 235, 0.6);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s ease;
+        }
+        .chart-container:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            border-color: rgba(59, 130, 246, 0.2);
         }
         .alert-item {
             animation: slideIn 0.5s ease-out;
@@ -259,6 +289,118 @@
             background-color: #374151;
         }
         
+        /* 新增：數據亮點效果 */
+        .metric-highlight {
+            position: relative;
+            display: inline-block;
+        }
+        .metric-highlight::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+            border-radius: 1px;
+            animation: shimmer 2s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+            0%, 100% { opacity: 0.3; transform: scaleX(0.8); }
+            50% { opacity: 1; transform: scaleX(1); }
+        }
+
+        /* 新增：改善的按鈕樣式 */
+        .enhanced-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .enhanced-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+        }
+        .enhanced-btn:active {
+            transform: translateY(0);
+        }
+        .enhanced-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        .enhanced-btn:hover::before {
+            left: 100%;
+        }
+
+        /* 新增：卡片網格增強 */
+        .card-grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        /* 新增：脈動動畫用於即時數據 */
+        .pulse-indicator {
+            position: relative;
+        }
+        .pulse-indicator::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -12px;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            transform: translateY(-50%);
+            animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 0.4; transform: translateY(-50%) scale(1); }
+            50% { opacity: 1; transform: translateY(-50%) scale(1.2); }
+        }
+
+        /* 新增：旋轉動畫 */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 新增：通知樣式 */
+        .notification-enter {
+            animation: notificationSlideIn 0.3s ease-out;
+        }
+        .notification-exit {
+            animation: notificationSlideOut 0.3s ease-in;
+        }
+        @keyframes notificationSlideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes notificationSlideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* 新增：載入動畫 */
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
         /* 響應式設計 */
         @media (max-width: 768px) {
             .time-controls {
@@ -281,6 +423,15 @@
                 margin-left: -120px;
                 font-size: 12px;
             }
+
+            .stat-card {
+                margin-bottom: 16px;
+            }
+
+            .chart-container {
+                height: 300px;
+                padding: 12px;
+            }
         }
     </style>
 </head>
@@ -291,10 +442,17 @@
             <div class="flex items-center justify-between">
                 <h1 class="text-2xl font-bold text-gray-900">SysTalk.Audit儀表板</h1>
                 <div class="flex items-center space-x-4">
-                    <span class="text-sm text-gray-600" id="lastUpdate">最後更新: 2025/10/17 14:30</span>
-                    <button onclick="exportReport()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                        匯出報表
-                    </button>
+                    <span class="text-sm text-gray-600 pulse-indicator" id="lastUpdate">最後更新: 2025/10/17 14:30</span>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="refreshData()" class="enhanced-btn" title="重新載入數據">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i>
+                            更新
+                        </button>
+                        <button onclick="exportReport()" class="enhanced-btn">
+                            <i data-lucide="download" class="w-4 h-4 mr-2"></i>
+                            匯出報表
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -333,12 +491,12 @@
         <!-- Overview Tab -->
         <div id="overview-content" class="space-y-6">
             <!-- Key Metrics -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="card-grid">
                 <div class="stat-card bg-white rounded-lg shadow p-6">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600 mb-1">今日質檢通話數</p>
-                            <p class="text-3xl font-bold text-gray-900">700</p>
+                            <p class="text-3xl font-bold text-gray-900 metric-highlight">700</p>
                             <div class="flex items-center mt-2 text-sm trend-up">
                                 <i data-lucide="trending-up" class="w-4 h-4 mr-1"></i>
                                 <span>+12.5%</span>
@@ -354,7 +512,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600 mb-1">質檢覆蓋率</p>
-                            <p class="text-3xl font-bold text-gray-900">98%</p>
+                            <p class="text-3xl font-bold text-gray-900 metric-highlight">98%</p>
                             <div class="flex items-center mt-2 text-sm trend-up">
                                 <i data-lucide="trending-up" class="w-4 h-4 mr-1"></i>
                                 <span>+2.1%</span>
@@ -370,7 +528,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600 mb-1">平均品質分數</p>
-                            <p class="text-3xl font-bold text-gray-900">88</p>
+                            <p class="text-3xl font-bold text-gray-900 metric-highlight">88</p>
                             <div class="flex items-center mt-2 text-sm trend-up">
                                 <i data-lucide="trending-up" class="w-4 h-4 mr-1"></i>
                                 <span>+1.5</span>
@@ -386,7 +544,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600 mb-1">合格率</p>
-                            <p class="text-3xl font-bold text-gray-900" id="complianceRate">90.6%</p>
+                            <p class="text-3xl font-bold text-gray-900 metric-highlight" id="complianceRate">90.6%</p>
                             <div class="flex items-center mt-2 text-sm trend-up">
                                 <i data-lucide="trending-up" class="w-4 h-4 mr-1"></i>
                                 <span>+1.5%</span>
@@ -1287,8 +1445,28 @@
     </div>
 
     <script>
+        // 安全初始化 Lucide 圖標的函數
+        function safeCreateIcons() {
+            try {
+                if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                    // 檢查是否有 data-lucide 屬性的元素存在
+                    const lucideElements = document.querySelectorAll('[data-lucide]');
+                    if (lucideElements.length > 0) {
+                        console.log('Found', lucideElements.length, 'lucide elements, initializing icons...');
+                        safeCreateIcons();
+                    } else {
+                        console.log('No lucide elements found');
+                    }
+                } else {
+                    console.warn('Lucide library not available');
+                }
+            } catch (error) {
+                console.warn('Lucide icons initialization failed:', error);
+            }
+        }
+
         // Initialize Lucide icons
-        lucide.createIcons();
+        safeCreateIcons();
 
         // Global variables
         let activeTab = 'overview';
@@ -2457,7 +2635,7 @@ function initComplianceChart() {
                 container.appendChild(div);
             });
             
-            lucide.createIcons();
+            safeCreateIcons();
         }
 
         // Populate agents table
@@ -2510,9 +2688,144 @@ function initComplianceChart() {
             });
         }
 
-        // Export report function
+        // Refresh data function
+        function refreshData() {
+            const button = event.target.closest('button');
+            const icon = button.querySelector('i[data-lucide="refresh-cw"]');
+            
+            // Add spinning animation
+            icon.style.animation = 'spin 1s linear infinite';
+            button.disabled = true;
+            
+            // Simulate data refresh
+            setTimeout(() => {
+                // Update metrics with animation
+                updateMetricsWithAnimation();
+                
+                // Refresh all charts
+                Object.values(charts).forEach(chart => {
+                    if (chart && chart.setOption) {
+                        chart.setOption(chart.getOption(), true);
+                    }
+                });
+                
+                // Update timestamp
+                updateLastUpdateTime();
+                
+                // Remove spinning animation
+                icon.style.animation = '';
+                button.disabled = false;
+                
+                // Show success feedback
+                showNotification('數據已更新', 'success');
+            }, 1500);
+        }
+
+        // Animated metrics update
+        function updateMetricsWithAnimation() {
+            const metrics = [
+                { id: 'complianceRate', newValue: (Math.random() * 10 + 85).toFixed(1) + '%' }
+            ];
+            
+            metrics.forEach(metric => {
+                const element = document.getElementById(metric.id);
+                if (element) {
+                    element.style.animation = 'shimmer 0.5s ease-in-out';
+                    setTimeout(() => {
+                        element.textContent = metric.newValue;
+                        element.style.animation = '';
+                    }, 250);
+                }
+            });
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white transform translate-x-full transition-transform duration-300 ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Slide in
+            setTimeout(() => {
+                notification.style.transform = 'translate-x-0';
+            }, 100);
+            
+            // Slide out and remove
+            setTimeout(() => {
+                notification.style.transform = 'translate-x-full';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Enhanced export report function
         function exportReport() {
-            alert('匯出報表功能開發中...');
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i>準備中...';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                // Simulate export process
+                const reportData = generateReportData();
+                downloadReport(reportData);
+                
+                button.innerHTML = originalText;
+                button.disabled = false;
+                showNotification('報表已成功匯出', 'success');
+            }, 2000);
+        }
+
+        // Generate comprehensive report data
+        function generateReportData() {
+            const currentDate = new Date().toLocaleDateString('zh-TW');
+            return {
+                title: 'SysTalk.Audit 質檢報表',
+                date: currentDate,
+                summary: {
+                    totalCalls: '700',
+                    coverage: '98%',
+                    avgScore: '88',
+                    complianceRate: document.getElementById('complianceRate')?.textContent || '90.6%'
+                }
+            };
+        }
+
+        // Download report
+        function downloadReport(data) {
+            const content = `
+SysTalk.Audit 質檢報表
+===================
+
+生成日期: ${data.date}
+
+總體概況:
+- 今日質檢通話數: ${data.summary.totalCalls}
+- 質檢覆蓋率: ${data.summary.coverage}
+- 平均品質分數: ${data.summary.avgScore}
+- 合格率: ${data.summary.complianceRate}
+
+本報表由 SysTalk.Audit 系統自動生成
+            `.trim();
+            
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `SysTalk_Audit_報表_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         // Update last update time
@@ -2729,7 +3042,7 @@ function initComplianceChart() {
                 tbody.appendChild(row);
             });
             
-            lucide.createIcons();
+            safeCreateIcons();
         }
 
         function createAudioRow(audio, index) {
@@ -2969,7 +3282,7 @@ function initComplianceChart() {
                 container.appendChild(div);
             });
             
-            lucide.createIcons();
+            safeCreateIcons();
         }
 
         function populateActivityTagsList() {
@@ -3066,7 +3379,7 @@ function initComplianceChart() {
                 tbody.appendChild(tr);
             });
             
-            lucide.createIcons();
+            safeCreateIcons();
         }
 
         function initIntentChart() {
@@ -3716,7 +4029,7 @@ function initComplianceChart() {
                 generateImprovementContent();
                 document.getElementById('improvementLoading').style.display = 'none';
                 document.getElementById('improvementContent').style.display = 'block';
-                lucide.createIcons(); // 重新初始化圖標
+                safeCreateIcons(); // 重新初始化圖標
             }, 3000);
         }
 
