@@ -445,6 +445,62 @@
             }
         }
 
+        /* 季度下拉選單樣式 */
+        .quarter-dropdown-menu {
+            min-width: 140px;
+            max-height: 200px;
+            overflow-y: auto;
+            animation: dropdownSlideIn 0.2s ease-out;
+        }
+
+        .quarter-dropdown-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+            margin: 2px;
+            font-size: 13px;
+        }
+
+        .quarter-dropdown-item:hover {
+            background-color: #f3f4f6;
+            color: #3b82f6;
+        }
+
+        .quarter-dropdown-item.current {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            font-weight: 500;
+        }
+
+        .quarter-dropdown-item.disabled {
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .quarter-dropdown-item.disabled:hover {
+            background-color: transparent;
+            color: #9ca3af;
+        }
+
+        @keyframes dropdownSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* 季度按鈕特殊狀態 */
+        .quarter-btn-active {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
         /* 響應式設計 */
         @media (max-width: 768px) {
             .time-controls {
@@ -575,10 +631,20 @@
                                 class="quick-time-btn bg-gray-100 hover:bg-blue-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-all">
                             本月
                         </button>
-                        <button onclick="setQuickFilter('q1')" 
-                                class="quick-time-btn bg-gray-100 hover:bg-blue-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-all">
-                            2025-Q1
-                        </button>
+                        
+                        <!-- 季度下拉選單 -->
+                        <div class="relative" id="quarterDropdown">
+                            <button onclick="toggleQuarterDropdown()" 
+                                    class="quick-time-btn bg-gray-100 hover:bg-blue-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center">
+                                <span id="quarterBtnText">季度</span>
+                                <i data-lucide="chevron-down" class="w-3 h-3 ml-1"></i>
+                            </button>
+                            <div id="quarterDropdownMenu" 
+                                 class="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border z-50 min-w-32 hidden">
+                                <!-- 動態生成季度選項 -->
+                            </div>
+                        </div>
+
                         <button onclick="setQuickFilter('thisYear')" 
                                 class="quick-time-btn bg-gray-100 hover:bg-blue-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-all">
                             年度
@@ -3003,8 +3069,14 @@ SysTalk.Audit 質檢報表
                     break;
                     
                 case 'q1':
-                    startDate = new Date(2025, 0, 1); // 2025/01/01
-                    endDate = new Date(2025, 2, 31); // 2025/03/31
+                case 'q2':
+                case 'q3':
+                case 'q4':
+                    const currentYear = today.getFullYear();
+                    const quarterNum = parseInt(period.substring(1));
+                    const quarterStartMonth = (quarterNum - 1) * 3;
+                    startDate = new Date(currentYear, quarterStartMonth, 1);
+                    endDate = new Date(currentYear, quarterStartMonth + 3, 0);
                     break;
                     
                 case 'thisYear':
@@ -3032,9 +3104,15 @@ SysTalk.Audit 質檢報表
         // 清除快速篩選按鈕的選中狀態
         function clearQuickFilterActiveState() {
             document.querySelectorAll('.quick-time-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-500', 'text-white');
+                btn.classList.remove('bg-blue-500', 'text-white', 'quarter-btn-active');
                 btn.classList.add('bg-gray-100', 'text-gray-700');
             });
+            
+            // 重設季度按鈕文字
+            const quarterBtnText = document.getElementById('quarterBtnText');
+            if (quarterBtnText) {
+                quarterBtnText.textContent = '季度';
+            }
         }
 
         // 重設篩選條件
@@ -3167,6 +3245,167 @@ SysTalk.Audit 質檢報表
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
+        }
+
+        // === 季度下拉選單功能 ===
+
+        // 切換季度下拉選單
+        function toggleQuarterDropdown() {
+            const menu = document.getElementById('quarterDropdownMenu');
+            const isHidden = menu.classList.contains('hidden');
+            
+            if (isHidden) {
+                generateQuarterOptions();
+                menu.classList.remove('hidden');
+                menu.classList.add('quarter-dropdown-menu');
+                
+                // 點擊外部關閉下拉選單
+                setTimeout(() => {
+                    document.addEventListener('click', closeQuarterDropdown);
+                }, 0);
+            } else {
+                menu.classList.add('hidden');
+                document.removeEventListener('click', closeQuarterDropdown);
+            }
+        }
+
+        // 生成季度選項
+        function generateQuarterOptions() {
+            const menu = document.getElementById('quarterDropdownMenu');
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth();
+            const currentQuarter = Math.floor(currentMonth / 3) + 1;
+            
+            const quarters = [
+                { 
+                    num: 1, 
+                    label: `${currentYear}-Q1`, 
+                    desc: '1-3月',
+                    months: '01/01 ~ 03/31'
+                },
+                { 
+                    num: 2, 
+                    label: `${currentYear}-Q2`, 
+                    desc: '4-6月',
+                    months: '04/01 ~ 06/30'
+                },
+                { 
+                    num: 3, 
+                    label: `${currentYear}-Q3`, 
+                    desc: '7-9月',
+                    months: '07/01 ~ 09/30'
+                },
+                { 
+                    num: 4, 
+                    label: `${currentYear}-Q4`, 
+                    desc: '10-12月',
+                    months: '10/01 ~ 12/31'
+                }
+            ];
+
+            let html = '<div class="p-2">';
+            html += '<div class="text-xs text-gray-500 mb-2 px-2 font-medium">選擇季度</div>';
+            
+            quarters.forEach(quarter => {
+                const isCurrent = quarter.num === currentQuarter;
+                const isPast = quarter.num < currentQuarter;
+                const isFuture = quarter.num > currentQuarter;
+                
+                let itemClass = 'quarter-dropdown-item';
+                if (isCurrent) {
+                    itemClass += ' current';
+                } else if (isFuture) {
+                    itemClass += ' disabled';
+                }
+                
+                html += `
+                    <div class="${itemClass}" 
+                         onclick="${isFuture ? '' : `selectQuarter('q${quarter.num}', '${quarter.label}')`}">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="font-medium">${quarter.label}</div>
+                                <div class="text-xs opacity-75">${quarter.months}</div>
+                            </div>
+                            ${isCurrent ? '<span class="text-xs">目前</span>' : ''}
+                            ${isFuture ? '<span class="text-xs">未來</span>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            // 添加去年季度選項
+            html += '<div class="border-t mt-2 pt-2">';
+            html += '<div class="text-xs text-gray-500 mb-2 px-2 font-medium">去年</div>';
+            
+            const lastYear = currentYear - 1;
+            for (let i = 4; i >= 1; i--) {
+                const quarterMonths = [
+                    '01/01 ~ 03/31',
+                    '04/01 ~ 06/30', 
+                    '07/01 ~ 09/30',
+                    '10/01 ~ 12/31'
+                ][i-1];
+                
+                html += `
+                    <div class="quarter-dropdown-item" 
+                         onclick="selectQuarter('q${i}', '${lastYear}-Q${i}', ${lastYear})">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="font-medium">${lastYear}-Q${i}</div>
+                                <div class="text-xs opacity-75">${quarterMonths}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += '</div></div>';
+            menu.innerHTML = html;
+        }
+
+        // 選擇季度
+        function selectQuarter(quarter, displayText, year = null) {
+            const targetYear = year || new Date().getFullYear();
+            
+            // 更新按鈕文字
+            document.getElementById('quarterBtnText').textContent = displayText;
+            
+            // 關閉下拉選單
+            document.getElementById('quarterDropdownMenu').classList.add('hidden');
+            document.removeEventListener('click', closeQuarterDropdown);
+            
+            // 清除其他按鈕狀態
+            clearQuickFilterActiveState();
+            
+            // 設定季度按鈕為選中狀態
+            const quarterBtn = document.querySelector('button[onclick="toggleQuarterDropdown()"]');
+            quarterBtn.classList.add('quarter-btn-active');
+            quarterBtn.classList.remove('bg-gray-100', 'text-gray-700');
+            
+            // 計算季度日期範圍
+            const quarterNum = parseInt(quarter.substring(1));
+            const quarterStartMonth = (quarterNum - 1) * 3;
+            const startDate = new Date(targetYear, quarterStartMonth, 1);
+            const endDate = new Date(targetYear, quarterStartMonth + 3, 0);
+            
+            // 更新日期選擇器
+            document.getElementById('startDate').value = formatDateForInput(startDate);
+            document.getElementById('endDate').value = formatDateForInput(endDate);
+            
+            // 套用篩選
+            applyFilter(formatDateForInput(startDate), formatDateForInput(endDate));
+        }
+
+        // 關閉季度下拉選單
+        function closeQuarterDropdown(event) {
+            const dropdown = document.getElementById('quarterDropdown');
+            const menu = document.getElementById('quarterDropdownMenu');
+            
+            if (!dropdown.contains(event.target)) {
+                menu.classList.add('hidden');
+                document.removeEventListener('click', closeQuarterDropdown);
+            }
         }
 
         // 初始化時間篩選器
