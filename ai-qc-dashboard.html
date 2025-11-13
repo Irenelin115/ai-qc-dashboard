@@ -592,91 +592,229 @@
         <div id="overview-content" class="space-y-6">
             <!-- Time Filter Section -->
             <div class="date-filter-section rounded-lg shadow p-6">
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    <!-- Date Range Section -->
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                            <i data-lucide="calendar" class="w-5 h-5 mr-2 text-blue-600"></i>
-                            時間範圍
-                        </h3>
-                        
-                        <!-- Custom Date Range -->
-                        <div class="flex items-center gap-2">
-                            <input type="date" 
-                                   id="startDate" 
-                                   class="time-selector border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   value="2025-01-01">
-                            <span class="text-gray-500 font-medium">~</span>
-                            <input type="date" 
-                                   id="endDate" 
-                                   class="time-selector border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   value="2025-01-31">
-                            <button onclick="applyDateFilter()" 
-                                    class="enhanced-btn ml-2" 
-                                    title="套用篩選">
-                                <i data-lucide="search" class="w-4 h-4 mr-1"></i>
-                                查詢
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Quick Filter Buttons -->
-                    <div class="flex flex-wrap items-center gap-2">
-                        <span class="text-sm text-gray-600 mr-2">快速選擇：</span>
-                        <button onclick="setQuickFilter('thisWeek')" 
-                                class="quick-time-btn bg-gray-100 hover:bg-blue-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-all">
-                            本週
+                <!-- Filter Tabs -->
+                <div class="mb-6">
+                    <div class="flex items-center space-x-1 p-1 bg-gray-100 rounded-lg w-fit">
+                        <button onclick="setFilterTab('custom')" 
+                                id="tab-custom"
+                                class="filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all bg-blue-600 text-white">
+                            自選
                         </button>
-                        <button onclick="setQuickFilter('thisMonth')" 
-                                class="quick-time-btn bg-gray-100 hover:bg-blue-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-all">
-                            本月
+                        <button onclick="setFilterTab('weekly')" 
+                                id="tab-weekly"
+                                class="filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-900">
+                            週期
                         </button>
-                        
-                        <!-- 季度下拉選單 -->
-                        <div class="relative" id="quarterDropdown">
-                            <button onclick="toggleQuarterDropdown()" 
-                                    class="quick-time-btn bg-gray-100 hover:bg-blue-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center">
-                                <span id="quarterBtnText">季度</span>
-                                <i data-lucide="chevron-down" class="w-3 h-3 ml-1"></i>
-                            </button>
-                            <div id="quarterDropdownMenu" 
-                                 class="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border z-50 min-w-32 hidden">
-                                <!-- 動態生成季度選項 -->
-                            </div>
-                        </div>
-
-                        <button onclick="setQuickFilter('thisYear')" 
-                                class="quick-time-btn bg-gray-100 hover:bg-blue-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-all">
+                        <button onclick="setFilterTab('monthly')" 
+                                id="tab-monthly"
+                                class="filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-900">
+                            月份
+                        </button>
+                        <button onclick="setFilterTab('quarterly')" 
+                                id="tab-quarterly"
+                                class="filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-900">
+                            季度
+                        </button>
+                        <button onclick="setFilterTab('yearly')" 
+                                id="tab-yearly"
+                                class="filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-900">
                             年度
                         </button>
-                        <button onclick="setQuickFilter('lastMonth')" 
-                                class="quick-time-btn bg-gray-100 hover:bg-blue-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium transition-all">
-                            上個月
-                        </button>
                     </div>
                 </div>
 
-                <!-- Current Filter Display -->
-                <div class="mt-4 pt-4 border-t border-gray-200">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i data-lucide="info" class="w-4 h-4 mr-2"></i>
-                            <span>目前顯示：</span>
-                            <span class="time-range-badge mx-2 px-3 py-1 rounded-full text-xs font-medium" id="currentRange">
-                                2025/01/01 ~ 2025/01/31
-                            </span>
-                            <span id="dataCount" class="text-gray-500">(共 700 筆資料)</span>
+                <!-- Filter Content -->
+                <div id="filter-content">
+                    <!-- Custom Date Range (自選) -->
+                    <div id="custom-filter" class="filter-content">
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-600 mb-4">
+                            </p>
+                            <div class="flex items-center gap-4 flex-wrap">
+                                <div class="flex items-center gap-2">
+                                    <input type="date" 
+                                           id="customStartDate" 
+                                           class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           onchange="validateDateRange()">
+                                    <span class="text-gray-500 font-medium">~</span>
+                                    <input type="date" 
+                                           id="customEndDate" 
+                                           class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           onchange="validateDateRange()">
+                                </div>
+                                <button onclick="applyCustomDateFilter()" 
+                                        id="customQueryBtn"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center">
+                                    <i data-lucide="search" class="w-4 h-4 mr-2"></i>
+                                    查詢
+                                </button>
+                            </div>
+                            <div id="dateValidationMessage" class="mt-2 text-sm hidden"></div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="resetFilter()" 
-                                    class="text-gray-400 hover:text-gray-600 transition-colors text-sm"
-                                    title="重設篩選">
-                                <i data-lucide="rotate-ccw" class="w-4 h-4 mr-1"></i>
-                                重設
-                            </button>
+                    </div>
+
+                    <!-- Other Filter Types (Placeholder) -->
+                    <div id="weekly-filter" class="filter-content hidden">
+                        <div class="mb-4">
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <!-- 週期選擇按鈕 -->
+                                <button onclick="setWeeklyPeriod('thisWeek')" 
+                                        id="weekly-this"
+                                        class="weekly-period-btn px-6 py-3 text-sm font-medium rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 transition-all">
+                                    本週
+                                </button>
+                                <button onclick="setWeeklyPeriod('lastWeek')" 
+                                        id="weekly-last"
+                                        class="weekly-period-btn px-6 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">
+                                    上週
+                                </button>
+                                <button onclick="setWeeklyPeriod('lastLastWeek')" 
+                                        id="weekly-lastlast"
+                                        class="weekly-period-btn px-6 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">
+                                    上上週
+                                </button>
+                                <button onclick="applyWeeklyFilter()" 
+                                        id="weeklyQueryBtn"
+                                        class="px-6 py-3 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                    查詢
+                                </button>
+                            </div>
+                            
+                            <!-- 日期顯示區域 -->
+                            <div id="weeklyDateDisplay" class="mt-4 text-sm text-gray-600">
+                                目前顯示：<span id="weeklyDateRange">請選擇週期</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="monthly-filter" class="filter-content hidden">
+                        <div class="mb-4">
+                            <!-- 年份選擇區域 -->
+                            <div class="mb-4 flex items-center justify-center gap-4">
+                                <button onclick="changeYear(-1)" 
+                                        class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                    </svg>
+                                </button>
+                                <input type="text" 
+                                       id="monthlyYearInput" 
+                                       value="2025" 
+                                       onchange="validateAndSetYear()" 
+                                       onblur="validateAndSetYear()"
+                                       class="text-center text-2xl font-semibold text-blue-600 bg-transparent border-none focus:outline-none focus:ring-0 w-20">
+                                <button onclick="changeYear(1)" 
+                                        class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <!-- 月份選擇區域 -->
+                            <div class="grid grid-cols-6 gap-3 mb-4">
+                                <!-- 第一行：1-6月 -->
+                                <button onclick="setMonthlyPeriod(1)" id="monthly-1" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">1月</button>
+                                <button onclick="setMonthlyPeriod(2)" id="monthly-2" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">2月</button>
+                                <button onclick="setMonthlyPeriod(3)" id="monthly-3" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">3月</button>
+                                <button onclick="setMonthlyPeriod(4)" id="monthly-4" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">4月</button>
+                                <button onclick="setMonthlyPeriod(5)" id="monthly-5" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">5月</button>
+                                <button onclick="setMonthlyPeriod(6)" id="monthly-6" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">6月</button>
+                                <!-- 第二行：7-12月 -->
+                                <button onclick="setMonthlyPeriod(7)" id="monthly-7" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">7月</button>
+                                <button onclick="setMonthlyPeriod(8)" id="monthly-8" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">8月</button>
+                                <button onclick="setMonthlyPeriod(9)" id="monthly-9" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">9月</button>
+                                <button onclick="setMonthlyPeriod(10)" id="monthly-10" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">10月</button>
+                                <button onclick="setMonthlyPeriod(11)" id="monthly-11" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">11月</button>
+                                <button onclick="setMonthlyPeriod(12)" id="monthly-12" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">12月</button>
+                            </div>
+                            
+                            <!-- 查詢按鈕 -->
+                            <div class="flex justify-end">
+                                <button onclick="applyMonthlyFilter()" 
+                                        id="monthlyQueryBtn"
+                                        class="px-6 py-3 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                    查詢
+                                </button>
+                            </div>
+                            
+                            <!-- 日期顯示區域 -->
+                            <div id="monthlyDateDisplay" class="mt-4 text-sm text-gray-600">
+                                目前顯示：<span id="monthlyDateRange">請選擇月份</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="quarterly-filter" class="filter-content hidden">
+                        <div class="mb-4">
+                            <!-- 年份選擇區域 -->
+                            <div class="mb-4 flex items-center gap-3">
+                                <label class="text-sm font-medium text-gray-700">選擇年度：</label>
+                                <select id="quarterlyYearSelector" onchange="changeQuarterlyYear()" 
+                                        class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                    <!-- 年份選項會動態生成 -->
+                                </select>
+                            </div>
+                            
+                            <!-- 季度選擇區域 -->
+                            <div class="flex items-center gap-3 flex-wrap mb-4">
+                                <button onclick="setQuarterlyPeriod(1)" 
+                                        id="quarterly-q1"
+                                        class="quarterly-btn px-6 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">
+                                    Q1
+                                </button>
+                                <button onclick="setQuarterlyPeriod(2)" 
+                                        id="quarterly-q2"
+                                        class="quarterly-btn px-6 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">
+                                    Q2
+                                </button>
+                                <button onclick="setQuarterlyPeriod(3)" 
+                                        id="quarterly-q3"
+                                        class="quarterly-btn px-6 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">
+                                    Q3
+                                </button>
+                                <button onclick="setQuarterlyPeriod(4)" 
+                                        id="quarterly-q4"
+                                        class="quarterly-btn px-6 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">
+                                    Q4
+                                </button>
+                                <button onclick="applyQuarterlyFilter()" 
+                                        id="quarterlyQueryBtn"
+                                        class="px-6 py-3 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                    查詢
+                                </button>
+                            </div>
+                            
+                            <!-- 日期顯示區域 -->
+                            <div id="quarterlyDateDisplay" class="mt-4 text-sm text-gray-600">
+                                目前顯示：<span id="quarterlyDateRange">請選擇季度</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="yearly-filter" class="filter-content hidden">
+                        <div class="mb-4">
+                            <!-- 年份選擇區域 -->
+                            <div class="mb-4 flex items-center gap-3">
+                                <select id="yearlyYearSelector" onchange="setYearlySelection()" 
+                                        class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                    <!-- 年份選項會動態生成 -->
+                                </select>
+                                <button onclick="applyYearlyFilter()" 
+                                        id="yearlyQueryBtn"
+                                        class="px-6 py-3 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                    查詢
+                                </button>
+                            </div>
+                            
+                            <!-- 日期顯示區域 -->
+                            <div id="yearlyDateDisplay" class="mt-4 text-sm text-gray-600">
+                                目前顯示：<span id="yearlyDateRange">請選擇年度</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+
             </div>
 
             <!-- Key Metrics -->
@@ -1344,6 +1482,87 @@
                     <h4 class="font-semibold text-gray-900 mb-2">需要輔導</h4>
                     <div class="text-2xl font-bold text-orange-600">3人</div>
                     <p class="text-sm text-gray-600 mt-1">分數低於80分</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agent Detail Modal -->
+        <div id="agentDetailModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+            <div style="background: white; margin: 30px auto; width: 95%; max-width: 1200px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); max-height: 90vh; overflow: hidden; display: flex; flex-direction: column;">
+                
+                <!-- Modal Header -->
+                <div style="background: #F3F4F6; border-bottom: 1px solid #E5E7EB; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 id="modalAgentName" style="margin: 0; font-size: 18px; font-weight: 600; color: #1F2937;">客服詳細分析</h3>
+                    </div>
+                    <button onclick="closeAgentDetailModal()" style="background: none; border: none; color: #6B7280; font-size: 20px; cursor: pointer; padding: 4px; border-radius: 4px; hover: background-color: #F3F4F6;">×</button>
+                </div>
+
+                <!-- Modal Content -->
+                <div style="flex: 1; overflow-y: auto; padding: 20px;">
+                    
+                    <!-- Overall Score Card -->
+                    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
+                        <div style="background: #3B82F6; color: white; border-radius: 8px; padding: 16px; display: inline-block; margin-bottom: 12px;">
+                            <div style="font-size: 24px; font-weight: bold;">AI 質檢結果</div>
+                            <div id="modalOverallScore" style="font-size: 32px; font-weight: bold; margin-top: 8px;">92</div>
+                            <div style="font-size: 14px; opacity: 0.9;">分</div>
+                        </div>
+                    </div>
+
+                    <!-- Quality Analysis Table -->
+                    <div style="background: white; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
+                        <div style="background: #F9FAFB; padding: 12px 16px; border-bottom: 1px solid #E5E7EB; font-weight: 600; color: #374151;">
+                            📋 指標型
+                        </div>
+                        <div style="padding: 16px;">
+                            <div id="modalMetricScores" style="space-y: 12px;">
+                                <!-- 動態生成指標型內容 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Analysis Table -->
+                    <div style="background: white; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
+                        <div style="background: #F9FAFB; padding: 12px 16px; border-bottom: 1px solid #E5E7EB; font-weight: 600; color: #374151;">
+                            📊 摘要型
+                        </div>
+                        <div style="padding: 16px;">
+                            <div id="modalSummaryScores">
+                                <!-- 動態生成摘要型內容 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Call Records Table -->
+                    <div style="background: white; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden;">
+                        <div style="background: #F9FAFB; padding: 12px 16px; border-bottom: 1px solid #E5E7EB; font-weight: 600; color: #374151; display: flex; justify-content: space-between; align-items: center;">
+                            <span>📞 質檢記錄明細</span>
+                            <button style="background: #3B82F6; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">匯出報表</button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead style="background: #F9FAFB;">
+                                    <tr>
+                                        <th style="padding: 8px 12px; text-align: left; font-size: 12px; color: #6B7280; border-bottom: 1px solid #E5E7EB;">日期</th>
+                                        <th style="padding: 8px 12px; text-align: left; font-size: 12px; color: #6B7280; border-bottom: 1px solid #E5E7EB;">時間</th>
+                                        <th style="padding: 8px 12px; text-align: left; font-size: 12px; color: #6B7280; border-bottom: 1px solid #E5E7EB;">總分</th>
+                                        <th style="padding: 8px 12px; text-align: left; font-size: 12px; color: #6B7280; border-bottom: 1px solid #E5E7EB;">主要問題</th>
+                                        <th style="padding: 8px 12px; text-align: left; font-size: 12px; color: #6B7280; border-bottom: 1px solid #E5E7EB;">功能</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="modalCallRecords">
+                                    <!-- 動態生成通話記錄 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <!-- Modal Footer -->
+                <div style="background: #F9FAFB; border-top: 1px solid #E5E7EB; padding: 12px 24px; text-align: right;">
+                    <button onclick="closeAgentDetailModal()" style="background: #6B7280; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px;">關閉</button>
                 </div>
             </div>
         </div>
@@ -3344,7 +3563,10 @@ function initComplianceChart() {
             
             agentPerformance.forEach((agent, index) => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50';
+                tr.className = 'hover:bg-gray-50 cursor-pointer';
+                tr.onclick = () => {
+                    openAgentDetailModal(agent);
+                };
                 
                 const rankClass = index === 0 ? 'bg-yellow-100 text-yellow-800' :
                                  index === 1 ? 'bg-gray-100 text-gray-800' :
@@ -3383,6 +3605,133 @@ function initComplianceChart() {
                 tbody.appendChild(tr);
             });
         }
+
+        // Agent Detail Modal Functions
+        function openAgentDetailModal(agent) {
+            // Update modal content
+            document.getElementById('modalAgentName').textContent = `${agent.name} - 質檢結果詳細分析`;
+            document.getElementById('modalOverallScore').textContent = agent.score;
+            
+            // Generate detailed analysis data
+            generateModalContent(agent);
+            
+            // Show modal
+            document.getElementById('agentDetailModal').style.display = 'block';
+        }
+        
+        function generateModalContent(agent) {
+            // Generate metric scores (指標型)
+            const metricScores = [
+                { name: '話術檢測', score: Math.floor(agent.score * 0.85), items: ['禮貌性', '話術檢測', '商品說明', '產品賣點', '售後'] },
+                { name: '敏感詞檢測', score: Math.floor(agent.score * 0.95), items: ['價格', '法規合規性檢查', '產品賣點'] }
+            ];
+            
+            let metricHtml = '';
+            metricScores.forEach(metric => {
+                const status = metric.score >= 80 ? 'good' : metric.score >= 60 ? 'warning' : 'danger';
+                const statusColor = status === 'good' ? '#10B981' : status === 'warning' ? '#F59E0B' : '#EF4444';
+                const statusText = status === 'good' ? '通過' : status === 'warning' ? '不合格' : '不合格';
+                
+                metricHtml += `
+                    <div style="border-bottom: 1px solid #E5E7EB; padding: 12px 0; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: #374151; margin-bottom: 8px;">${metric.name}</div>
+                            <div style="display: flex; flex-wrap: gap: 4px;">
+                                ${metric.items.map(item => `
+                                    <span style="background: #F3F4F6; color: #6B7280; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+                                        ${item}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div style="text-align: right; margin-left: 16px;">
+                            <div style="color: ${statusColor}; font-weight: 600; font-size: 14px;">${statusText}</div>
+                            <div style="color: ${statusColor}; font-weight: bold; font-size: 18px;">${metric.score}/100 分</div>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('modalMetricScores').innerHTML = metricHtml;
+            
+            // Generate summary scores (摘要型)
+            const summaryScores = [
+                { name: '準確面/問題處理', score: Math.floor(agent.score * 0.75) },
+                { name: '權威面/基本應對', score: Math.floor(agent.score * 0.65) },
+                { name: '整體感受', score: Math.floor(agent.score * 0.8) }
+            ];
+            
+            let summaryHtml = '';
+            summaryScores.forEach(summary => {
+                const status = summary.score >= 80 ? 'good' : summary.score >= 60 ? 'warning' : 'danger';
+                const statusColor = status === 'good' ? '#10B981' : status === 'warning' ? '#F59E0B' : '#EF4444';
+                const statusText = status === 'good' ? '通過' : status === 'warning' ? '不合格' : '不合格';
+                
+                summaryHtml += `
+                    <div style="border-bottom: 1px solid #E5E7EB; padding: 12px 0; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="font-weight: 600; color: #374151;">${summary.name}</div>
+                        <div style="text-align: right;">
+                            <div style="color: ${statusColor}; font-weight: 600; font-size: 14px;">${statusText}</div>
+                            <div style="color: ${statusColor}; font-weight: bold; font-size: 18px;">${summary.score}/100 分</div>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('modalSummaryScores').innerHTML = summaryHtml;
+            
+            // Generate call records
+            const callRecords = generateCallRecords(agent);
+            let recordsHtml = '';
+            callRecords.forEach(record => {
+                const scoreColor = record.score >= 80 ? '#10B981' : record.score >= 60 ? '#F59E0B' : '#EF4444';
+                recordsHtml += `
+                    <tr style="border-bottom: 1px solid #E5E7EB;">
+                        <td style="padding: 8px 12px; font-size: 14px;">${record.date}</td>
+                        <td style="padding: 8px 12px; font-size: 14px;">${record.time}</td>
+                        <td style="padding: 8px 12px; font-weight: 600; color: ${scoreColor};">${record.score} 分</td>
+                        <td style="padding: 8px 12px; color: #6B7280;">${record.mainIssue}</td>
+                        <td style="padding: 8px 12px;">
+                            <button style="background: #3B82F6; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">詳細</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('modalCallRecords').innerHTML = recordsHtml;
+        }
+        
+        function generateCallRecords(agent) {
+            const records = [];
+            const today = new Date();
+            
+            for (let i = 0; i < 8; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                
+                const score = Math.floor(Math.random() * 40) + 60;
+                const issues = ['無', '話術檢測不佳', '敏感詞使用', '服務態度', '專業術語過多'];
+                const mainIssue = score >= 85 ? '無' : issues[Math.floor(Math.random() * (issues.length - 1)) + 1];
+                
+                records.push({
+                    date: date.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' }),
+                    time: `${String(Math.floor(Math.random() * 10) + 8).padStart(2, '0')}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
+                    score: score,
+                    mainIssue: mainIssue
+                });
+            }
+            
+            return records;
+        }
+        
+        function closeAgentDetailModal() {
+            document.getElementById('agentDetailModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('agentDetailModal');
+            if (event.target === modal) {
+                closeAgentDetailModal();
+            }
+        });
 
         // Refresh data function
         function refreshData() {
@@ -3525,6 +3874,749 @@ SysTalk.Audit 質檢報表
         }
 
         // === 時間篩選功能 ===
+
+        // 設定篩選標籤
+        function setFilterTab(tabType) {
+            // 清除所有標籤的活躍狀態
+            const tabs = ['custom', 'weekly', 'monthly', 'quarterly', 'yearly'];
+            tabs.forEach(tab => {
+                const tabElement = document.getElementById(`tab-${tab}`);
+                const contentElement = document.getElementById(`${tab}-filter`);
+                
+                if (tab === tabType) {
+                    tabElement.className = 'filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all bg-blue-600 text-white';
+                    contentElement.classList.remove('hidden');
+                } else {
+                    tabElement.className = 'filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-900';
+                    contentElement.classList.add('hidden');
+                }
+            });
+
+            // 如果切換到自選標籤，初始化日期限制
+            if (tabType === 'custom') {
+                initializeDateLimits();
+            }
+            
+            // 如果切換到月份標籤，初始化月份篩選器
+            if (tabType === 'monthly') {
+                initMonthlyFilter();
+            }
+            
+            // 如果切換到季度標籤，初始化季度篩選器
+            if (tabType === 'quarterly') {
+                initQuarterlyFilter();
+            }
+            
+            // 如果切換到年度標籤，初始化年度篩選器
+            if (tabType === 'yearly') {
+                initYearlyFilter();
+            }
+        }
+
+        // 初始化日期限制（五年內）
+        function initializeDateLimits() {
+            const today = new Date();
+            const fiveYearsAgo = new Date();
+            fiveYearsAgo.setFullYear(today.getFullYear() - 5);
+            
+            const startInput = document.getElementById('customStartDate');
+            const endInput = document.getElementById('customEndDate');
+            
+            // 設定最小和最大日期
+            startInput.min = formatDateForInput(fiveYearsAgo);
+            startInput.max = formatDateForInput(today);
+            endInput.min = formatDateForInput(fiveYearsAgo);
+            endInput.max = formatDateForInput(today);
+            
+            // 設定預設值（本月）
+            if (!startInput.value) {
+                const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                startInput.value = formatDateForInput(startOfMonth);
+                endInput.value = formatDateForInput(endOfMonth);
+            }
+        }
+
+        // 驗證日期範圍
+        function validateDateRange() {
+            const startDate = document.getElementById('customStartDate').value;
+            const endDate = document.getElementById('customEndDate').value;
+            const messageElement = document.getElementById('dateValidationMessage');
+            const queryBtn = document.getElementById('customQueryBtn');
+            
+            if (!startDate || !endDate) {
+                showMessage('請選擇完整的日期範圍', 'warning');
+                queryBtn.disabled = true;
+                return false;
+            }
+            
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const today = new Date();
+            const fiveYearsAgo = new Date();
+            fiveYearsAgo.setFullYear(today.getFullYear() - 5);
+            
+            // 檢查日期順序
+            if (start > end) {
+                showMessage('開始日期不能晚於結束日期', 'error');
+                queryBtn.disabled = true;
+                return false;
+            }
+            
+            // 檢查日期範圍（五年內）
+            if (start < fiveYearsAgo || end > today) {
+                showMessage('查詢範圍僅限近五年內的資料', 'error');
+                queryBtn.disabled = true;
+                return false;
+            }
+            
+            // 檢查時間跨度（不超過五年）
+            const timeDiff = end.getTime() - start.getTime();
+            const fiveYears = 5 * 365 * 24 * 60 * 60 * 1000; // 5年的毫秒數
+            if (timeDiff > fiveYears) {
+                showMessage('查詢時間跨度不得超過五年', 'error');
+                queryBtn.disabled = true;
+                return false;
+            }
+            
+            // 通過驗證
+            hideMessage();
+            queryBtn.disabled = false;
+            return true;
+        }
+
+        // 顯示驗證訊息
+        function showMessage(message, type) {
+            const messageElement = document.getElementById('dateValidationMessage');
+            const colorClasses = {
+                'error': 'text-red-600 bg-red-50 border border-red-200',
+                'warning': 'text-yellow-600 bg-yellow-50 border border-yellow-200',
+                'info': 'text-blue-600 bg-blue-50 border border-blue-200'
+            };
+            
+            messageElement.textContent = message;
+            messageElement.className = `mt-2 text-sm px-3 py-2 rounded ${colorClasses[type] || colorClasses.info}`;
+            messageElement.classList.remove('hidden');
+        }
+
+        // 隱藏驗證訊息
+        function hideMessage() {
+            const messageElement = document.getElementById('dateValidationMessage');
+            messageElement.classList.add('hidden');
+        }
+
+        // 套用自選日期篩選
+        function applyCustomDateFilter() {
+            if (!validateDateRange()) {
+                return;
+            }
+            
+            const startDate = document.getElementById('customStartDate').value;
+            const endDate = document.getElementById('customEndDate').value;
+            
+            // 套用篩選並更新顯示
+            applyFilter(startDate, endDate, 'custom');
+        }
+
+        // === 週期篩選功能 ===
+        let selectedWeeklyPeriod = null;
+
+        // 設定週期選擇
+        function setWeeklyPeriod(period) {
+            selectedWeeklyPeriod = period;
+            
+            // 清除其他按鈕的選中狀態
+            const weeklyBtns = document.querySelectorAll('.weekly-period-btn');
+            weeklyBtns.forEach(btn => {
+                btn.classList.remove('border-blue-600', 'text-blue-600', 'bg-blue-50');
+                btn.classList.add('border-gray-300', 'text-gray-600');
+            });
+            
+            // 設定當前按鈕為選中狀態
+            let btnId = '';
+            switch(period) {
+                case 'thisWeek':
+                    btnId = 'weekly-this';
+                    break;
+                case 'lastWeek':
+                    btnId = 'weekly-last';
+                    break;
+                case 'lastLastWeek':
+                    btnId = 'weekly-lastlast';
+                    break;
+            }
+            
+            const currentBtn = document.getElementById(btnId);
+            if (currentBtn) {
+                currentBtn.classList.add('border-blue-600', 'text-blue-600', 'bg-blue-50');
+                currentBtn.classList.remove('border-gray-300', 'text-gray-600');
+            }
+            
+            // 計算並顯示日期範圍
+            const dateRange = calculateWeekRange(period);
+            updateWeeklyDateDisplay(dateRange);
+        }
+
+        // 計算週期日期範圍
+        function calculateWeekRange(period) {
+            const today = new Date();
+            const currentDay = today.getDay(); // 0=週日, 1=週一, ..., 6=週六
+            
+            // 計算本週一的日期
+            const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+            const thisMonday = new Date(today);
+            thisMonday.setDate(today.getDate() + mondayOffset);
+            
+            let startDate, endDate;
+            
+            switch(period) {
+                case 'thisWeek':
+                    startDate = new Date(thisMonday);
+                    endDate = new Date(thisMonday);
+                    endDate.setDate(thisMonday.getDate() + 6); // 週日
+                    break;
+                    
+                case 'lastWeek':
+                    startDate = new Date(thisMonday);
+                    startDate.setDate(thisMonday.getDate() - 7); // 上週一
+                    endDate = new Date(startDate);
+                    endDate.setDate(startDate.getDate() + 6); // 上週日
+                    break;
+                    
+                case 'lastLastWeek':
+                    startDate = new Date(thisMonday);
+                    startDate.setDate(thisMonday.getDate() - 14); // 上上週一
+                    endDate = new Date(startDate);
+                    endDate.setDate(startDate.getDate() + 6); // 上上週日
+                    break;
+                    
+                default:
+                    return null;
+            }
+            
+            return {
+                start: startDate,
+                end: endDate,
+                startStr: formatDate(startDate),
+                endStr: formatDate(endDate)
+            };
+        }
+
+        // 格式化日期為 YYYY/MM/DD
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}/${month}/${day}`;
+        }
+
+        // 更新週期日期顯示
+        function updateWeeklyDateDisplay(dateRange) {
+            if (!dateRange) {
+                document.getElementById('weeklyDateRange').textContent = '請選擇週期';
+                return;
+            }
+            
+            const displayText = `${dateRange.startStr} ~ ${dateRange.endStr}`;
+            document.getElementById('weeklyDateRange').textContent = displayText;
+        }
+
+        // 套用週期篩選
+        function applyWeeklyFilter() {
+            if (!selectedWeeklyPeriod) {
+                showMessage('請先選擇週期', 'warning');
+                return;
+            }
+            
+            const dateRange = calculateWeekRange(selectedWeeklyPeriod);
+            if (!dateRange) {
+                showMessage('日期範圍計算錯誤', 'error');
+                return;
+            }
+            
+            // 轉換為 YYYY-MM-DD 格式供系統使用
+            const startDate = dateRange.start.toISOString().split('T')[0];
+            const endDate = dateRange.end.toISOString().split('T')[0];
+            
+            // 套用篩選並更新顯示
+            applyFilter(startDate, endDate, 'weekly');
+            showMessage(`已套用 ${getPeriodName(selectedWeeklyPeriod)} 篩選條件`, 'info');
+        }
+
+        // 取得週期名稱
+        function getPeriodName(period) {
+            const names = {
+                'thisWeek': '本週',
+                'lastWeek': '上週',
+                'lastLastWeek': '上上週'
+            };
+            return names[period] || period;
+        }
+
+        // === 月份篩選功能 ===
+        let selectedMonth = null;
+        let selectedYear = null;
+
+        // 初始化月份篩選器
+        function initMonthlyFilter() {
+            const today = new Date();
+            selectedYear = today.getFullYear();
+            
+            // 初始化年份輸入框
+            document.getElementById('monthlyYearInput').value = selectedYear;
+            
+            // 更新月份按鈕狀態
+            updateMonthlyButtonStates();
+        }
+
+        // 左右箭頭切換年份
+        function changeYear(direction) {
+            const yearInput = document.getElementById('monthlyYearInput');
+            const currentYear = parseInt(yearInput.value) || new Date().getFullYear();
+            const newYear = currentYear + direction;
+            
+            // 檢查年份限制（5年內）
+            const today = new Date();
+            const minYear = today.getFullYear() - 4;
+            const maxYear = today.getFullYear();
+            
+            if (newYear < minYear || newYear > maxYear) {
+                showMessage(`年份範圍限制在 ${minYear} - ${maxYear} 年內`, 'warning');
+                return;
+            }
+            
+            selectedYear = newYear;
+            yearInput.value = newYear;
+            selectedMonth = null; // 重置月份選擇
+            
+            // 更新月份按鈕狀態
+            updateMonthlyButtonStates();
+            
+            // 重置日期顯示
+            document.getElementById('monthlyDateRange').textContent = '請選擇月份';
+        }
+
+        // 驗證並設定年份
+        function validateAndSetYear() {
+            const yearInput = document.getElementById('monthlyYearInput');
+            const inputYear = parseInt(yearInput.value);
+            const today = new Date();
+            const minYear = today.getFullYear() - 4;
+            const maxYear = today.getFullYear();
+            
+            // 檢查是否為有效數字
+            if (isNaN(inputYear)) {
+                showMessage('請輸入有效的年份', 'error');
+                yearInput.value = selectedYear; // 恢復原值
+                return;
+            }
+            
+            // 檢查年份範圍
+            if (inputYear < minYear || inputYear > maxYear) {
+                showMessage(`年份範圍限制在 ${minYear} - ${maxYear} 年內`, 'warning');
+                yearInput.value = selectedYear; // 恢復原值
+                return;
+            }
+            
+            selectedYear = inputYear;
+            selectedMonth = null; // 重置月份選擇
+            
+            // 更新月份按鈕狀態
+            updateMonthlyButtonStates();
+            
+            // 重置日期顯示
+            document.getElementById('monthlyDateRange').textContent = '請選擇月份';
+        }
+
+        // 更新月份按鈕狀態
+        function updateMonthlyButtonStates() {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth() + 1; // JavaScript月份是0-11，轉換為1-12
+            
+            for (let month = 1; month <= 12; month++) {
+                const btn = document.getElementById(`monthly-${month}`);
+                if (btn) {
+                    // 重置按鈕樣式
+                    btn.classList.remove('border-blue-600', 'text-blue-600', 'bg-blue-50', 'opacity-50', 'cursor-not-allowed');
+                    btn.classList.add('border-gray-300', 'text-gray-600', 'hover:bg-gray-50');
+                    btn.disabled = false;
+                    
+                    // 只有當選擇的年份是當前年份時，才禁用未來月份
+                    if (selectedYear === currentYear && month > currentMonth) {
+                        btn.classList.add('opacity-50', 'cursor-not-allowed');
+                        btn.classList.remove('hover:bg-gray-50');
+                        btn.disabled = true;
+                    }
+                    
+                    // 如果是選中的月份，高亮顯示
+                    if (selectedMonth === month) {
+                        btn.classList.remove('border-gray-300', 'text-gray-600');
+                        btn.classList.add('border-blue-600', 'text-blue-600', 'bg-blue-50');
+                        
+                        // 如果選中的是禁用的月份，恢復禁用樣式
+                        if (btn.disabled) {
+                            btn.classList.add('opacity-50');
+                        }
+                    }
+                }
+            }
+        }
+
+        // 設定月份選擇
+        function setMonthlyPeriod(month) {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth() + 1;
+            
+            // 檢查是否選擇未來月份
+            if (selectedYear === currentYear && month > currentMonth) {
+                showMessage('無法選擇尚未到達的月份', 'warning');
+                return;
+            }
+            
+            selectedMonth = month;
+            
+            // 更新按鈕狀態
+            updateMonthlyButtonStates();
+            
+            // 計算並顯示日期範圍
+            const dateRange = calculateMonthRange(selectedYear, month);
+            updateMonthlyDateDisplay(dateRange, month);
+        }
+
+        // 計算月份日期範圍
+        function calculateMonthRange(year, month) {
+            const startDate = new Date(year, month - 1, 1); // 月份的第一天
+            const endDate = new Date(year, month, 0); // 月份的最後一天
+            
+            return {
+                start: startDate,
+                end: endDate,
+                startStr: formatDate(startDate),
+                endStr: formatDate(endDate)
+            };
+        }
+
+        // 更新月份日期顯示
+        function updateMonthlyDateDisplay(dateRange, month) {
+            if (!dateRange) {
+                document.getElementById('monthlyDateRange').textContent = '請選擇月份';
+                return;
+            }
+            
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth() + 1;
+            const currentDate = today.getDate();
+            
+            let displayText = `${dateRange.startStr} ~ ${dateRange.endStr}`;
+            
+            // 如果是當前月份，顯示截至目前的資料說明
+            if (selectedYear === currentYear && month === currentMonth) {
+                const todayStr = formatDate(today);
+                displayText = `${dateRange.startStr} ~ ${todayStr} (截至目前已產出資料)`;
+            }
+            
+            document.getElementById('monthlyDateRange').textContent = displayText;
+        }
+
+        // 套用月份篩選
+        function applyMonthlyFilter() {
+            if (!selectedMonth) {
+                showMessage('請先選擇月份', 'warning');
+                return;
+            }
+            
+            const dateRange = calculateMonthRange(selectedYear, selectedMonth);
+            if (!dateRange) {
+                showMessage('日期範圍計算錯誤', 'error');
+                return;
+            }
+            
+            // 轉換為 YYYY-MM-DD 格式供系統使用
+            const startDate = dateRange.start.toISOString().split('T')[0];
+            const endDate = dateRange.end.toISOString().split('T')[0];
+            
+            // 套用篩選並更新顯示
+            applyFilter(startDate, endDate, 'monthly');
+            showMessage(`已套用 ${selectedYear}年${selectedMonth}月 篩選條件`, 'info');
+        }
+
+        // === 季度篩選功能 ===
+        let selectedQuarter = null;
+        let selectedQuarterlyYear = null;
+
+        // 初始化季度篩選器
+        function initQuarterlyFilter() {
+            const today = new Date();
+            selectedQuarterlyYear = today.getFullYear();
+            
+            // 初始化年份選擇器
+            initQuarterlyYearSelector();
+            
+            // 更新季度按鈕狀態
+            updateQuarterlyButtonStates();
+        }
+
+        // 初始化季度年份選擇器
+        function initQuarterlyYearSelector() {
+            const yearSelector = document.getElementById('quarterlyYearSelector');
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            
+            // 清空現有選項
+            yearSelector.innerHTML = '';
+            
+            // 生成近5年的年份選項
+            for (let year = currentYear; year >= currentYear - 4; year--) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = `${year}年`;
+                option.selected = (year === selectedQuarterlyYear);
+                yearSelector.appendChild(option);
+            }
+        }
+
+        // 切換季度年份
+        function changeQuarterlyYear() {
+            const yearSelector = document.getElementById('quarterlyYearSelector');
+            selectedQuarterlyYear = parseInt(yearSelector.value);
+            selectedQuarter = null; // 重置季度選擇
+            
+            // 更新季度按鈕狀態
+            updateQuarterlyButtonStates();
+            
+            // 重置日期顯示
+            document.getElementById('quarterlyDateRange').textContent = '請選擇季度';
+        }
+
+        // 更新季度按鈕狀態
+        function updateQuarterlyButtonStates() {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentQuarter = Math.floor((today.getMonth() + 3) / 3); // 計算當前季度
+            
+            for (let quarter = 1; quarter <= 4; quarter++) {
+                const btn = document.getElementById(`quarterly-q${quarter}`);
+                if (btn) {
+                    // 重置按鈕樣式
+                    btn.classList.remove('border-blue-600', 'text-blue-600', 'bg-blue-50', 'opacity-50', 'cursor-not-allowed');
+                    btn.classList.add('border-gray-300', 'text-gray-600', 'hover:bg-gray-50');
+                    btn.disabled = false;
+                    
+                    // 只有當選擇的年份是當前年份時，才禁用未來季度
+                    if (selectedQuarterlyYear === currentYear && quarter > currentQuarter) {
+                        btn.classList.add('opacity-50', 'cursor-not-allowed');
+                        btn.classList.remove('hover:bg-gray-50');
+                        btn.disabled = true;
+                    }
+                    
+                    // 如果是選中的季度，高亮顯示
+                    if (selectedQuarter === quarter) {
+                        btn.classList.remove('border-gray-300', 'text-gray-600');
+                        btn.classList.add('border-blue-600', 'text-blue-600', 'bg-blue-50');
+                        
+                        // 如果選中的是禁用的季度，恢復禁用樣式
+                        if (btn.disabled) {
+                            btn.classList.add('opacity-50');
+                        }
+                    }
+                }
+            }
+        }
+
+        // 設定季度選擇
+        function setQuarterlyPeriod(quarter) {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentQuarter = Math.floor((today.getMonth() + 3) / 3);
+            
+            // 檢查是否選擇未來季度
+            if (selectedQuarterlyYear === currentYear && quarter > currentQuarter) {
+                showMessage('無法選擇尚未到達的季度', 'warning');
+                return;
+            }
+            
+            selectedQuarter = quarter;
+            
+            // 更新按鈕狀態
+            updateQuarterlyButtonStates();
+            
+            // 計算並顯示日期範圍
+            const dateRange = calculateQuarterRange(selectedQuarterlyYear, quarter);
+            updateQuarterlyDateDisplay(dateRange, quarter);
+        }
+
+        // 計算季度日期範圍
+        function calculateQuarterRange(year, quarter) {
+            const startMonth = (quarter - 1) * 3; // 季度起始月份 (0-based)
+            const startDate = new Date(year, startMonth, 1); // 季度第一天
+            const endDate = new Date(year, startMonth + 3, 0); // 季度最後一天
+            
+            return {
+                start: startDate,
+                end: endDate,
+                startStr: formatDate(startDate),
+                endStr: formatDate(endDate)
+            };
+        }
+
+        // 更新季度日期顯示
+        function updateQuarterlyDateDisplay(dateRange, quarter) {
+            if (!dateRange) {
+                document.getElementById('quarterlyDateRange').textContent = '請選擇季度';
+                return;
+            }
+            
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentQuarter = Math.floor((today.getMonth() + 3) / 3);
+            
+            let displayText = `${dateRange.startStr} ~ ${dateRange.endStr}`;
+            
+            // 如果是當前季度，顯示截至目前的資料說明
+            if (selectedQuarterlyYear === currentYear && quarter === currentQuarter) {
+                const todayStr = formatDate(today);
+                displayText = `${dateRange.startStr} ~ ${todayStr} (截至目前已產出資料)`;
+            }
+            
+            document.getElementById('quarterlyDateRange').textContent = displayText;
+        }
+
+        // 套用季度篩選
+        function applyQuarterlyFilter() {
+            if (!selectedQuarter) {
+                showMessage('請先選擇季度', 'warning');
+                return;
+            }
+            
+            const dateRange = calculateQuarterRange(selectedQuarterlyYear, selectedQuarter);
+            if (!dateRange) {
+                showMessage('日期範圍計算錯誤', 'error');
+                return;
+            }
+            
+            // 轉換為 YYYY-MM-DD 格式供系統使用
+            const startDate = dateRange.start.toISOString().split('T')[0];
+            const endDate = dateRange.end.toISOString().split('T')[0];
+            
+            // 套用篩選並更新顯示
+            applyFilter(startDate, endDate, 'quarterly');
+            showMessage(`已套用 ${selectedQuarterlyYear}年Q${selectedQuarter} 篩選條件`, 'info');
+        }
+
+        // === 年度篩選功能 ===
+        let selectedYearlyYear = null;
+
+        // 初始化年度篩選器
+        function initYearlyFilter() {
+            const today = new Date();
+            selectedYearlyYear = today.getFullYear();
+            
+            // 初始化年份選擇器
+            initYearlyYearSelector();
+            
+            // 更新日期顯示
+            updateYearlyDateDisplay();
+        }
+
+        // 初始化年度年份選擇器
+        function initYearlyYearSelector() {
+            const yearSelector = document.getElementById('yearlyYearSelector');
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            
+            // 清空現有選項
+            yearSelector.innerHTML = '';
+            
+            // 添加預設選項
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = '請選擇年度';
+            defaultOption.selected = true;
+            yearSelector.appendChild(defaultOption);
+            
+            // 生成近5年的年份選項
+            for (let year = currentYear; year >= currentYear - 4; year--) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = `${year}年`;
+                yearSelector.appendChild(option);
+            }
+        }
+
+        // 設定年度選擇
+        function setYearlySelection() {
+            const yearSelector = document.getElementById('yearlyYearSelector');
+            const selectedValue = yearSelector.value;
+            
+            if (selectedValue === '') {
+                selectedYearlyYear = null;
+                document.getElementById('yearlyDateRange').textContent = '請選擇年度';
+                return;
+            }
+            
+            selectedYearlyYear = parseInt(selectedValue);
+            updateYearlyDateDisplay();
+        }
+
+        // 計算年度日期範圍
+        function calculateYearRange(year) {
+            const startDate = new Date(year, 0, 1); // 年度第一天 (1月1日)
+            const endDate = new Date(year, 11, 31); // 年度最後一天 (12月31日)
+            
+            return {
+                start: startDate,
+                end: endDate,
+                startStr: formatDate(startDate),
+                endStr: formatDate(endDate)
+            };
+        }
+
+        // 更新年度日期顯示
+        function updateYearlyDateDisplay() {
+            if (!selectedYearlyYear) {
+                document.getElementById('yearlyDateRange').textContent = '請選擇年度';
+                return;
+            }
+            
+            const dateRange = calculateYearRange(selectedYearlyYear);
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            
+            let displayText = `${dateRange.startStr} ~ ${dateRange.endStr}`;
+            
+            // 如果是當前年度，顯示截至目前的資料說明
+            if (selectedYearlyYear === currentYear) {
+                const todayStr = formatDate(today);
+                displayText = `${dateRange.startStr} ~ ${todayStr} (截至目前已產出資料)`;
+            }
+            
+            document.getElementById('yearlyDateRange').textContent = displayText;
+        }
+
+        // 套用年度篩選
+        function applyYearlyFilter() {
+            if (!selectedYearlyYear) {
+                showMessage('請先選擇年度', 'warning');
+                return;
+            }
+            
+            const dateRange = calculateYearRange(selectedYearlyYear);
+            if (!dateRange) {
+                showMessage('日期範圍計算錯誤', 'error');
+                return;
+            }
+            
+            // 轉換為 YYYY-MM-DD 格式供系統使用
+            const startDate = dateRange.start.toISOString().split('T')[0];
+            const endDate = dateRange.end.toISOString().split('T')[0];
+            
+            // 套用篩選並更新顯示
+            applyFilter(startDate, endDate, 'yearly');
+            showMessage(`已套用 ${selectedYearlyYear}年度 篩選條件`, 'info');
+        }
 
         // 套用自定義日期篩選
         function applyDateFilter() {
