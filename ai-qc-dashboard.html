@@ -1568,176 +1568,149 @@
         </div>
 
         <!-- Tags Tab -->
-        <div id="tags-content" class="space-y-6" style="display: none;">
-            <!-- 語音標籤總覽 -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="stat-card bg-white rounded-lg shadow p-6">
+        <div id="tags-content" class="space-y-8" style="display: none;">
+            
+            <!-- 區塊一：時間查詢條件 (使用共享的時間篩選) -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i data-lucide="clock" class="w-5 h-5 inline mr-2"></i>
+                    時間查詢條件
+                </h2>
+                <div class="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <i data-lucide="info" class="w-4 h-4 inline mr-2"></i>
+                    語音標籤分析將使用主頁面的時間篩選條件。請在「總覽」頁面設定查詢時間範圍。
+                </div>
+            </div>
+
+            <!-- 區塊二：四個統計指標 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- 命中標籤總數量 -->
+                <div class="stat-card rounded-lg p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm text-gray-600 mb-1 tooltip">總標籤數量
-                                <span class="tooltip-icon">?</span>
-                                <span class="tooltip-text">
-                                    <strong>總標籤數量</strong><br>
-                                    使用 jieba 分詞識別出的所有標籤總數<br>
-                                    <em>包含商品、活動、意圖等各類標籤</em>
-                                </span>
-                            </p>
-                            <p class="text-3xl font-bold text-gray-900">1,247</p>
-                            <div class="flex items-center mt-2 text-sm trend-up">
-                                <i data-lucide="tag" class="w-4 h-4 mr-1"></i>
-                                <span>本週新增 156</span>
-                            </div>
+                            <p class="text-sm font-medium text-gray-600">命中標籤總數</p>
+                            <p class="text-3xl font-bold text-gray-900" id="voiceTotalLabelsHit">110 / 200</p>
+                            <p class="text-xs text-gray-500 mt-1">命中數 / 總數</p>
                         </div>
-                        <div class="bg-purple-50 p-3 rounded-full">
-                            <i data-lucide="tags" class="w-8 h-8 text-purple-600"></i>
+                        <div class="p-3 bg-blue-100 rounded-lg">
+                            <i data-lucide="tag" class="w-6 h-6 text-blue-600"></i>
                         </div>
                     </div>
                 </div>
 
-                <div class="stat-card bg-white rounded-lg shadow p-6">
+                <!-- 命中意圖總數量 -->
+                <div class="stat-card rounded-lg p-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm text-gray-600 mb-1 tooltip">商品標籤
-                                <span class="tooltip-icon">?</span>
-                                <span class="tooltip-text">
-                                    <strong>商品標籤</strong><br>
-                                    從語音中識別出的保險商品名稱<br>
-                                    <em>如：意外險、壽險、醫療險等</em>
-                                </span>
-                            </p>
-                            <p class="text-3xl font-bold text-gray-900">89</p>
-                            <div class="flex items-center mt-2 text-sm trend-up">
-                                <i data-lucide="package" class="w-4 h-4 mr-1"></i>
-                                <span>覆蓋率 94%</span>
-                            </div>
+                            <p class="text-sm font-medium text-gray-600">命中意圖總數</p>
+                            <p class="text-3xl font-bold text-gray-900" id="voiceTotalIntentsHit">25 / 50</p>
+                            <p class="text-xs text-gray-500 mt-1">命中數 / 總數</p>
                         </div>
-                        <div class="bg-green-50 p-3 rounded-full">
-                            <i data-lucide="package" class="w-8 h-8 text-green-600"></i>
+                        <div class="p-3 bg-green-100 rounded-lg">
+                            <i data-lucide="target" class="w-6 h-6 text-green-600"></i>
                         </div>
                     </div>
                 </div>
 
-                <div class="stat-card bg-white rounded-lg shadow p-6">
+                <!-- 可選分類區塊1 -->
+                <div class="stat-card rounded-lg p-6 cursor-pointer" onclick="showVoiceCategorySelector(1)">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1 tooltip">意圖類型
-                                <span class="tooltip-icon">?</span>
-                                <span class="tooltip-text">
-                                    <strong>意圖類型</strong><br>
-                                    識別出的客戶意圖分類數量<br>
-                                    <em>如：購買、詢問、申請、理賠等</em>
-                                </span>
-                            </p>
-                            <p class="text-3xl font-bold text-gray-900">12</p>
-                            <div class="flex items-center mt-2 text-sm text-blue-600">
-                                <i data-lucide="target" class="w-4 h-4 mr-1"></i>
-                                <span>準確率 91%</span>
+                        <div class="w-full">
+                            <p class="text-sm font-medium text-gray-600">分類標籤統計</p>
+                            <div id="voiceCategory1Content">
+                                <div class="flex items-center justify-center h-16 text-gray-400">
+                                    <i data-lucide="plus" class="w-8 h-8"></i>
+                                </div>
+                                <p class="text-xs text-gray-500 text-center">點擊選擇分類</p>
                             </div>
-                        </div>
-                        <div class="bg-blue-50 p-3 rounded-full">
-                            <i data-lucide="target" class="w-8 h-8 text-blue-600"></i>
                         </div>
                     </div>
                 </div>
 
-                <div class="stat-card bg-white rounded-lg shadow p-6">
+                <!-- 可選分類區塊2 -->
+                <div class="stat-card rounded-lg p-6 cursor-pointer" onclick="showVoiceCategorySelector(2)">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-600 mb-1 tooltip">活動標籤
-                                <span class="tooltip-icon">?</span>
-                                <span class="tooltip-text">
-                                    <strong>活動標籤</strong><br>
-                                    識別出的促銷活動和優惠方案<br>
-                                    <em>如：新春專案、限時優惠等</em>
-                                </span>
-                            </p>
-                            <p class="text-3xl font-bold text-gray-900">23</p>
-                            <div class="flex items-center mt-2 text-sm trend-up">
-                                <i data-lucide="gift" class="w-4 h-4 mr-1"></i>
-                                <span>熱門度 +15%</span>
+                        <div class="w-full">
+                            <p class="text-sm font-medium text-gray-600">分類標籤統計</p>
+                            <div id="voiceCategory2Content">
+                                <div class="flex items-center justify-center h-16 text-gray-400">
+                                    <i data-lucide="plus" class="w-8 h-8"></i>
+                                </div>
+                                <p class="text-xs text-gray-500 text-center">點擊選擇分類</p>
                             </div>
-                        </div>
-                        <div class="bg-orange-50 p-3 rounded-full">
-                            <i data-lucide="gift" class="w-8 h-8 text-orange-600"></i>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 商品標籤分析 -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">熱門商品標籤 TOP 10</h3>
-                    <div class="space-y-3" id="productTagsList">
-                        <!-- 商品標籤列表 -->
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">客戶意圖分布</h3>
-                    <div class="chart-container">
-                        <div id="intentChart" style="width: 100%; height: 100%;"></div>
-                    </div>
+            <!-- 區塊三：標籤統計圓餅圖 -->
+            <div class="space-y-6">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    <i data-lucide="pie-chart" class="w-5 h-5 inline mr-2"></i>
+                    標籤統計
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="voiceLabelChartsContainer">
+                    <!-- 動態生成的圓餅圖將放在這裡 -->
                 </div>
             </div>
 
-            <!-- 活動標籤和趨勢分析 -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">活動標籤統計</h3>
-                    <div class="space-y-3" id="activityTagsList">
-                        <!-- 活動標籤列表 -->
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">標籤趨勢分析 (近7天)</h3>
-                    <div class="chart-container">
-                        <div id="tagTrendChart" style="width: 100%; height: 100%;"></div>
-                    </div>
-                </div>
+            <!-- 區塊四：意圖統計長條圖 -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i data-lucide="bar-chart" class="w-5 h-5 inline mr-2"></i>
+                    意圖統計
+                </h2>
+                <div id="voiceIntentChart" style="height: 400px;"></div>
             </div>
 
-            <!-- 標籤詳細分析表格 -->
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-gray-900">標籤詳細分析</h3>
-                        <div class="flex items-center space-x-4">
-                            <select id="tagTypeFilter" class="border border-gray-300 rounded px-3 py-1 text-sm">
-                                <option value="all">全部類型</option>
-                                <option value="product">商品標籤</option>
-                                <option value="intent">意圖標籤</option>
-                                <option value="activity">活動標籤</option>
+            <!-- 區塊五：標籤/意圖交集 Heatmap -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900">
+                        <i data-lucide="grid" class="w-5 h-5 inline mr-2"></i>
+                        標籤/意圖交集分析
+                    </h2>
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm font-medium text-gray-700">顯示模式：</label>
+                            <select id="voiceHeatmapMode" onchange="updateVoiceHeatmapMode()" class="custom-select px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                <option value="count">絕對數量</option>
+                                <option value="percentage">百分比</option>
                             </select>
-                            <button onclick="exportTagReport()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                                <i data-lucide="download" class="w-4 h-4 mr-2 inline"></i>
-                                匯出標籤報表
-                            </button>
                         </div>
+                        <button onclick="exportVoiceHeatmapData()" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-all">
+                            <i data-lucide="download" class="w-4 h-4 mr-2 inline"></i>
+                            導出數據
+                        </button>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">標籤名稱</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">類型</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">出現次數</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">覆蓋通話</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">成功率</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">趨勢</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200" id="tagDetailTable">
-                            <!-- 標籤詳細數據 -->
-                        </tbody>
-                    </table>
+                <div id="voiceHeatmapChart" style="height: 500px;"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- 語音標籤分類選擇Modal -->
+    <div id="voiceCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">選擇標籤分類</h3>
+                    <div class="space-y-2" id="voiceCategoryOptions">
+                        <!-- 分類選項將動態生成 -->
+                    </div>
+                    <div class="mt-6 flex justify-end gap-3">
+                        <button onclick="closeVoiceCategoryModal()" class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
+                            取消
+                        </button>
+                        <button onclick="confirmVoiceCategorySelection()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all">
+                            確認
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
     <!-- STT Modal -->
     <div id="sttModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
@@ -5430,13 +5403,56 @@ SysTalk.Audit 質檢報表
             URL.revokeObjectURL(url);
         }
 
-        // 語音標籤頁面功能
+        // === 語音標籤頁面功能（新設計五區塊） ===
+        
+        // 全域變數
+        let voiceCurrentCategorySlot = null;
+        let voiceSelectedCategories = { 1: null, 2: null };
+        let voiceLabelCharts = {};
+        let voiceIntentChart = null;
+        let voiceHeatmapChart = null;
+
+        // 模擬語音標籤數據
+        const voiceMockData = {
+            totalLabels: 200,
+            totalIntents: 50,
+            hitLabels: 110,
+            hitIntents: 25,
+            
+            categories: [
+                { id: 'product', name: '商品', labels: ['壽險商品', '醫療商品', '投資商品', '保障商品', '儲蓄', '其他'] },
+                { id: 'activity', name: '活動', labels: ['壽險商品', '醫療商品', '投資商品', '保障商品', '儲蓄', '其他'] },
+                { id: 'sensitive', name: '敏感詞', labels: ['壽險商品', '醫療商品', '投資商品', '保障商品', '儲蓄', '其他'] },
+                { id: 'finance', name: '理賠商品', labels: ['壽險商品', '醫療商品', '投資商品', '保障商品', '儲蓄', '其他'] }
+            ],
+
+            labelStats: {
+                'product': { '壽險商品': 45, '醫療商品': 32, '投資商品': 28, '保障商品': 25, '儲蓄': 18, '其他': 12 },
+                'activity': { '壽險商品': 38, '醫療商品': 35, '投資商品': 22, '保障商品': 19, '儲蓄': 15, '其他': 8 },
+                'sensitive': { '壽險商品': 42, '醫療商品': 30, '投資商品': 25, '保障商品': 20, '儲蓄': 16, '其他': 10 },
+                'finance': { '壽險商品': 50, '醫療商品': 40, '投資商品': 35, '保障商品': 28, '儲蓄': 22, '其他': 15 }
+            },
+
+            intents: ['詢問商品', '申請理賠', '保單查詢', '投保意願', '客戶文件'],
+            intentStats: [340, 320, 250, 190, 150],
+
+            heatmapData: {
+                labels: ['住宅險', '意外險', '車險'],
+                intents: ['詢問商品', '申請理賠', '保單查詢', '投保意願'],
+                data: [
+                    [0, 0, 10], [0, 1, 5], [0, 2, 15], [0, 3, 8],
+                    [1, 0, 12], [1, 1, 20], [1, 2, 8], [1, 3, 6],
+                    [2, 0, 8], [2, 1, 3], [2, 2, 25], [2, 3, 12]
+                ]
+            }
+        };
+
+        // 初始化語音標籤頁面
         function initTagsPage() {
-            populateProductTagsList();
-            populateActivityTagsList();
-            populateTagDetailTable();
-            initIntentChart();
-            initTagTrendChart();
+            initVoiceLabelCharts();
+            initVoiceIntentChart();
+            initVoiceHeatmapChart();
+            console.log('語音標籤頁面初始化完成');
         }
 
         function populateProductTagsList() {
@@ -6442,6 +6458,270 @@ ${document.getElementById('expectedResults').innerText}
             }
         }
         
+        // === 語音標籤分析功能續 ===
+        
+        // === 分類選擇功能 ===
+        function showVoiceCategorySelector(slot) {
+            voiceCurrentCategorySlot = slot;
+            const modal = document.getElementById('voiceCategoryModal');
+            const optionsContainer = document.getElementById('voiceCategoryOptions');
+            
+            // 生成分類選項
+            optionsContainer.innerHTML = '';
+            voiceMockData.categories.forEach(category => {
+                const option = document.createElement('label');
+                option.className = 'flex items-center p-3 rounded-lg border hover:bg-gray-50 cursor-pointer';
+                option.innerHTML = `
+                    <input type="radio" name="voiceCategory" value="${category.id}" class="mr-3">
+                    <span class="font-medium">${category.name}</span>
+                `;
+                optionsContainer.appendChild(option);
+            });
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeVoiceCategoryModal() {
+            document.getElementById('voiceCategoryModal').classList.add('hidden');
+            voiceCurrentCategorySlot = null;
+        }
+
+        function confirmVoiceCategorySelection() {
+            const selectedRadio = document.querySelector('input[name="voiceCategory"]:checked');
+            if (!selectedRadio) return;
+            
+            const categoryId = selectedRadio.value;
+            const categoryName = voiceMockData.categories.find(c => c.id === categoryId).name;
+            
+            // 更新選中的分類
+            voiceSelectedCategories[voiceCurrentCategorySlot] = { id: categoryId, name: categoryName };
+            
+            // 更新UI
+            updateVoiceCategoryDisplay(voiceCurrentCategorySlot, categoryName, categoryId);
+            
+            closeVoiceCategoryModal();
+        }
+
+        function updateVoiceCategoryDisplay(slot, categoryName, categoryId) {
+            const contentDiv = document.getElementById(`voiceCategory${slot}Content`);
+            const stats = voiceMockData.labelStats[categoryId];
+            const total = Object.values(stats).reduce((sum, val) => sum + val, 0);
+            const hitCount = Object.keys(stats).length;
+            
+            contentDiv.innerHTML = `
+                <p class="text-2xl font-bold text-gray-900">${total}</p>
+                <p class="text-xs text-gray-500 mt-1">${categoryName} (${hitCount}個標籤)</p>
+            `;
+            
+            // 添加 hover 效果顯示詳細資訊
+            const cardElement = contentDiv.closest('.stat-card');
+            cardElement.setAttribute('title', Object.entries(stats).map(([label, count]) => `${label}: ${count}`).join('\n'));
+        }
+
+        // === 圖表初始化 ===
+        function initVoiceLabelCharts() {
+            const container = document.getElementById('voiceLabelChartsContainer');
+            container.innerHTML = '';
+            
+            voiceMockData.categories.forEach(category => {
+                const chartDiv = document.createElement('div');
+                chartDiv.className = 'bg-white rounded-lg shadow p-6';
+                chartDiv.innerHTML = `
+                    <h3 class="text-md font-medium text-gray-800 mb-4">${category.name}</h3>
+                    <div id="voiceChart-${category.id}" style="height: 300px;"></div>
+                `;
+                container.appendChild(chartDiv);
+                
+                // 創建圓餅圖
+                setTimeout(() => {
+                    const chart = echarts.init(document.getElementById(`voiceChart-${category.id}`));
+                    const data = Object.entries(voiceMockData.labelStats[category.id])
+                        .filter(([label, value]) => value > 0)
+                        .map(([label, value]) => ({ name: label, value }));
+                    
+                    const option = {
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{a} <br/>{b}: {c} ({d}%)'
+                        },
+                        legend: {
+                            orient: 'horizontal',
+                            bottom: 10,
+                            itemWidth: 12,
+                            itemHeight: 12,
+                            textStyle: { fontSize: 10 }
+                        },
+                        series: [{
+                            name: category.name,
+                            type: 'pie',
+                            radius: ['40%', '70%'],
+                            center: ['50%', '45%'],
+                            avoidLabelOverlap: false,
+                            itemStyle: {
+                                borderRadius: 2,
+                                borderColor: '#fff',
+                                borderWidth: 1
+                            },
+                            label: {
+                                show: false,
+                                position: 'center'
+                            },
+                            emphasis: {
+                                label: {
+                                    show: true,
+                                    fontSize: 16,
+                                    fontWeight: 'bold'
+                                }
+                            },
+                            labelLine: {
+                                show: false
+                            },
+                            data: data
+                        }]
+                    };
+                    
+                    chart.setOption(option);
+                    voiceLabelCharts[category.id] = chart;
+                }, 100);
+            });
+        }
+
+        function initVoiceIntentChart() {
+            setTimeout(() => {
+                const chart = echarts.init(document.getElementById('voiceIntentChart'));
+                
+                const option = {
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                            type: 'shadow'
+                        }
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: voiceMockData.intents,
+                        axisTick: {
+                            alignWithLabel: true
+                        },
+                        axisLabel: {
+                            rotate: 45
+                        }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        name: '命中次數'
+                    },
+                    series: [{
+                        name: '命中次數',
+                        type: 'bar',
+                        barWidth: '60%',
+                        itemStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: '#3b82f6' },
+                                { offset: 1, color: '#1d4ed8' }
+                            ])
+                        },
+                        data: voiceMockData.intentStats
+                    }]
+                };
+                
+                chart.setOption(option);
+                voiceIntentChart = chart;
+            }, 200);
+        }
+
+        function initVoiceHeatmapChart() {
+            setTimeout(() => {
+                const chart = echarts.init(document.getElementById('voiceHeatmapChart'));
+                
+                const option = {
+                    tooltip: {
+                        position: 'top',
+                        formatter: function(params) {
+                            const labelName = voiceMockData.heatmapData.labels[params.data[1]];
+                            const intentName = voiceMockData.heatmapData.intents[params.data[0]];
+                            return `${labelName} × ${intentName}<br/>交集數量: ${params.data[2]}`;
+                        }
+                    },
+                    grid: {
+                        height: '50%',
+                        top: '10%'
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: voiceMockData.heatmapData.labels,
+                        splitArea: {
+                            show: true
+                        }
+                    },
+                    yAxis: {
+                        type: 'category',
+                        data: voiceMockData.heatmapData.intents,
+                        splitArea: {
+                            show: true
+                        }
+                    },
+                    visualMap: {
+                        min: 0,
+                        max: 30,
+                        calculable: true,
+                        orient: 'horizontal',
+                        left: 'center',
+                        bottom: '15%',
+                        inRange: {
+                            color: ['#f3f4f6', '#dbeafe', '#93c5fd', '#3b82f6', '#1e40af']
+                        }
+                    },
+                    series: [{
+                        name: '交集數量',
+                        type: 'heatmap',
+                        data: voiceMockData.heatmapData.data,
+                        label: {
+                            show: true
+                        },
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }]
+                };
+                
+                chart.setOption(option);
+                voiceHeatmapChart = chart;
+            }, 300);
+        }
+
+        // === Heatmap 功能 ===
+        function updateVoiceHeatmapMode() {
+            const mode = document.getElementById('voiceHeatmapMode').value;
+            console.log('切換語音標籤 Heatmap 顯示模式:', mode);
+            // 這裡可以實作切換顯示模式的邏輯
+        }
+
+        function exportVoiceHeatmapData() {
+            console.log('導出語音標籤 Heatmap 數據');
+            alert('導出功能開發中...');
+        }
+
+        // === 重新載入語音圖表 ===
+        function loadVoiceCharts() {
+            // 重新載入所有語音標籤圖表數據
+            Object.values(voiceLabelCharts).forEach(chart => {
+                if (chart) chart.resize();
+            });
+            
+            if (voiceIntentChart) voiceIntentChart.resize();
+            if (voiceHeatmapChart) voiceHeatmapChart.resize();
+        }
+
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             waitForECharts(initDashboard);
