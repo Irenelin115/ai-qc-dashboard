@@ -1075,6 +1075,11 @@
 
         <!-- Integrated Analysis Tab -->
         <div id="analysis-content" class="space-y-6" style="display: none;">
+            <!-- 時間篩選區域 -->
+            <div id="analysis-time-filter-container">
+                <!-- Time filter will be inserted here -->
+            </div>
+            
             <!-- 品質分析區域 -->
             <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
                 <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
@@ -1447,6 +1452,11 @@
 
         <!-- Agents Tab -->
         <div id="agents-content" class="space-y-6" style="display: none;">
+            <!-- 時間篩選區域 -->
+            <div id="agents-time-filter-container">
+                <!-- Time filter will be inserted here -->
+            </div>
+            
             <div class="bg-white rounded-lg shadow overflow-hidden">
                 <h3 class="text-lg font-semibold text-gray-900 p-6 border-b">客服人員績效排名</h3>
                 <div class="overflow-x-auto">
@@ -1570,16 +1580,9 @@
         <!-- Tags Tab -->
         <div id="tags-content" class="space-y-8" style="display: none;">
             
-            <!-- 區塊一：時間查詢條件 (使用共享的時間篩選) -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">
-                    <i data-lucide="clock" class="w-5 h-5 inline mr-2"></i>
-                    時間查詢條件
-                </h2>
-                <div class="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <i data-lucide="info" class="w-4 h-4 inline mr-2"></i>
-                    語音標籤分析將使用主頁面的時間篩選條件。請在「總覽」頁面設定查詢時間範圍。
-                </div>
+            <!-- 時間篩選區域 -->
+            <div id="tags-time-filter-container">
+                <!-- Time filter will be inserted here -->
             </div>
 
             <!-- 區塊二：四個統計指標 -->
@@ -1907,6 +1910,49 @@
         // Global variables
         let activeTab = 'overview';
         let charts = {};
+        
+        // === 每個Tab的獨立篩選狀態 ===
+        let tabFilterStates = {
+            'overview': {
+                type: 'custom',
+                startDate: '',
+                endDate: '',
+                selectedWeek: '',
+                selectedMonth: '',
+                selectedQuarter: '',
+                selectedYear: ''
+            },
+            'analysis': {
+                type: 'custom',
+                startDate: '',
+                endDate: '',
+                selectedWeek: '',
+                selectedMonth: '',
+                selectedQuarter: '',
+                selectedYear: ''
+            },
+            'tags': {
+                type: 'custom',
+                startDate: '',
+                endDate: '',
+                selectedWeek: '',
+                selectedMonth: '',
+                selectedQuarter: '',
+                selectedYear: ''
+            },
+            'agents': {
+                type: 'custom',
+                startDate: '',
+                endDate: '',
+                selectedWeek: '',
+                selectedMonth: '',
+                selectedQuarter: '',
+                selectedYear: ''
+            }
+        };
+        
+        // 保持向後兼容的全域狀態（指向當前Tab的狀態）
+        let currentFilterState = tabFilterStates.overview;
 
         // Data
         const qualityScoreData = [
@@ -2482,10 +2528,52 @@
                 console.warn(`Tab button not found: tab-${tab}`);
             }
 
+            // Update tab state management
+            switchTab(tab);
+            
+            // Inject time filters for tabs that need them (not overview since it has the original filter)
+            if (tab !== 'overview') {
+                injectTimeFilterForTab(tab);
+            }
+
             activeTab = tab;
 
             // Initialize charts for the active tab
             initChartsForTab(tab);
+        }
+        
+        // Function to inject time filter for specific tab
+        function injectTimeFilterForTab(tabId) {
+            const container = document.getElementById(`${tabId}-time-filter-container`);
+            if (container && !container.hasChildNodes()) {
+                container.innerHTML = generateTimeFilterTemplate(tabId);
+                
+                // Initialize the filter after injection
+                setTimeout(() => {
+                    setTabFilterTab(tabId, 'custom');
+                    
+                    // Copy state from overview tab if this tab has no state yet
+                    const tabState = tabFilterStates[tabId];
+                    const overviewState = tabFilterStates.overview;
+                    
+                    if (!tabState.startDate && overviewState.startDate) {
+                        tabState.startDate = overviewState.startDate;
+                        tabState.endDate = overviewState.endDate;
+                        tabState.type = overviewState.type;
+                        
+                        // Set the form values if they exist
+                        const startInput = document.getElementById(`${tabId}-customStartDate`);
+                        const endInput = document.getElementById(`${tabId}-customEndDate`);
+                        if (startInput) startInput.value = overviewState.startDate;
+                        if (endInput) endInput.value = overviewState.endDate;
+                    }
+                    
+                    // Recreate icons after injecting new HTML
+                    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                        lucide.createIcons();
+                    }
+                }, 100);
+            }
         }
 
         // Initialize charts based on active tab
@@ -3846,7 +3934,546 @@ SysTalk.Audit 質檢報表
             URL.revokeObjectURL(url);
         }
 
-        // === 時間篩選功能 ===
+        // === Tab狀態管理與時間篩選功能 ===
+        
+        // 生成時間篩選器HTML模板
+        function generateTimeFilterTemplate(tabId) {
+            return `
+                <div class="bg-white rounded-lg shadow p-6" id="${tabId}-time-filter">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i data-lucide="clock" class="w-5 h-5 inline mr-2"></i>
+                        時間查詢條件
+                    </h2>
+                    
+                    <div class="date-filter-section">
+                        <!-- Filter Tabs -->
+                        <div class="mb-6">
+                            <div class="flex items-center space-x-1 p-1 bg-gray-100 rounded-lg w-fit">
+                                <button onclick="setTabFilterTab('${tabId}', 'custom')" 
+                                        id="${tabId}-tab-custom"
+                                        class="filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all bg-blue-600 text-white">
+                                    自選
+                                </button>
+                                <button onclick="setTabFilterTab('${tabId}', 'weekly')" 
+                                        id="${tabId}-tab-weekly"
+                                        class="filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-900">
+                                    週期
+                                </button>
+                                <button onclick="setTabFilterTab('${tabId}', 'monthly')" 
+                                        id="${tabId}-tab-monthly"
+                                        class="filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-900">
+                                    月份
+                                </button>
+                                <button onclick="setTabFilterTab('${tabId}', 'quarterly')" 
+                                        id="${tabId}-tab-quarterly"
+                                        class="filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-900">
+                                    季度
+                                </button>
+                                <button onclick="setTabFilterTab('${tabId}', 'yearly')" 
+                                        id="${tabId}-tab-yearly"
+                                        class="filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-900">
+                                    年度
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Filter Content -->
+                        <div id="${tabId}-filter-content">
+                            <!-- Custom Date Range (自選) -->
+                            <div id="${tabId}-custom-filter" class="filter-content">
+                                <div class="mb-4">
+                                    <div class="flex items-center gap-4 flex-wrap">
+                                        <div class="flex items-center gap-2">
+                                            <input type="date" 
+                                                   id="${tabId}-customStartDate" 
+                                                   class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                   onchange="validateTabDateRange('${tabId}')">
+                                            <span class="text-gray-500 font-medium">~</span>
+                                            <input type="date" 
+                                                   id="${tabId}-customEndDate" 
+                                                   class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                   onchange="validateTabDateRange('${tabId}')">
+                                        </div>
+                                        <button onclick="applyTabCustomDateFilter('${tabId}')" 
+                                                id="${tabId}-customQueryBtn"
+                                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center">
+                                            <i data-lucide="search" class="w-4 h-4 mr-2"></i>
+                                            查詢
+                                        </button>
+                                    </div>
+                                    <div id="${tabId}-dateValidationMessage" class="mt-2 text-sm hidden"></div>
+                                </div>
+                            </div>
+
+                            <!-- Weekly Filter -->
+                            <div id="${tabId}-weekly-filter" class="filter-content hidden">
+                                <div class="mb-4">
+                                    <div class="flex items-center gap-3 flex-wrap">
+                                        <button onclick="setTabWeeklyPeriod('${tabId}', 'thisWeek')" 
+                                                id="${tabId}-weekly-this"
+                                                class="weekly-period-btn px-6 py-3 text-sm font-medium rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 transition-all">
+                                            本週
+                                        </button>
+                                        <button onclick="setTabWeeklyPeriod('${tabId}', 'lastWeek')" 
+                                                id="${tabId}-weekly-last"
+                                                class="weekly-period-btn px-6 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">
+                                            上週
+                                        </button>
+                                        <button onclick="setTabWeeklyPeriod('${tabId}', 'lastLastWeek')" 
+                                                id="${tabId}-weekly-lastlast"
+                                                class="weekly-period-btn px-6 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">
+                                            上上週
+                                        </button>
+                                        <button onclick="applyTabWeeklyFilter('${tabId}')" 
+                                                id="${tabId}-weeklyQueryBtn"
+                                                class="px-6 py-3 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                            查詢
+                                        </button>
+                                    </div>
+                                    <div id="${tabId}-weeklyDateDisplay" class="mt-4 text-sm text-gray-600">
+                                        目前顯示：<span id="${tabId}-weeklyDateRange">請選擇週期</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Monthly Filter -->
+                            <div id="${tabId}-monthly-filter" class="filter-content hidden">
+                                <div class="mb-4">
+                                    <div class="mb-4 flex items-center justify-center gap-4">
+                                        <button onclick="changeTabYear('${tabId}', -1)" 
+                                                class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                            </svg>
+                                        </button>
+                                        <input type="text" 
+                                               id="${tabId}-monthlyYearInput" 
+                                               value="2025" 
+                                               onchange="validateAndSetTabYear('${tabId}')" 
+                                               onblur="validateAndSetTabYear('${tabId}')"
+                                               class="text-center text-2xl font-semibold text-blue-600 bg-transparent border-none focus:outline-none focus:ring-0 w-20">
+                                        <button onclick="changeTabYear('${tabId}', 1)" 
+                                                class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-6 gap-3 mb-4">
+                                        <button onclick="setTabMonthlyPeriod('${tabId}', 1)" id="${tabId}-monthly-1" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">1月</button>
+                                        <button onclick="setTabMonthlyPeriod('${tabId}', 2)" id="${tabId}-monthly-2" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">2月</button>
+                                        <button onclick="setTabMonthlyPeriod('${tabId}', 3)" id="${tabId}-monthly-3" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">3月</button>
+                                        <button onclick="setTabMonthlyPeriod('${tabId}', 4)" id="${tabId}-monthly-4" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">4月</button>
+                                        <button onclick="setTabMonthlyPeriod('${tabId}', 5)" id="${tabId}-monthly-5" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">5月</button>
+                                        <button onclick="setTabMonthlyPeriod('${tabId}', 6)" id="${tabId}-monthly-6" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">6月</button>
+                                        <button onclick="setTabMonthlyPeriod('${tabId}', 7)" id="${tabId}-monthly-7" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">7月</button>
+                                        <button onclick="setTabMonthlyPeriod('${tabId}', 8)" id="${tabId}-monthly-8" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">8月</button>
+                                        <button onclick="setTabMonthlyPeriod('${tabId}', 9)" id="${tabId}-monthly-9" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">9月</button>
+                                        <button onclick="setTabMonthlyPeriod('${tabId}', 10)" id="${tabId}-monthly-10" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">10月</button>
+                                        <button onclick="setTabMonthlyPeriod('${tabId}', 11)" id="${tabId}-monthly-11" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">11月</button>
+                                        <button onclick="setTabMonthlyPeriod('${tabId}', 12)" id="${tabId}-monthly-12" class="monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">12月</button>
+                                    </div>
+                                    
+                                    <div class="flex justify-end">
+                                        <button onclick="applyTabMonthlyFilter('${tabId}')" 
+                                                id="${tabId}-monthlyQueryBtn"
+                                                class="px-6 py-3 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                            查詢
+                                        </button>
+                                    </div>
+                                    
+                                    <div id="${tabId}-monthlyDateDisplay" class="mt-4 text-sm text-gray-600">
+                                        目前顯示：<span id="${tabId}-monthlyDateRange">請選擇月份</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Quarterly Filter -->
+                            <div id="${tabId}-quarterly-filter" class="filter-content hidden">
+                                <div class="mb-4">
+                                    <div class="mb-4 flex items-center gap-3">
+                                        <label class="text-sm font-medium text-gray-700">選擇年度：</label>
+                                        <select id="${tabId}-quarterlyYearSelector" onchange="changeTabQuarterlyYear('${tabId}')" 
+                                                class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="flex items-center gap-3 flex-wrap mb-4">
+                                        <button onclick="setTabQuarterlyPeriod('${tabId}', 1)" 
+                                                id="${tabId}-quarterly-q1"
+                                                class="quarterly-btn px-6 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">
+                                            Q1
+                                        </button>
+                                        <button onclick="setTabQuarterlyPeriod('${tabId}', 2)" 
+                                                id="${tabId}-quarterly-q2"
+                                                class="quarterly-btn px-6 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">
+                                            Q2
+                                        </button>
+                                        <button onclick="setTabQuarterlyPeriod('${tabId}', 3)" 
+                                                id="${tabId}-quarterly-q3"
+                                                class="quarterly-btn px-6 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">
+                                            Q3
+                                        </button>
+                                        <button onclick="setTabQuarterlyPeriod('${tabId}', 4)" 
+                                                id="${tabId}-quarterly-q4"
+                                                class="quarterly-btn px-6 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all">
+                                            Q4
+                                        </button>
+                                        <button onclick="applyTabQuarterlyFilter('${tabId}')" 
+                                                id="${tabId}-quarterlyQueryBtn"
+                                                class="px-6 py-3 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                            查詢
+                                        </button>
+                                    </div>
+                                    
+                                    <div id="${tabId}-quarterlyDateDisplay" class="mt-4 text-sm text-gray-600">
+                                        目前顯示：<span id="${tabId}-quarterlyDateRange">請選擇季度</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Yearly Filter -->
+                            <div id="${tabId}-yearly-filter" class="filter-content hidden">
+                                <div class="mb-4">
+                                    <div class="mb-4 flex items-center gap-3">
+                                        <select id="${tabId}-yearlyYearSelector" onchange="setTabYearlySelection('${tabId}')" 
+                                                class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                        </select>
+                                        <button onclick="applyTabYearlyFilter('${tabId}')" 
+                                                id="${tabId}-yearlyQueryBtn"
+                                                class="px-6 py-3 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                            查詢
+                                        </button>
+                                    </div>
+                                    
+                                    <div id="${tabId}-yearlyDateDisplay" class="mt-4 text-sm text-gray-600">
+                                        目前顯示：<span id="${tabId}-yearlyDateRange">請選擇年度</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 切換Tab時同步篩選狀態
+        function switchTab(newTab) {
+            if (activeTab !== newTab) {
+                currentFilterState = tabFilterStates[newTab];
+                activeTab = newTab;
+            }
+        }
+        
+        // === Tab特定的時間篩選功能 ===
+        
+        // Tab特定的篩選標籤設定
+        function setTabFilterTab(tabId, tabType) {
+            const tabs = ['custom', 'weekly', 'monthly', 'quarterly', 'yearly'];
+            const tabState = tabFilterStates[tabId];
+            
+            tabs.forEach(tab => {
+                const tabElement = document.getElementById(`${tabId}-tab-${tab}`);
+                const contentElement = document.getElementById(`${tabId}-${tab}-filter`);
+                
+                if (tab === tabType) {
+                    tabElement.className = 'filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all bg-blue-600 text-white';
+                    contentElement.classList.remove('hidden');
+                } else {
+                    tabElement.className = 'filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-900';
+                    contentElement.classList.add('hidden');
+                }
+            });
+
+            tabState.type = tabType;
+
+            if (tabType === 'custom') {
+                initializeTabDateLimits(tabId);
+            }
+            if (tabType === 'monthly') {
+                initTabMonthlyFilter(tabId);
+            }
+            if (tabType === 'quarterly') {
+                initTabQuarterlyFilter(tabId);
+            }
+            if (tabType === 'yearly') {
+                initTabYearlyFilter(tabId);
+            }
+        }
+
+        // Tab特定的日期限制初始化
+        function initializeTabDateLimits(tabId) {
+            const today = new Date();
+            const fiveYearsAgo = new Date();
+            fiveYearsAgo.setFullYear(today.getFullYear() - 5);
+            
+            const startInput = document.getElementById(`${tabId}-customStartDate`);
+            const endInput = document.getElementById(`${tabId}-customEndDate`);
+            
+            if (startInput && endInput) {
+                startInput.max = today.toISOString().split('T')[0];
+                startInput.min = fiveYearsAgo.toISOString().split('T')[0];
+                endInput.max = today.toISOString().split('T')[0];
+                endInput.min = fiveYearsAgo.toISOString().split('T')[0];
+            }
+        }
+
+        // Tab特定的日期範圍驗證
+        function validateTabDateRange(tabId) {
+            const startInput = document.getElementById(`${tabId}-customStartDate`);
+            const endInput = document.getElementById(`${tabId}-customEndDate`);
+            const messageElement = document.getElementById(`${tabId}-dateValidationMessage`);
+            const queryBtn = document.getElementById(`${tabId}-customQueryBtn`);
+            
+            if (!startInput || !endInput || !messageElement || !queryBtn) return true;
+            
+            const startDate = startInput.value;
+            const endDate = endInput.value;
+            
+            if (!startDate || !endDate) {
+                hideTabMessage(tabId);
+                queryBtn.disabled = false;
+                return true;
+            }
+            
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const today = new Date();
+            const fiveYearsAgo = new Date();
+            fiveYearsAgo.setFullYear(today.getFullYear() - 5);
+            
+            if (start > end) {
+                showTabMessage(tabId, '開始日期不能晚於結束日期', 'error');
+                queryBtn.disabled = true;
+                return false;
+            }
+            
+            if (start < fiveYearsAgo || end > today) {
+                showTabMessage(tabId, '查詢範圍僅限近五年內的資料', 'error');
+                queryBtn.disabled = true;
+                return false;
+            }
+            
+            hideTabMessage(tabId);
+            queryBtn.disabled = false;
+            return true;
+        }
+
+        // Tab特定的訊息顯示
+        function showTabMessage(tabId, message, type) {
+            const messageElement = document.getElementById(`${tabId}-dateValidationMessage`);
+            if (!messageElement) return;
+            
+            const colorClasses = {
+                'error': 'text-red-600 bg-red-50 border border-red-200',
+                'warning': 'text-yellow-600 bg-yellow-50 border border-yellow-200',
+                'info': 'text-blue-600 bg-blue-50 border border-blue-200'
+            };
+            
+            messageElement.textContent = message;
+            messageElement.className = `mt-2 text-sm px-3 py-2 rounded ${colorClasses[type] || colorClasses.info}`;
+            messageElement.classList.remove('hidden');
+        }
+
+        // Tab特定的訊息隱藏
+        function hideTabMessage(tabId) {
+            const messageElement = document.getElementById(`${tabId}-dateValidationMessage`);
+            if (messageElement) {
+                messageElement.classList.add('hidden');
+            }
+        }
+
+        // Tab特定的自選日期篩選
+        function applyTabCustomDateFilter(tabId) {
+            if (!validateTabDateRange(tabId)) return;
+            
+            const startInput = document.getElementById(`${tabId}-customStartDate`);
+            const endInput = document.getElementById(`${tabId}-customEndDate`);
+            
+            if (!startInput || !endInput) return;
+            
+            const startDate = startInput.value;
+            const endDate = endInput.value;
+            
+            if (!startDate || !endDate) {
+                showTabMessage(tabId, '請選擇完整的日期範圍', 'warning');
+                return;
+            }
+            
+            const tabState = tabFilterStates[tabId];
+            tabState.startDate = startDate;
+            tabState.endDate = endDate;
+            tabState.type = 'custom';
+            
+            showTabMessage(tabId, '篩選條件已套用', 'info');
+            console.log(`${tabId} Tab 自選日期篩選:`, startDate, '~', endDate);
+        }
+
+        // Tab特定的週期篩選功能（簡化版）
+        function setTabWeeklyPeriod(tabId, period) {
+            // 重置所有週期按鈕樣式
+            ['thisWeek', 'lastWeek', 'lastLastWeek'].forEach(p => {
+                const btn = document.getElementById(`${tabId}-weekly-${p.replace('Week', '').replace('thisW', 'this').replace('lastLastW', 'lastlast').replace('lastW', 'last')}`);
+                if (btn) {
+                    btn.className = 'weekly-period-btn px-6 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all';
+                }
+            });
+            
+            // 設定選中的按鈕樣式
+            const selectedBtn = document.getElementById(`${tabId}-weekly-${period.replace('Week', '').replace('thisW', 'this').replace('lastLastW', 'lastlast').replace('lastW', 'last')}`);
+            if (selectedBtn) {
+                selectedBtn.className = 'weekly-period-btn px-6 py-3 text-sm font-medium rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 transition-all';
+            }
+            
+            tabFilterStates[tabId].selectedWeek = period;
+        }
+
+        function applyTabWeeklyFilter(tabId) {
+            const tabState = tabFilterStates[tabId];
+            if (!tabState.selectedWeek) return;
+            
+            tabState.type = 'weekly';
+            console.log(`${tabId} Tab 週期篩選:`, tabState.selectedWeek);
+        }
+
+        // Tab特定的月份篩選功能（簡化版）
+        function initTabMonthlyFilter(tabId) {
+            const yearInput = document.getElementById(`${tabId}-monthlyYearInput`);
+            if (yearInput) {
+                yearInput.value = '2025';
+            }
+        }
+
+        function setTabMonthlyPeriod(tabId, month) {
+            // 重置所有月份按鈕
+            for (let i = 1; i <= 12; i++) {
+                const btn = document.getElementById(`${tabId}-monthly-${i}`);
+                if (btn) {
+                    btn.className = 'monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all';
+                }
+            }
+            
+            // 設定選中的月份
+            const selectedBtn = document.getElementById(`${tabId}-monthly-${month}`);
+            if (selectedBtn) {
+                selectedBtn.className = 'monthly-btn px-4 py-3 text-sm font-medium rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 transition-all';
+            }
+            
+            tabFilterStates[tabId].selectedMonth = month;
+        }
+
+        function changeTabYear(tabId, direction) {
+            const yearInput = document.getElementById(`${tabId}-monthlyYearInput`);
+            if (yearInput) {
+                let currentYear = parseInt(yearInput.value) || 2025;
+                yearInput.value = currentYear + direction;
+            }
+        }
+
+        function validateAndSetTabYear(tabId) {
+            const yearInput = document.getElementById(`${tabId}-monthlyYearInput`);
+            if (yearInput) {
+                let year = parseInt(yearInput.value);
+                if (isNaN(year) || year < 2020 || year > 2030) {
+                    yearInput.value = '2025';
+                }
+            }
+        }
+
+        function applyTabMonthlyFilter(tabId) {
+            const tabState = tabFilterStates[tabId];
+            const yearInput = document.getElementById(`${tabId}-monthlyYearInput`);
+            
+            if (!tabState.selectedMonth || !yearInput) return;
+            
+            tabState.type = 'monthly';
+            tabState.selectedYear = yearInput.value;
+            console.log(`${tabId} Tab 月份篩選:`, tabState.selectedYear, '年', tabState.selectedMonth, '月');
+        }
+
+        // Tab特定的季度篩選功能（簡化版）
+        function initTabQuarterlyFilter(tabId) {
+            const yearSelector = document.getElementById(`${tabId}-quarterlyYearSelector`);
+            if (yearSelector) {
+                yearSelector.innerHTML = '';
+                for (let year = 2025; year >= 2020; year--) {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    if (year === 2025) option.selected = true;
+                    yearSelector.appendChild(option);
+                }
+            }
+        }
+
+        function setTabQuarterlyPeriod(tabId, quarter) {
+            // 重置所有季度按鈕
+            [1, 2, 3, 4].forEach(q => {
+                const btn = document.getElementById(`${tabId}-quarterly-q${q}`);
+                if (btn) {
+                    btn.className = 'quarterly-btn px-6 py-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all';
+                }
+            });
+            
+            // 設定選中的季度
+            const selectedBtn = document.getElementById(`${tabId}-quarterly-q${quarter}`);
+            if (selectedBtn) {
+                selectedBtn.className = 'quarterly-btn px-6 py-3 text-sm font-medium rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 transition-all';
+            }
+            
+            tabFilterStates[tabId].selectedQuarter = quarter;
+        }
+
+        function changeTabQuarterlyYear(tabId) {
+            // 年份變更邏輯
+        }
+
+        function applyTabQuarterlyFilter(tabId) {
+            const tabState = tabFilterStates[tabId];
+            const yearSelector = document.getElementById(`${tabId}-quarterlyYearSelector`);
+            
+            if (!tabState.selectedQuarter || !yearSelector) return;
+            
+            tabState.type = 'quarterly';
+            tabState.selectedYear = yearSelector.value;
+            console.log(`${tabId} Tab 季度篩選:`, tabState.selectedYear, '年 Q', tabState.selectedQuarter);
+        }
+
+        // Tab特定的年度篩選功能（簡化版）
+        function initTabYearlyFilter(tabId) {
+            const yearSelector = document.getElementById(`${tabId}-yearlyYearSelector`);
+            if (yearSelector) {
+                yearSelector.innerHTML = '';
+                for (let year = 2025; year >= 2020; year--) {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    if (year === 2025) option.selected = true;
+                    yearSelector.appendChild(option);
+                }
+            }
+        }
+
+        function setTabYearlySelection(tabId) {
+            const yearSelector = document.getElementById(`${tabId}-yearlyYearSelector`);
+            if (yearSelector) {
+                tabFilterStates[tabId].selectedYear = yearSelector.value;
+            }
+        }
+
+        function applyTabYearlyFilter(tabId) {
+            const tabState = tabFilterStates[tabId];
+            const yearSelector = document.getElementById(`${tabId}-yearlyYearSelector`);
+            
+            if (!yearSelector) return;
+            
+            tabState.type = 'yearly';
+            tabState.selectedYear = yearSelector.value;
+            console.log(`${tabId} Tab 年度篩選:`, tabState.selectedYear, '年');
+        }
+
+        // === 原有的時間篩選功能（保持向後兼容） ===
 
         // 設定篩選標籤
         function setFilterTab(tabType) {
