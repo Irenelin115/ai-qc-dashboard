@@ -439,6 +439,37 @@
             }
         }
 
+        /* Tooltip 樣式 */
+        .mode-option {
+            position: relative;
+        }
+
+        .mode-option:hover .tooltip-integrated,
+        .mode-option:hover .tooltip-separate {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        .tooltip-integrated,
+        .tooltip-separate,
+        .tooltip-custom,
+        .tooltip-weekly,
+        .tooltip-monthly,
+        .tooltip-quarterly,
+        .tooltip-yearly {
+            pointer-events: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .time-range-option:hover .tooltip-custom,
+        .time-range-option:hover .tooltip-weekly,
+        .time-range-option:hover .tooltip-monthly,
+        .time-range-option:hover .tooltip-quarterly,
+        .time-range-option:hover .tooltip-yearly {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
         /* 季度下拉選單樣式 */
         .quarter-dropdown-menu {
             min-width: 140px;
@@ -584,46 +615,290 @@
     <main class="max-w-7xl mx-auto px-6 py-6">
         <!-- Overview Tab -->
         <div id="overview-content" class="space-y-6">
-            <!-- Time Filter Section -->
+            <!-- Filter Section -->
             <div class="date-filter-section rounded-lg shadow p-6">
-                <!-- Filter Tabs -->
-                <div class="mb-6">
-                    <div class="flex items-center space-x-1 p-1 bg-gray-100 rounded-lg w-fit">
-                        <button onclick="setFilterTab('custom')" 
-                                id="tab-custom"
-                                class="filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all bg-blue-600 text-white">
-                            自選
-                        </button>
-                        <button onclick="setFilterTab('weekly')" 
-                                id="tab-weekly"
-                                class="filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-900">
-                            週期
-                        </button>
-                        <button onclick="setFilterTab('monthly')" 
-                                id="tab-monthly"
-                                class="filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-900">
-                            月份
-                        </button>
-                        <button onclick="setFilterTab('quarterly')" 
-                                id="tab-quarterly"
-                                class="filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-900">
-                            季度
-                        </button>
-                        <button onclick="setFilterTab('yearly')" 
-                                id="tab-yearly"
-                                class="filter-tab px-4 py-2 text-sm font-medium rounded-md transition-all text-gray-600 hover:text-gray-900">
-                            年度
-                        </button>
+                <!-- Section Header -->
+                <div class="filter-section-header mb-8 pb-6 border-b border-gray-200">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                            <i data-lucide="filter" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900">查詢篩選條件</h2>
+                            <p class="text-sm text-gray-600 mt-1">設定時間範圍、業務資料夾與顯示模式</p>
+                        </div>
                     </div>
                 </div>
+                
+                <!-- Folder Filter Section -->
+                <div class="folder-filter-section mt-0 pt-0">
+                    <div class="filter-header flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">業務資料夾篩選</h3>
+                    </div>
+
+                    <div class="filter-controls flex gap-4 mb-4 flex-wrap items-center">
+                        <div class="quick-actions flex gap-2">
+                            <button onclick="selectAllFolders()" class="quick-btn px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 transition">全選</button>
+                            <button onclick="invertFolderSelection()" class="quick-btn px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 transition">反選</button>
+                            <button onclick="clearFolderSelection()" class="quick-btn px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 transition">清除</button>
+                        </div>
+                        <div class="scoring-filter">
+                            <select id="scoringMethodFilter" onchange="filterFoldersByScoring()" class="scoring-select border border-gray-300 rounded px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500">
+                                <option value="all">所有算分方式</option>
+                                <option value="weight">僅權重算分</option>
+                                <option value="average">僅平均算分</option>
+                                <option value="sum">僅加總算分</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="folder-list grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4" id="folderList">
+                        <div class="folder-item border border-gray-300 rounded p-3 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition selected" data-scoring="weight" onclick="toggleFolderSelection(this)">
+                            <div class="folder-checkbox flex items-start gap-3">
+                                <input type="checkbox" class="folder-checkbox-input mt-1 accent-blue-600" checked>
+                                <div class="folder-info flex-1">
+                                    <div class="folder-name font-medium text-gray-900">意外險</div>
+                                    <div class="folder-meta flex justify-between items-center text-xs text-gray-600 mt-1">
+                                        <span>1,247 筆音檔</span>
+                                        <span class="scoring-method bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs">權重</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="folder-item border border-gray-300 rounded p-3 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition selected" data-scoring="weight" onclick="toggleFolderSelection(this)">
+                            <div class="folder-checkbox flex items-start gap-3">
+                                <input type="checkbox" class="folder-checkbox-input mt-1 accent-blue-600" checked>
+                                <div class="folder-info flex-1">
+                                    <div class="folder-name font-medium text-gray-900">汽機車強制險</div>
+                                    <div class="folder-meta flex justify-between items-center text-xs text-gray-600 mt-1">
+                                        <span>892 筆音檔</span>
+                                        <span class="scoring-method bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs">權重</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="folder-item border border-gray-300 rounded p-3 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition" data-scoring="average" onclick="toggleFolderSelection(this)">
+                            <div class="folder-checkbox flex items-start gap-3">
+                                <input type="checkbox" class="folder-checkbox-input mt-1 accent-blue-600">
+                                <div class="folder-info flex-1">
+                                    <div class="folder-name font-medium text-gray-900">身故險</div>
+                                    <div class="folder-meta flex justify-between items-center text-xs text-gray-600 mt-1">
+                                        <span>634 筆音檔</span>
+                                        <span class="scoring-method bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs">平均</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="folder-item border border-gray-300 rounded p-3 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition selected" data-scoring="weight" onclick="toggleFolderSelection(this)">
+                            <div class="folder-checkbox flex items-start gap-3">
+                                <input type="checkbox" class="folder-checkbox-input mt-1 accent-blue-600" checked>
+                                <div class="folder-info flex-1">
+                                    <div class="folder-name font-medium text-gray-900">醫療險</div>
+                                    <div class="folder-meta flex justify-between items-center text-xs text-gray-600 mt-1">
+                                        <span>1,589 筆音檔</span>
+                                        <span class="scoring-method bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs">權重</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="folder-item border border-gray-300 rounded p-3 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition" data-scoring="sum" onclick="toggleFolderSelection(this)">
+                            <div class="folder-checkbox flex items-start gap-3">
+                                <input type="checkbox" class="folder-checkbox-input mt-1 accent-blue-600">
+                                <div class="folder-info flex-1">
+                                    <div class="folder-name font-medium text-gray-900">旅遊險</div>
+                                    <div class="folder-meta flex justify-between items-center text-xs text-gray-600 mt-1">
+                                        <span>423 筆音檔</span>
+                                        <span class="scoring-method bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs">加總</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="folder-item border border-gray-300 rounded p-3 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition" data-scoring="average" onclick="toggleFolderSelection(this)">
+                            <div class="folder-checkbox flex items-start gap-3">
+                                <input type="checkbox" class="folder-checkbox-input mt-1 accent-blue-600">
+                                <div class="folder-info flex-1">
+                                    <div class="folder-name font-medium text-gray-900">壽險</div>
+                                    <div class="folder-meta flex justify-between items-center text-xs text-gray-600 mt-1">
+                                        <span>756 筆音檔</span>
+                                        <span class="scoring-method bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs">平均</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Display Mode Section -->
+                    <div class="display-mode-section mt-4 pt-4 border-t border-gray-200">
+                        <h4 class="text-base font-medium text-gray-900 mb-3">顯示模式</h4>
+                        <div class="mode-options flex gap-4">
+                            <label class="mode-option flex items-center gap-2 px-4 py-2 border border-gray-300 rounded cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition active" onclick="setDisplayMode('integrated')">
+                                <input type="radio" name="display-mode" value="integrated" class="accent-blue-600" checked>
+                                <span class="text-sm">整合顯示</span>
+                                <div class="relative ml-1">
+                                    <i data-lucide="help-circle" class="w-3.5 h-3.5 text-gray-400 hover:text-blue-500 transition-colors cursor-help"></i>
+                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 tooltip-integrated">
+                                        將所有選中資料夾的數據合併顯示，適合查看整體趨勢
+                                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="mode-option flex items-center gap-2 px-4 py-2 border border-gray-300 rounded cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition" onclick="setDisplayMode('separate')">
+                                <input type="radio" name="display-mode" value="separate" class="accent-blue-600">
+                                <span class="text-sm">分別顯示</span>
+                                <div class="relative ml-1">
+                                    <i data-lucide="help-circle" class="w-3.5 h-3.5 text-gray-400 hover:text-blue-500 transition-colors cursor-help"></i>
+                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 tooltip-separate">
+                                        為每個資料夾獨立顯示報表，適合比較各資料夾差異
+                                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Info Alert -->
+                    <div id="folderInfoAlert" class="info-alert mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800 flex items-center gap-2">
+                        <span>ℹ️</span>
+                        <span id="folderInfoText">整合顯示包含 3 個資料夾的數據</span>
+                    </div>
+
+                    <!-- Selected Summary -->
+                    <div class="selected-summary-section mt-6">
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <i data-lucide="database" class="w-4 h-4 text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-900">篩選摘要</p>
+                                        <p class="text-xs text-blue-700" id="selectedFolderInfo">已選擇 3 個資料夾，共 3,728 筆音檔</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                    <span class="text-xs text-blue-700 font-medium">準備就緒</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Time Filter Section -->
+                <div class="time-filter-subsection mt-8 pt-6 border-t border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">時間範圍篩選</h3>
+                    
+                    <!-- Time Range Options -->
+                    <div class="mb-6">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                            <!-- 自選 -->
+                            <div class="time-range-option relative">
+                                <button onclick="setFilterTab('custom')" 
+                                        id="tab-custom"
+                                        class="filter-tab w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg border border-blue-500 bg-blue-600 text-white shadow-sm transition-all hover:shadow-md">
+                                    <span>自選日期</span>
+                                    <div class="relative ml-2">
+                                        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-blue-200 hover:text-white transition-colors cursor-help"></i>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible hover:opacity-100 hover:visible transition-all duration-200 whitespace-nowrap z-50 tooltip-custom">
+                                            自由選擇開始和結束日期，最多支援五年範圍
+                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <!-- 週期 -->
+                            <div class="time-range-option relative">
+                                <button onclick="setFilterTab('weekly')" 
+                                        id="tab-weekly"
+                                        class="filter-tab w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50">
+                                    <span>週期選擇</span>
+                                    <div class="relative ml-2">
+                                        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-gray-400 hover:text-blue-500 transition-colors cursor-help"></i>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible hover:opacity-100 hover:visible transition-all duration-200 whitespace-nowrap z-50 tooltip-weekly">
+                                            快速選擇本週、上週或指定週期範圍
+                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <!-- 月份 -->
+                            <div class="time-range-option relative">
+                                <button onclick="setFilterTab('monthly')" 
+                                        id="tab-monthly"
+                                        class="filter-tab w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50">
+                                    <span>月份選擇</span>
+                                    <div class="relative ml-2">
+                                        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-gray-400 hover:text-blue-500 transition-colors cursor-help"></i>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible hover:opacity-100 hover:visible transition-all duration-200 whitespace-nowrap z-50 tooltip-monthly">
+                                            按年份和月份快速篩選資料範圍
+                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <!-- 季度 -->
+                            <div class="time-range-option relative">
+                                <button onclick="setFilterTab('quarterly')" 
+                                        id="tab-quarterly"
+                                        class="filter-tab w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50">
+                                    <span>季度選擇</span>
+                                    <div class="relative ml-2">
+                                        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-gray-400 hover:text-blue-500 transition-colors cursor-help"></i>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible hover:opacity-100 hover:visible transition-all duration-200 whitespace-nowrap z-50 tooltip-quarterly">
+                                            按季度快速篩選，適合季度性分析報告
+                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <!-- 年度 -->
+                            <div class="time-range-option relative">
+                                <button onclick="setFilterTab('yearly')" 
+                                        id="tab-yearly"
+                                        class="filter-tab w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50">
+                                    <span>年度選擇</span>
+                                    <div class="relative ml-2">
+                                        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-gray-400 hover:text-blue-500 transition-colors cursor-help"></i>
+                                        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 invisible hover:opacity-100 hover:visible transition-all duration-200 whitespace-nowrap z-50 tooltip-yearly">
+                                            選擇整年度資料，適合年度總結和比較
+                                            <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
                 <!-- Filter Content -->
                 <div id="filter-content">
                     <!-- Custom Date Range (自選) -->
                     <div id="custom-filter" class="filter-content">
                         <div class="mb-4">
-                            <p class="text-sm text-gray-600 mb-4">
-                            </p>
+                            <!-- 警示訊息 -->
+                            <div class="mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-400 rounded-r-lg shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <i data-lucide="clock" class="w-4 h-4 text-blue-600"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-900 mb-1">時間範圍提醒</p>
+                                        <p class="text-xs text-blue-700 leading-relaxed">
+                                            為確保查詢效能，自選日期範圍限制為 <span class="font-semibold text-blue-800">最近五年內</span> 的資料
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="flex items-center gap-4 flex-wrap">
                                 <div class="flex items-center gap-2">
                                     <input type="date" 
@@ -636,12 +911,6 @@
                                            class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                            onchange="validateDateRange()">
                                 </div>
-                                <button onclick="applyCustomDateFilter()" 
-                                        id="customQueryBtn"
-                                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center">
-                                    <i data-lucide="search" class="w-4 h-4 mr-2"></i>
-                                    查詢
-                                </button>
                             </div>
                             <div id="dateValidationMessage" class="mt-2 text-sm hidden"></div>
                         </div>
@@ -806,6 +1075,21 @@
                                 目前顯示：<span id="yearlyDateRange">請選擇年度</span>
                             </div>
                         </div>
+                    </div>
+                </div>
+                </div>
+                
+                <!-- Main Filter Actions -->
+                <div class="main-filter-actions mt-6 pt-6 border-t border-gray-200 bg-gray-50 rounded-b-lg -mx-6 -mb-6 px-6 pb-6">
+                    <div class="flex flex-col sm:flex-row sm:justify-center gap-4">
+                        <button onclick="resetFolderFilters()" class="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-white hover:border-gray-400 transition-all duration-200 font-medium">
+                            <i data-lucide="refresh-ccw" class="w-4 h-4 mr-2 inline"></i>
+                            重置篩選
+                        </button>
+                        <button onclick="applyFolderFilters()" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium shadow-sm">
+                            <i data-lucide="bar-chart-3" class="w-4 h-4 mr-2 inline"></i>
+                            查看報表
+                        </button>
                     </div>
                 </div>
 
@@ -7327,9 +7611,256 @@ ${document.getElementById('expectedResults').innerText}
             if (voiceHeatmapChart) voiceHeatmapChart.resize();
         }
 
+        // === 資料夾篩選功能 ===
+        function toggleFolderSelection(element) {
+            const checkbox = element.querySelector('.folder-checkbox-input');
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                element.classList.add('selected');
+                element.style.borderColor = '#3b82f6';
+                element.style.backgroundColor = '#eff6ff';
+            } else {
+                element.classList.remove('selected');
+                element.style.borderColor = '#d1d5db';
+                element.style.backgroundColor = 'white';
+            }
+            
+            updateFolderInfo();
+        }
+
+        function selectAllFolders() {
+            const folderItems = document.querySelectorAll('.folder-item');
+            folderItems.forEach(item => {
+                const checkbox = item.querySelector('.folder-checkbox-input');
+                checkbox.checked = true;
+                item.classList.add('selected');
+                item.style.borderColor = '#3b82f6';
+                item.style.backgroundColor = '#eff6ff';
+            });
+            updateFolderInfo();
+        }
+
+        function invertFolderSelection() {
+            const folderItems = document.querySelectorAll('.folder-item');
+            folderItems.forEach(item => {
+                const checkbox = item.querySelector('.folder-checkbox-input');
+                checkbox.checked = !checkbox.checked;
+                
+                if (checkbox.checked) {
+                    item.classList.add('selected');
+                    item.style.borderColor = '#3b82f6';
+                    item.style.backgroundColor = '#eff6ff';
+                } else {
+                    item.classList.remove('selected');
+                    item.style.borderColor = '#d1d5db';
+                    item.style.backgroundColor = 'white';
+                }
+            });
+            updateFolderInfo();
+        }
+
+        function clearFolderSelection() {
+            const folderItems = document.querySelectorAll('.folder-item');
+            folderItems.forEach(item => {
+                const checkbox = item.querySelector('.folder-checkbox-input');
+                checkbox.checked = false;
+                item.classList.remove('selected');
+                item.style.borderColor = '#d1d5db';
+                item.style.backgroundColor = 'white';
+            });
+            updateFolderInfo();
+        }
+
+        function filterFoldersByScoring() {
+            const filterValue = document.getElementById('scoringMethodFilter').value;
+            const folderItems = document.querySelectorAll('.folder-item');
+            
+            folderItems.forEach(item => {
+                const scoringMethod = item.dataset.scoring;
+                if (filterValue === 'all' || scoringMethod === filterValue) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            updateFolderInfo();
+        }
+
+        function setDisplayMode(mode) {
+            const modeOptions = document.querySelectorAll('.mode-option');
+            modeOptions.forEach(option => {
+                option.classList.remove('active');
+                option.style.borderColor = '#d1d5db';
+                option.style.backgroundColor = 'white';
+                option.style.color = 'inherit';
+            });
+            
+            const selectedOption = document.querySelector(`input[value="${mode}"]`).closest('.mode-option');
+            selectedOption.classList.add('active');
+            selectedOption.style.borderColor = '#3b82f6';
+            selectedOption.style.backgroundColor = '#3b82f6';
+            selectedOption.style.color = 'white';
+            
+            updateFolderInfo();
+        }
+
+        function updateFolderInfo() {
+            const selectedFolders = document.querySelectorAll('.folder-checkbox-input:checked');
+            const visibleSelectedFolders = Array.from(selectedFolders).filter(checkbox => 
+                checkbox.closest('.folder-item').style.display !== 'none'
+            );
+            
+            let totalFiles = 0;
+            const scoringMethods = new Set();
+            
+            visibleSelectedFolders.forEach(checkbox => {
+                const folderItem = checkbox.closest('.folder-item');
+                const metaText = folderItem.querySelector('.folder-meta span').textContent;
+                const count = parseInt(metaText.match(/(\d+,?\d*)/)?.[1]?.replace(',', '') || 0);
+                totalFiles += count;
+                
+                const scoringMethod = folderItem.querySelector('.scoring-method').textContent;
+                scoringMethods.add(scoringMethod);
+            });
+            
+            // 更新選擇資訊
+            document.getElementById('selectedFolderInfo').textContent = 
+                `已選擇 ${visibleSelectedFolders.length} 個資料夾，共 ${totalFiles.toLocaleString()} 筆音檔`;
+            
+            // 更新提示信息
+            const displayMode = document.querySelector('input[name="display-mode"]:checked').value;
+            const infoAlert = document.getElementById('folderInfoAlert');
+            const infoText = document.getElementById('folderInfoText');
+            
+            if (visibleSelectedFolders.length === 0) {
+                infoAlert.style.display = 'none';
+            } else {
+                infoAlert.style.display = 'flex';
+                
+                if (displayMode === 'integrated') {
+                    if (scoringMethods.size > 1) {
+                        infoAlert.className = 'info-alert mt-4 p-3 bg-orange-50 border border-orange-200 rounded text-sm text-orange-800 flex items-center gap-2';
+                        infoAlert.querySelector('span').textContent = '⚠️';
+                        infoText.textContent = `整合顯示包含 ${visibleSelectedFolders.length} 個資料夾，使用不同算分方式，結果僅供參考`;
+                    } else {
+                        infoAlert.className = 'info-alert mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800 flex items-center gap-2';
+                        infoAlert.querySelector('span').textContent = 'ℹ️';
+                        infoText.textContent = `整合顯示包含 ${visibleSelectedFolders.length} 個資料夾的數據`;
+                    }
+                } else {
+                    infoAlert.className = 'info-alert mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800 flex items-center gap-2';
+                    infoAlert.querySelector('span').textContent = 'ℹ️';
+                    infoText.textContent = `分別顯示 ${visibleSelectedFolders.length} 個資料夾的獨立報表`;
+                }
+            }
+        }
+
+        function resetFolderFilters() {
+            // 重置篩選下拉選單
+            document.getElementById('scoringMethodFilter').value = 'all';
+            
+            // 顯示所有資料夾
+            const folderItems = document.querySelectorAll('.folder-item');
+            folderItems.forEach(item => {
+                item.style.display = 'block';
+            });
+            
+            // 重置顯示模式為整合顯示
+            document.querySelector('input[value="integrated"]').checked = true;
+            setDisplayMode('integrated');
+            
+            // 重置選擇狀態為預設（前三個選中）
+            clearFolderSelection();
+            const defaultSelected = [0, 1, 3]; // 意外險、汽機車強制險、醫療險
+            folderItems.forEach((item, index) => {
+                if (defaultSelected.includes(index)) {
+                    const checkbox = item.querySelector('.folder-checkbox-input');
+                    checkbox.checked = true;
+                    item.classList.add('selected');
+                    item.style.borderColor = '#3b82f6';
+                    item.style.backgroundColor = '#eff6ff';
+                }
+            });
+            
+            updateFolderInfo();
+        }
+
+        function applyFolderFilters() {
+            const selectedFolders = document.querySelectorAll('.folder-checkbox-input:checked');
+            const visibleSelectedFolders = Array.from(selectedFolders).filter(checkbox => 
+                checkbox.closest('.folder-item').style.display !== 'none'
+            );
+            
+            if (visibleSelectedFolders.length === 0) {
+                alert('請至少選擇一個資料夾');
+                return;
+            }
+            
+            const displayMode = document.querySelector('input[name="display-mode"]:checked').value;
+            
+            // 收集選中的資料夾資訊
+            const selectedFoldersInfo = visibleSelectedFolders.map(checkbox => {
+                const folderItem = checkbox.closest('.folder-item');
+                return {
+                    name: folderItem.querySelector('.folder-name').textContent,
+                    count: parseInt(folderItem.querySelector('.folder-meta span').textContent.match(/(\d+,?\d*)/)?.[1]?.replace(',', '') || 0),
+                    scoring: folderItem.querySelector('.scoring-method').textContent
+                };
+            });
+            
+            console.log('應用資料夾篩選:', {
+                folders: selectedFoldersInfo,
+                displayMode: displayMode
+            });
+            
+            // 這裡可以觸發重新載入圖表數據的邏輯
+            alert(`已應用篩選設定：\n- 選擇 ${selectedFoldersInfo.length} 個資料夾\n- 顯示模式：${displayMode === 'integrated' ? '整合顯示' : '分別顯示'}\n\n將重新載入圖表數據...`);
+            
+            // 觸發數據更新
+            setTimeout(() => {
+                updateDashboardWithFolderFilter(selectedFoldersInfo, displayMode);
+            }, 500);
+        }
+
+        function updateDashboardWithFolderFilter(folders, displayMode) {
+            // 這個函數用來根據選擇的資料夾更新儀表板數據
+            console.log('更新儀表板數據:', folders, displayMode);
+            
+            // 重新載入所有圖表
+            if (typeof initOverviewCharts === 'function') {
+                initOverviewCharts();
+            }
+            
+            // 顯示更新成功訊息
+            showNotification(`✅ 已根據 ${folders.length} 個資料夾更新數據（${displayMode === 'integrated' ? '整合' : '分別'}顯示）`);
+        }
+
+        function showNotification(message) {
+            // 創建通知元素
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50 transition-all duration-300';
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // 3秒後自動消失
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             waitForECharts(initDashboard);
+            
+            // 初始化資料夾篩選狀態
+            setTimeout(() => {
+                updateFolderInfo();
+            }, 100);
         });
     </script>
 </body>
