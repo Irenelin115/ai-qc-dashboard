@@ -1799,7 +1799,6 @@
                                         <th style="padding: 8px 12px; text-align: left; font-size: 12px; color: #6B7280; border-bottom: 1px solid #E5E7EB;">日期</th>
                                         <th style="padding: 8px 12px; text-align: left; font-size: 12px; color: #6B7280; border-bottom: 1px solid #E5E7EB;">時間</th>
                                         <th style="padding: 8px 12px; text-align: left; font-size: 12px; color: #6B7280; border-bottom: 1px solid #E5E7EB;">總分</th>
-                                        <th style="padding: 8px 12px; text-align: left; font-size: 12px; color: #6B7280; border-bottom: 1px solid #E5E7EB;">主要問題</th>
                                         <th style="padding: 8px 12px; text-align: left; font-size: 12px; color: #6B7280; border-bottom: 1px solid #E5E7EB;">功能</th>
                                     </tr>
                                 </thead>
@@ -3956,7 +3955,6 @@ function initComplianceChart() {
                         <td style="padding: 8px 12px; font-size: 14px;">${record.date}</td>
                         <td style="padding: 8px 12px; font-size: 14px;">${record.time}</td>
                         <td style="padding: 8px 12px; font-weight: 600; color: ${scoreColor};">${record.score} 分</td>
-                        <td style="padding: 8px 12px; color: #6B7280;">${record.mainIssue}</td>
                         <td style="padding: 8px 12px;">
                             <button style="background: #3B82F6; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">詳細</button>
                         </td>
@@ -3975,14 +3973,11 @@ function initComplianceChart() {
                 date.setDate(today.getDate() - i);
                 
                 const score = Math.floor(Math.random() * 40) + 60;
-                const issues = ['無', '話術檢測不佳', '敏感詞使用', '服務態度', '專業術語過多'];
-                const mainIssue = score >= 85 ? '無' : issues[Math.floor(Math.random() * (issues.length - 1)) + 1];
                 
                 records.push({
                     date: date.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' }),
                     time: `${String(Math.floor(Math.random() * 10) + 8).padStart(2, '0')}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
-                    score: score,
-                    mainIssue: mainIssue
+                    score: score
                 });
             }
             
