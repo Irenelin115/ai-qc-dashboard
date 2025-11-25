@@ -642,14 +642,6 @@
                             <button onclick="invertFolderSelection()" class="quick-btn px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 transition">反選</button>
                             <button onclick="clearFolderSelection()" class="quick-btn px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 transition">清除</button>
                         </div>
-                        <div class="scoring-filter">
-                            <select id="scoringMethodFilter" onchange="filterFoldersByScoring()" class="scoring-select border border-gray-300 rounded px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500">
-                                <option value="all">所有算分方式</option>
-                                <option value="weight">僅權重算分</option>
-                                <option value="average">僅平均算分</option>
-                                <option value="sum">僅加總算分</option>
-                            </select>
-                        </div>
                     </div>
 
                     <div class="folder-list grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4" id="folderList">
@@ -7672,20 +7664,6 @@ ${document.getElementById('expectedResults').innerText}
             updateFolderInfo();
         }
 
-        function filterFoldersByScoring() {
-            const filterValue = document.getElementById('scoringMethodFilter').value;
-            const folderItems = document.querySelectorAll('.folder-item');
-            
-            folderItems.forEach(item => {
-                const scoringMethod = item.dataset.scoring;
-                if (filterValue === 'all' || scoringMethod === filterValue) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-            updateFolderInfo();
-        }
 
         function setDisplayMode(mode) {
             const modeOptions = document.querySelectorAll('.mode-option');
@@ -7757,9 +7735,6 @@ ${document.getElementById('expectedResults').innerText}
         }
 
         function resetFolderFilters() {
-            // 重置篩選下拉選單
-            document.getElementById('scoringMethodFilter').value = 'all';
-            
             // 顯示所有資料夾
             const folderItems = document.querySelectorAll('.folder-item');
             folderItems.forEach(item => {
