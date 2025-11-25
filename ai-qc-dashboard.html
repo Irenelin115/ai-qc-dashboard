@@ -1786,17 +1786,6 @@
                         </div>
                     </div>
 
-                    <!-- Summary Analysis Table -->
-                    <div style="background: white; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
-                        <div style="background: #F9FAFB; padding: 12px 16px; border-bottom: 1px solid #E5E7EB; font-weight: 600; color: #374151;">
-                            📊 摘要型
-                        </div>
-                        <div style="padding: 16px;">
-                            <div id="modalSummaryScores">
-                                <!-- 動態生成摘要型內容 -->
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Call Records Table -->
                     <div style="background: white; border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden;">
@@ -3968,30 +3957,6 @@ function initComplianceChart() {
             });
             document.getElementById('modalMetricScores').innerHTML = metricHtml;
             
-            // Generate summary scores (摘要型)
-            const summaryScores = [
-                { name: '準確面/問題處理', score: Math.floor(agent.score * 0.75) },
-                { name: '權威面/基本應對', score: Math.floor(agent.score * 0.65) },
-                { name: '整體感受', score: Math.floor(agent.score * 0.8) }
-            ];
-            
-            let summaryHtml = '';
-            summaryScores.forEach(summary => {
-                const status = summary.score >= 80 ? 'good' : summary.score >= 60 ? 'warning' : 'danger';
-                const statusColor = status === 'good' ? '#10B981' : status === 'warning' ? '#F59E0B' : '#EF4444';
-                const statusText = status === 'good' ? '通過' : status === 'warning' ? '不合格' : '不合格';
-                
-                summaryHtml += `
-                    <div style="border-bottom: 1px solid #E5E7EB; padding: 12px 0; display: flex; justify-content: space-between; align-items: center;">
-                        <div style="font-weight: 600; color: #374151;">${summary.name}</div>
-                        <div style="text-align: right;">
-                            <div style="color: ${statusColor}; font-weight: 600; font-size: 14px;">${statusText}</div>
-                            <div style="color: ${statusColor}; font-weight: bold; font-size: 18px;">${summary.score}/100 分</div>
-                        </div>
-                    </div>
-                `;
-            });
-            document.getElementById('modalSummaryScores').innerHTML = summaryHtml;
             
             // Generate call records
             const callRecords = generateCallRecords(agent);
